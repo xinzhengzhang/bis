@@ -10,6 +10,11 @@ git_repository(
     remote = "git@github.com:xinzhengzhang/bis.git",
     branh = "main",
 )
+
+load("@bis//:repositories.bzl", "bis_rules_dependencies")
+
+bis_rules_dependencies()
+
 ```
 
 # Setup

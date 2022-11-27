@@ -1,4 +1,3 @@
-local_repository(
-    name = "hedron_compile_commands",
-    path = "/Users/xinzhengzhang/Workspace/bazel-compile-commands-extractor",
-)
+load(":repositories.bzl", "bis_rules_dependencies")
+
+bis_rules_dependencies()
