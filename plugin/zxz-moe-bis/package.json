@@ -1,0 +1,68 @@
+{
+  "name": "zxz-moe-bis",
+  "displayName": "bis",
+  "description": "Plugin for developing iOS project using bis rule",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onDebugResolve:lldb"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "zxz-moe-bis.cpu",
+        "title": "Get cpu"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Bis",
+        "properties": {
+          "bis.target": {
+            "type": "string",
+            "markdownDescription": "Default compile target for build",
+            "order": 1
+          },
+          "bis.compilation_mode": {
+            "type": "string",
+            "default": "dbg",
+            "markdownDescription": "Default compilation mode for build",
+            "order": 2
+          }
+          
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "extensionDependencies": [
+    "nisargjhaveri.ios-debug"
+  ],
+  "devDependencies": {
+    "@types/vscode": "^1.73.0",
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "eslint": "^8.26.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.1.0",
+    "typescript": "^4.8.4",
+    "@vscode/test-electron": "^2.2.0"
+  }
+}

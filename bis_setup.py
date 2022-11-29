@@ -46,9 +46,9 @@ with open(".vscode/tasks.json", "w") as fd:
       "command": "bazel",
       "args": [
         "build",
-        "${input:target}",
-        "--cpu=${input:cpu}",
-        "--compilation_mode=${input:compilation_mode}"
+        "${command:zxz-moe-bis.buildTarget}",
+        "--cpu=${command:zxz-moe-bis.cpu}",
+        "--compilation_mode=${command:zxz-moe-bis.compilationMode}"
       ],
       "group": {
         "kind":  "build",
@@ -61,8 +61,8 @@ with open(".vscode/tasks.json", "w") as fd:
       "args": [
         "run",
         "//.bis:bis_proj",
-        "--cpu=${input:cpu}",
-        "--compilation_mode=${input:compilation_mode}"
+        "--cpu=${command:zxz-moe-bis.cpu}",
+        "--compilation_mode=${command:zxz-moe-bis.compilationMode}"
       ],
       "group": {
         "kind": "build",
@@ -82,13 +82,13 @@ with open(".vscode/tasks.json", "w") as fd:
         "@bis//:setup",
         "--",
         "--cpu",
-        "${input:cpu}",
+        "${command:zxz-moe-bis.cpu}",
         "--compilation_mode",
-        "${input:compilation_mode}",
+        "${command:zxz-moe-bis.compilationMode}",
         "--pre_compile_swift_module",
         "${input:pre_compile_swift_module}",
         "--targets",
-        "${input:target}"
+        "${command:zxz-moe-bis.buildTarget}"
       ],
       "group": {
         "kind": "build",
@@ -96,26 +96,6 @@ with open(".vscode/tasks.json", "w") as fd:
   }
   ],
     "inputs": [
-        {
-          "type": "pickString",
-          "id": "compilation_mode",
-          "description": "What type of compilation_mode do you want?",
-          "options": [
-            "dbg",
-            "opt",
-          ],
-          "default": "dbg"
-        },
-        {
-            "type": "pickString",
-            "id": "cpu",
-            "description": "What type of cpu do you want? (Simulator: cpu = '', device: cpu = ios_arm64",
-            "options": [
-              "",
-              "ios_arm64",
-            ],
-            "default": ""
-        },
         {
             "type": "pickString",
             "id": "pre_compile_swift_module",
@@ -125,11 +105,6 @@ with open(".vscode/tasks.json", "w") as fd:
               "False",
             ],
             "default": "True"
-        },
-        {
-          "type": "promptString",
-          "id": "target",
-          "description": "What target do you want build?",
         }
     ]
 }
