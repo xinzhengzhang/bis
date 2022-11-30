@@ -53,6 +53,7 @@ with open(".vscode/tasks.json", "w") as fd:
       "group": {
         "kind":  "build",
       },
+      "dependsOn": ["RefreshIndex"],
     },
     {
       "label": "RefreshIndex",
@@ -68,32 +69,10 @@ with open(".vscode/tasks.json", "w") as fd:
         "kind": "build",
         "isDefault": true
       },
-      "dependsOn": ["SetupProj"],
       "runOptions": {
         "runOn": "folderOpen"
       }
-    },
-    {
-      "label": "SetupProj",
-      "type": "process",
-      "command": "bazel",
-      "args": [
-        "run",
-        "@bis//:setup",
-        "--",
-        "--cpu",
-        "${command:zxz-moe-bis.cpu}",
-        "--compilation_mode",
-        "${command:zxz-moe-bis.compilationMode}",
-        "--pre_compile_swift_module",
-        "${input:pre_compile_swift_module}",
-        "--targets",
-        "${command:zxz-moe-bis.buildTarget}"
-      ],
-      "group": {
-        "kind": "build",
-      },
-  }
+    }
   ],
     "inputs": [
         {

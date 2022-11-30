@@ -17,8 +17,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "zxz-moe-bis.cpu",
-        "title": "Get cpu"
+        "command": "zxz-moe-bis.setup",
+        "title": "Setup bis"
       }
     ],
     "configuration": [
@@ -39,6 +39,11 @@
           
         }
       }
+    ],
+    "taskDeddfinitions": [
+      {
+        "type": "lldb"
+      }
     ]
   },
   "scripts": {
@@ -50,7 +55,8 @@
     "test": "node ./out/test/runTest.js"
   },
   "extensionDependencies": [
-    "nisargjhaveri.ios-debug"
+    "nisargjhaveri.ios-debug",
+    "sswg.swift-lang"
   ],
   "devDependencies": {
     "@types/vscode": "^1.73.0",

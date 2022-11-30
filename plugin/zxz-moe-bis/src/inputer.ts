@@ -13,7 +13,6 @@ let statusBarTargetInputer: vscode.StatusBarItem;
 
 function setupStatusBarInputer()
 {
-    statusBarTargetInputer = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
     statusBarTargetInputer.command = "zxz-moe-bis.inputBuildTarget";
     statusBarTargetInputer.tooltip = "Input build target for debugging";
     if (configuration.target && configuration.target.match(LABEL_REGEX))
@@ -58,7 +57,14 @@ export async function buildTarget()
 export function activate(c: vscode.ExtensionContext)
 {
     context = c;
+    statusBarTargetInputer = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
     setupStatusBarInputer();
+
+    return vscode.workspace.onDidChangeConfiguration(event => {
+        if (event.affectsConfiguration("bis.target")) {
+            setupStatusBarInputer();
+        }
+    });
 }
 
 async function _getOrInputLabel()

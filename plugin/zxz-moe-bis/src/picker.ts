@@ -17,14 +17,17 @@ enum CompilationMode {
 
 function setupStatusBarPicker()
 {
-    statusBarCompilationModePicker = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
     statusBarCompilationModePicker.command = "zxz-moe-bis.pickCompilationMode";
     statusBarCompilationModePicker.tooltip = "Select iOS compilcation mode for debugging";
-    if (configuration.compilationMode)
+    if (configuration.compilationMode && configuration.compilationMode in CompilationMode)
     {
         _updateCompilationMode(configuration.compilationMode);
+        statusBarCompilationModePicker.text = configuration.compilationMode;
     }
-    statusBarCompilationModePicker.text = configuration.compilationMode || CompilationMode.dbg;
+    else
+    {
+        statusBarCompilationModePicker.text = CompilationMode.dbg;
+    }
     statusBarCompilationModePicker.show();
 }
 
@@ -55,8 +58,14 @@ export async function compilationMode()
 export function activate(c: vscode.ExtensionContext)
 {
     context = c;
-
+    statusBarCompilationModePicker = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
     setupStatusBarPicker();
+
+    return vscode.workspace.onDidChangeConfiguration(event => {
+        if (event.affectsConfiguration("bis.compilation_mode")) {
+            setupStatusBarPicker();
+        }
+    });
 }
 
 async function _getOrPickCompilationMode()

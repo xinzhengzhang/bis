@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 
-let channel = {
-    appendLine: console.log
-};
+let channel: vscode.OutputChannel;
 
 function getFormattedTime()
 {
@@ -46,6 +44,11 @@ export function error(...args: any[])
 export function warn(...args: any[])
 {
     channel.appendLine(formatMessage("WARN", args));
+}
+
+export function show()
+{
+    channel.show();
 }
 
 export function log(...args: any[])
