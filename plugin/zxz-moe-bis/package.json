@@ -1,7 +1,11 @@
 {
   "name": "zxz-moe-bis",
   "displayName": "bis",
-  "description": "Plugin for developing iOS project using bis rule",
+  "description": "Plugin for developing iOS project using bazel rule",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xinzhengzhang/bis"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.73.0"
@@ -18,7 +22,7 @@
     "commands": [
       {
         "command": "zxz-moe-bis.setup",
-        "title": "Setup bis"
+        "title": "Setup bis project"
       }
     ],
     "configuration": [

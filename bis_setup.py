@@ -53,10 +53,10 @@ with open(".vscode/tasks.json", "w") as fd:
       "group": {
         "kind":  "build",
       },
-      "dependsOn": ["RefreshIndex"],
+      "dependsOn": ["RefreshInfo"],
     },
     {
-      "label": "RefreshIndex",
+      "label": "RefreshInfo",
       "type": "process",
       "command": "bazel",
       "args": [

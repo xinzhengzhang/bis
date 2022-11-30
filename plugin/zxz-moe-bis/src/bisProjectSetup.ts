@@ -19,8 +19,11 @@ export async function setup()
             const compilationMode: string = values[1] ?? "";
             const cpu: string = values[2];
             let args = ['run', '@bis//:setup', '--'];
-            if(buildTarget) {
+            if (buildTarget) {
                 args.push(...['--target', buildTarget]);
+            } else {
+                logger.error("No target spec")
+                return;
             }
             if(compilationMode) {
                 args.push(...['--compilation_mode', compilationMode]);
