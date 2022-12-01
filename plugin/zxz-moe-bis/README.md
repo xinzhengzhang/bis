@@ -4,20 +4,35 @@ The plugin is used in conjunction with rules [bis](github.com:xinzhengzhang/bis)
 
 It provides the IDE to develop iOS application which compiled by [rules_apple](http://github.com/bazelbuild/rules_apple)
 
+---
 ## Features
 
 * Necessary UI for configure iOS project
 * Extract source info from build target and generate `compile_commands.json` for Sourcekit-lsp
 * Generate `launch.json` for debug
 
+---
 ## Requirements
 
 * [bazel](http://github.com/bazelbuild/bazel)
 
+---
+## Usage
+
+### First Initialize
+* generate `.vscode/tasks.json`
+    * command + shift + p `>Setup bis project`
+* generate `.vscode/launch.json`
+    * command + shift + b
+
+### Switch to `Run and Debug`
+* `.vscode/launch.json` will auto refresh when running and debugging
+
+---
+
 ## Exatension Commands
 This extension contributes the following commands:
 * Setup bis project: `zxz-moe-bis.setup`
-    * generate `.bis/BUILD`
     * generate `.vscode/tasks.json`
 
 * Variable
@@ -38,11 +53,11 @@ This extension contributes the following commands:
 
 This extension contributes the following settings:
 
-* `bis.compilation_mode`: Default compilation mode for debug
-    * dbg
-    * opt
-* `bis.target`: Default build target
+* `bis.prebuild_swift_when_indexing`
 
+    Prebuild swiftmodule used in compile commands
+
+---
 ## How bis work
 
 1. It bridged rules_apple with CodeLLDB and generate `launch.json` automatically

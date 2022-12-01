@@ -18,19 +18,7 @@ export async function setup()
             const buildTarget: string = values[0] ?? "";
             const compilationMode: string = values[1] ?? "";
             const cpu: string = values[2];
-            let args = ['run', '@bis//:setup', '--'];
-            if (buildTarget) {
-                args.push(...['--target', buildTarget]);
-            } else {
-                logger.error("No target spec")
-                return;
-            }
-            if(compilationMode) {
-                args.push(...['--compilation_mode', compilationMode]);
-            }
-            if(cpu !== "") {
-                args.push(...['--cpu', cpu]);
-            }
+            let args = ['run', '@bis//:setup'];
             
             return Promise.all((vscode.workspace.workspaceFolders ?? []).map((folder) => {
                 _execFile('bazel', args, {

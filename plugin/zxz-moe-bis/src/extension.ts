@@ -15,8 +15,8 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "zxz-moe-bis" is now active!');
 
 	// Component
-	context.subscriptions.push(picker.activate(context));
-	context.subscriptions.push(inputer.activate(context));
+	picker.activate(context);
+	inputer.activate(context);
 
 	// Commands get variable
 	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.cpu', cpuProvider.cpu));

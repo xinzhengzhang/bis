@@ -19,10 +19,13 @@ function setupStatusBarPicker()
 {
     statusBarCompilationModePicker.command = "zxz-moe-bis.pickCompilationMode";
     statusBarCompilationModePicker.tooltip = "Select iOS compilcation mode for debugging";
-    if (configuration.compilationMode && configuration.compilationMode in CompilationMode)
+
+    let compilationMode = configuration.compilationMode ?? context.workspaceState.get(SELECTED_COMPILATION_MODE_KEY);
+
+    if (compilationMode && compilationMode in CompilationMode)
     {
-        _updateCompilationMode(configuration.compilationMode);
-        statusBarCompilationModePicker.text = configuration.compilationMode;
+        _updateCompilationMode(compilationMode);
+        statusBarCompilationModePicker.text = compilationMode;
     }
     else
     {
@@ -60,12 +63,6 @@ export function activate(c: vscode.ExtensionContext)
     context = c;
     statusBarCompilationModePicker = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
     setupStatusBarPicker();
-
-    return vscode.workspace.onDidChangeConfiguration(event => {
-        if (event.affectsConfiguration("bis.compilation_mode")) {
-            setupStatusBarPicker();
-        }
-    });
 }
 
 async function _getOrPickCompilationMode()

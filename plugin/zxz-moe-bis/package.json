@@ -29,18 +29,12 @@
       {
         "title": "Bis",
         "properties": {
-          "bis.target": {
-            "type": "string",
-            "markdownDescription": "Default compile target for build",
-            "order": 1
-          },
-          "bis.compilation_mode": {
-            "type": "string",
-            "default": "dbg",
-            "markdownDescription": "Default compilation mode for build",
-            "order": 2
+          "bis.prebuild_swift_when_indexing": {
+            "type": "boolean",
+            "markdownDescription": "Prebuild swift module when indexing",
+            "order": 1,
+            "default": true
           }
-          
         }
       }
     ],

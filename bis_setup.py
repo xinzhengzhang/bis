@@ -4,11 +4,21 @@ import os
 import argparse
 from pathlib import Path
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description='Setup bis project')
 
 parser.add_argument('--compilation_mode', default = 'dbg', type = str, help='dbg or opt')
 parser.add_argument('--cpu', default = '', type = str, help='ios_arm64')
-parser.add_argument('--pre_compile_swift_module', default = True, type = bool, help='pre compile swift module')
+parser.add_argument('--pre_compile_swift_module', default = True, type = str2bool, help='pre compile swift module')
 parser.add_argument('--targets', nargs= '+', default = [], help='target labels')
 
 args = parser.parse_args()
@@ -51,7 +61,7 @@ with open(".vscode/tasks.json", "w") as fd:
         "--compilation_mode=${command:zxz-moe-bis.compilationMode}"
       ],
       "group": {
-        "kind":  "build",
+        "kind":  "build"
       },
       "dependsOn": ["RefreshInfo"],
     },
@@ -71,21 +81,31 @@ with open(".vscode/tasks.json", "w") as fd:
       },
       "runOptions": {
         "runOn": "folderOpen"
+      },
+      "dependsOn": ["RefreshBisBuild"]
+    },
+    {
+      "label": "RefreshBisBuild",
+      "type": "process",
+      "command": "bazel",
+      "args": [
+        "run",
+        "@bis//:setup",
+        "--",
+        "--targets",
+        "${command:zxz-moe-bis.buildTarget}",
+        "--cpu",
+        "'${command:zxz-moe-bis.cpu}'",
+        "--compilation_mode",
+        "${command:zxz-moe-bis.compilationMode}",
+        "--pre_compile_swift_module",
+        "${config:bis.prebuild_swift_when_indexing}"
+      ],
+      "group": {
+        "kind": "build"
       }
     }
-  ],
-    "inputs": [
-        {
-            "type": "pickString",
-            "id": "pre_compile_swift_module",
-            "description": "Do you want to pre compile swift? (It will slow the indexing phase and you can write swift module without compile)",
-            "options": [
-              "True",
-              "False",
-            ],
-            "default": "True"
-        }
-    ]
+  ]
 }
 """)
 
