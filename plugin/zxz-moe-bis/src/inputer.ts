@@ -4,7 +4,7 @@ import * as logger from './logger';
 import configuration from './configuration';
 
 const INPUTED_LABEL_STRING = "inputed_label_string";
-const LABEL_REGEX = new RegExp("@?\\w*//\\w*:\\w+");
+const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-]*:[\\w-]+");
 
 let context: vscode.ExtensionContext;
 let statusBarTargetInputer: vscode.StatusBarItem;
