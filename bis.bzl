@@ -98,6 +98,7 @@ def bis_proj(name, targets, pre_compile_swift_module = False , optionals = "", *
         name = extractor_name,
         targets = {target : optionals for target in targets },
         enable_swift = True,
+        exclude_headers = "all",
         **kwargs 
     )
 
