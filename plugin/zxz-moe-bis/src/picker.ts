@@ -1,7 +1,6 @@
 import exp = require('constants');
 import * as vscode from 'vscode';
 import * as logger from './logger';
-import configuration from './configuration';
 
 const SELECTED_COMPILATION_MODE_KEY = "selected_compilation_mode";
 
@@ -20,7 +19,7 @@ function setupStatusBarPicker()
     statusBarCompilationModePicker.command = "zxz-moe-bis.pickCompilationMode";
     statusBarCompilationModePicker.tooltip = "Select iOS compilcation mode for debugging";
 
-    let compilationMode = configuration.compilationMode ?? context.workspaceState.get(SELECTED_COMPILATION_MODE_KEY);
+    let compilationMode: string|undefined = context.workspaceState.get(SELECTED_COMPILATION_MODE_KEY);
 
     if (compilationMode && compilationMode in CompilationMode)
     {

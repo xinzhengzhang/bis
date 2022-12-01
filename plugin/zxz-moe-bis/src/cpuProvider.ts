@@ -1,5 +1,6 @@
 
 import * as vscode from 'vscode';
+import configuration from './configuration';
 
 export async function cpu()
 {
@@ -8,7 +9,7 @@ export async function cpu()
     {
         // Return empty string to bazel 
         // It will use the current cpu properties of the current platform
-        return "";
+        return configuration.simulatorCpuString ?? "";
     } 
     else 
     {

@@ -1,7 +1,6 @@
 import exp = require('constants');
 import * as vscode from 'vscode';
 import * as logger from './logger';
-import configuration from './configuration';
 
 const INPUTED_LABEL_STRING = "inputed_label_string";
 const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-]*:[\\w-]+");
@@ -16,8 +15,7 @@ function setupStatusBarInputer()
     statusBarTargetInputer.command = "zxz-moe-bis.inputBuildTarget";
     statusBarTargetInputer.tooltip = "Input build target for debugging";
     
-
-    let target: string|undefined = (!configuration.target || configuration.target.length === 0) ? context.workspaceState.get(INPUTED_LABEL_STRING): undefined;
+    let target: string|undefined = context.workspaceState.get(INPUTED_LABEL_STRING);
 
     if (target && target.match(LABEL_REGEX))
     {
