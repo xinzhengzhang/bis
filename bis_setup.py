@@ -58,6 +58,8 @@ refresh_launch_json(
 
 """
 
+# process start
+os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
 Path(".bis").mkdir(parents=True, exist_ok=True)
 
 with open('.bis/BUILD', 'w') as output_file:
