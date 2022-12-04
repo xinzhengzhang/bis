@@ -5,7 +5,10 @@ import * as logger from './logger';
 import * as picker from './picker';
 import * as inputer from './inputer';
 import * as cpuProvider from './cpuProvider';
-import * as bisProjectSetup from './bisProjectSetup';
+import * as launchGenerator from './launchGenerator';
+import configuration from './configuration';
+import { BuildTaskProvider } from './buildTaskProvider';
+import { onDidChangeActiveTextEditor } from './refreshCompileCommands';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -26,11 +29,21 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.buildTarget', inputer.buildTarget));
 
 	// Commands action
-	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.setup', bisProjectSetup.setup));
+	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.generateLaunchJson', launchGenerator.generate));
 
 	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.pickCompilationMode', picker.pickCompilationMode));
 
 	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.inputBuildTarget', inputer.inputBuildTarget));
+
+	context.subscriptions.push(vscode.tasks.registerTaskProvider(BuildTaskProvider.ScriptType, new BuildTaskProvider()));
+
+	// Hook event
+	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
+
+	// Auto generateLaunchJson
+	if (configuration.autoGenerateLaunchJson) {
+		vscode.commands.executeCommand("zxz-moe-bis.generateLaunchJson");
+	}
 }
 
 export function deactivate() {}

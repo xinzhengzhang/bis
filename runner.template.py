@@ -21,10 +21,3 @@ os.chdir(workspace_path)
 # compile_commands.json
 # python3 "${relative_path}" 
 call(["python3", relative_path])
-
-# .vscode config
-Path(".vscode").mkdir(parents=True, exist_ok=True)
-
-with open(".vscode/launch.json", "w") as fd:
-    fd.write("""%launch_items%
-""")

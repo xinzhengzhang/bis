@@ -21,33 +21,39 @@
   "contributes": {
     "commands": [
       {
-        "command": "zxz-moe-bis.setup",
-        "title": "Setup bis project"
+        "command": "zxz-moe-bis.generateLaunchJson",
+        "title": "Generate bis launch json"
       }
     ],
     "configuration": [
       {
         "title": "Bis",
         "properties": {
+          "bis.auto_generate_launch_json": {
+            "type": "boolean",
+            "markdownDescription": "Generate launch.json automaticaly",
+            "order": 1,
+            "default": true
+          },
           "bis.prebuild_swift_when_indexing": {
             "type": "boolean",
             "markdownDescription": "Prebuild swift module when indexing",
-            "order": 1,
+            "order": 2,
             "default": true
           },
           "bis.simulator_cpu_string": {
             "type": "string",
             "markdownDescription": "CPU string of simulator",
-            "order": 2,
+            "order": 3,
             "default": ""
           }
         }
       }
     ],
-    "taskDeddfinitions": [
+    "taskDefinitions": [
       {
-        "type": "lldb"
-      }
+				"type": "bis.build"
+			}
     ]
   },
   "scripts": {

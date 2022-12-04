@@ -19,21 +19,29 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 ---
 ## Usage
 
-### First Initialize
-* generate `.vscode/tasks.json`
-    * command + shift + p `>Setup bis project`
-* generate `.vscode/launch.json`
-    * command + shift + b
+* Import bis rules in your WORKSPACE
+    ```
+    load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
 
-### Switch to `Run and Debug`
-* `.vscode/launch.json` will auto refresh when running and debugging
+    git_repository(
+        name = "bis",
+        remote = "git@github.com:xinzhengzhang/bis.git",
+        branch = "main",
+    )
+
+    load("@bis//:repositories.bzl", "bis_rules_dependencies")
+
+    bis_rules_dependencies()
+    ```
+* Generate `.vscode/launch.json`
+    * command + shift + p `>Generate bis launch json`
 
 ---
 
-## Exatension Commands
+## Extension Commands
 This extension contributes the following commands:
-* Setup bis project: `zxz-moe-bis.setup`
-    * generate `.vscode/tasks.json`
+* Setup bis project: `zxz-moe-bis.generateLaunchJson`
+    * generate `.vscode/launch.json`
 
 * Variable
     * `zxz-moe-bis.buildTarget`
@@ -56,6 +64,10 @@ This extension contributes the following settings:
 * `bis.prebuild_swift_when_indexing`
 
     Prebuild swiftmodule used in compile commands
+
+* `bis.simulator_cpu_string`
+
+    Default cpu string for simulator ( | ios_x86_64)
 
 ---
 ## How bis work

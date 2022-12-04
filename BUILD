@@ -1,4 +1,4 @@
-exports_files(["runner.template.py"])
+exports_files(["runner.template.py", "json.template.py"])
 
 py_binary(
     name = "setup",
