@@ -11,14 +11,17 @@ import sys
 from pathlib import Path
 
 def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+  if isinstance(v, bool):
+    return v
+  if v.lower() in ('yes', 'true', 't', 'y', '1'):
+    return True
+  elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+    return False
+  else:
+    raise argparse.ArgumentTypeError('Boolean value expected.')
+
+def query_escape(str):
+  return str.replace("+", "\+").replace("-", "\-")
 
 parser = argparse.ArgumentParser(description='Setup bis project')
 
@@ -28,13 +31,12 @@ parser.add_argument('--target', required=True, type = str, help='target labels')
 parser.add_argument('--file_path', default = '.*', type = str, help='source code path')
 parser.add_argument('--pre_compile_swift_module', default = True, type = str2bool, help='pre compile swift module')
 
-
 args = parser.parse_args()
 
 aquery_args = [
   'bazel',
   'aquery',
-  f"mnemonic('(Swift|Objc|Cpp)Compile', inputs({args.file_path}, deps({args.target})))",
+  f"mnemonic('(Swift|Objc|Cpp)Compile', inputs('{query_escape(args.file_path)}', deps({args.target})))",
   '--output=jsonproto',
   '--include_artifacts=false',
   '--ui_event_filters=-info',
@@ -53,6 +55,7 @@ os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
 
 print("Run process start !!!")
 print("It may tooks a few minutes depends on the size of target")
+print(f"command = {' '.join(aquery_args)}")
 
 aquery_process = subprocess.run(
 	aquery_args,
