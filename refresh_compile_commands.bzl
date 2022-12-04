@@ -6,10 +6,10 @@ load(":bisproject_aspect.bzl", "bis_aspect")
 
 def _refresh_compile_commands_imp(ctx):
     
-    # Prebuild swfit files
-    swift_modules = []
+    # Prebuild modules
+    modules = depset([])
     if ctx.attr.pre_compile_swift_module:
-        swift_modules = depset([], transitive = [target[BisProjInfo].transitive_swift_modules for target in ctx.attr.targets]).to_list()
+        modules = depset([], transitive = [target[BisProjInfo].transitive_modules for target in ctx.attr.targets])
 
     # Extractor 
     extractor = ctx.attr.extractor
@@ -32,9 +32,10 @@ def _refresh_compile_commands_imp(ctx):
 
     return [
         DefaultInfo(
+            files = modules,
             executable = output,
             runfiles = ctx.runfiles(
-                files = extractor_sources + swift_modules,
+                files = extractor_sources,
             ),
         ),
     ]

@@ -9,6 +9,7 @@ import * as launchGenerator from './launchGenerator';
 import configuration from './configuration';
 import { BuildTaskProvider } from './buildTaskProvider';
 import { onDidChangeActiveTextEditor } from './refreshCompileCommands';
+import { isBazelWorkspace, launchConfigurationExists } from './utils';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -41,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
 
 	// Auto generateLaunchJson
-	if (configuration.autoGenerateLaunchJson) {
+	if (configuration.autoGenerateLaunchJson && isBazelWorkspace() && !launchConfigurationExists()) {
 		vscode.commands.executeCommand("zxz-moe-bis.generateLaunchJson");
 	}
 }

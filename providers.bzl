@@ -1,11 +1,11 @@
 BisProjInfo = provider(
     "Provides information needed to generate an bis project.",
     fields = {
-        "direct_swift_modules": """\
-A `list` of direct swift_modules depends on.
+        "direct_modules": """\
+A `list` of direct modules(.swiftmodule, swift.modulemap) depends on.
 """,
-        "transitive_swift_modules": """\
-A `depset` of transitive swift_modules depends on.
+        "transitive_modules": """\
+A `depset` of transitive modules(.swiftmodule, swift.modulemap) depends on.
 """,
     }
 )

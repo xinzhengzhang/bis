@@ -14,6 +14,6 @@ os.chdir(workspace_path)
 # .vscode config
 Path(".vscode").mkdir(parents=True, exist_ok=True)
 
-with open(".vscode/%config_name%.json", "w") as fd:
+with open(".vscode/%config_name%", "w") as fd:
     fd.write("""%json_items%
 """)

@@ -51,11 +51,16 @@ aquery_args = [
 # process start
 os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
 
+print("Run process start !!!")
+print("It may tooks a few minutes depends on the size of target")
+
 aquery_process = subprocess.run(
 	aquery_args,
 	capture_output= True,
 	encoding=locale.getpreferredencoding(),
 )
+
+print("Run process end !!!")
 
 for line in aquery_process.stderr.splitlines():
 	print(line, file=sys.stderr)

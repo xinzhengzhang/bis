@@ -27,7 +27,7 @@ def _transitive_infos(*, ctx):
 
 
 def _bis_aspect_impl(target, ctx):
-    swift_modules = []
+    modules = []
 
     is_swift = SwiftInfo in target
     if is_swift:
@@ -35,17 +35,19 @@ def _bis_aspect_impl(target, ctx):
         for direct_module in direct_modules:
             compilation_context = direct_module.compilation_context
             if type(compilation_context) == list:
-                swift_modules += compilation_context
+                modules += compilation_context
             elif compilation_context:
-                swift_modules += list(compilation_context.swiftmodules)
+                modules += list(compilation_context.swiftmodules)
+                modules += list(compilation_context.module_maps)
+
 
     transitive_infos = _transitive_infos(ctx = ctx)
     infos = [info for attr, info in transitive_infos]
-    transitive_swift_modules = depset(swift_modules, transitive = [info.transitive_swift_modules for info in infos])
+    transitive_modules = depset(modules, transitive = [info.transitive_modules for info in infos])
 
     return [BisProjInfo(
-        direct_swift_modules = swift_modules,
-        transitive_swift_modules = transitive_swift_modules,
+        direct_modules = modules,
+        transitive_modules = transitive_modules,
     )]
 
 

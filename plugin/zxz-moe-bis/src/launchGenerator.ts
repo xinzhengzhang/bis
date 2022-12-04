@@ -1,4 +1,3 @@
-import { _execFile } from "./utils";
 import * as vscode from 'vscode';
 import * as picker from './picker';
 import * as inputer from './inputer';
@@ -13,7 +12,7 @@ export async function generate()
         cpuProvider.cpu()
     ]).then(values => {
         let executionCommands = `bazel run @bis//:setup -- --target ${values[0]} --compilation_mode ${values[1]} --cpu "${values[2]}"`;
-        executionCommands += `;bazel run //.bis:refresh_launch_json --compilation_mode=${values[1]} --cpu="${values[2]}"`;
+        executionCommands += `;bazel run //.bis:refresh_launch_json --check_visibility=false --compilation_mode=${values[1]} --cpu="${values[2]}"`;
         const task = new vscode.Task(
             {type: buildType},
             vscode.TaskScope.Workspace,
