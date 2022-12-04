@@ -25,5 +25,5 @@ def bis_rules_dependencies():
         git_repository,
         name = "hedron_compile_commands",
         remote = "git@github.com:xinzhengzhang/bazel-compile-commands-extractor.git",
-        branch = "feature/swift-commands-rb3"
+        branch = "feature/bis-support"
     )

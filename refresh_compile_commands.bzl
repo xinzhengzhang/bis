@@ -66,7 +66,6 @@ def refresh_compile_commands(name, targets, optionals = "", file_path = ".*", pr
     hedron_refresh_compile_commands(
         name = extractor_name,
         targets = { target : optionals for target in targets },
-        enable_swift = True,
         input_filter = file_path,
         cache_store_path = "/tmp/.hedron_compile_commands/cache/",
         **kwargs 
