@@ -1,5 +1,6 @@
 {
   "name": "zxz-moe-bis",
+  "publisher": "zxz-moe",
   "displayName": "bis",
   "description": "Plugin for developing iOS project using bazel rule",
   "repository": {
