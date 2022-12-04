@@ -20,8 +20,6 @@ def str2bool(v):
   else:
     raise argparse.ArgumentTypeError('Boolean value expected.')
 
-def query_escape(str):
-  return str.replace("+", "\+").replace("-", "\-")
 
 parser = argparse.ArgumentParser(description='Setup bis project')
 
