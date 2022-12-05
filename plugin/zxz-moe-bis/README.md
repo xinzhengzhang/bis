@@ -81,11 +81,14 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.0.2
+* Change activationEvents to `workspaceContains:WORKSPACE`
+* Change bis.auto_generate_launch_json default value to `false`
+* Filter supported file extension(.m | .swift | .mm) for refreshing `compile_commands`.json
+    * Since most projects use modules, most of them cannot find the inputs containt '.h'. So for the header file it is recommended to build an index by directly including his source file（.m & .mm)
 ### 0.0.1
 
-Initial release of ...
-
----
+Initial release
 
 ## For more information
 
