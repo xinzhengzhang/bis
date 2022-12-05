@@ -23,7 +23,7 @@ export function onDidChangeActiveTextEditorMaker() {
                 if (isBisWorkspace(value)) {
                     let relative = path.relative(value.uri.fsPath, editor?.document.uri.fsPath);
                     // Is there a more elegant way?
-                    const supportExt = ['swift', '.m', '.mm'];
+                    const supportExt = ['.swift', '.m', '.mm'];
                     if (!relative.startsWith("../") && supportExt.includes(path.extname(relative))) {
                         refresh(relative, context);
                     }

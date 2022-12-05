@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.tasks.registerTaskProvider(BuildTaskProvider.ScriptType, new BuildTaskProvider()));
 
 	// Hook event
-	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditorMaker));
+	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditorMaker()));
 
 	// Auto generateLaunchJson
 	if (configuration.autoGenerateLaunchJson &&  !launchConfigurationExists()) {
