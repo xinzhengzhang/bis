@@ -81,6 +81,9 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.0.3
+* fix wrong registation
+
 ### 0.0.2
 * Change activationEvents to `workspaceContains:WORKSPACE`
 * Change bis.auto_generate_launch_json default value to `false`
