@@ -7,18 +7,6 @@ export function isBisWorkspace(workspace: vscode.WorkspaceFolder) {
     return fs.existsSync(workspace.uri.fsPath + "/.bis/BUILD");
 }
 
-export function isBazelWorkspace() {
-    let isBazelWorkspace = false;
-
-    vscode.workspace.workspaceFolders?.forEach(value => {
-        if(fs.existsSync(value.uri.fsPath + "/WORKSPACE")) {
-            isBazelWorkspace = true;
-        }
-    });
-
-    return isBazelWorkspace;
-}
-
 export function launchConfigurationExists() {
     let exists = false;
 

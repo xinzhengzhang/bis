@@ -15,8 +15,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished",
-    "onDebugResolve:lldb"
+    "workspaceContains:WORKSPACE"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -34,7 +33,7 @@
             "type": "boolean",
             "markdownDescription": "Generate launch.json automaticaly",
             "order": 1,
-            "default": true
+            "default": false
           },
           "bis.prebuild_swift_when_indexing": {
             "type": "boolean",
