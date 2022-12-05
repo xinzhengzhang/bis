@@ -5,23 +5,41 @@ import * as inputer from './inputer';
 import * as cpuProvider from './cpuProvider';
 import * as path from 'path';
 import configuration from "./configuration";
+import { type } from "os";
 
-export function onDidChangeActiveTextEditor(editor: vscode.TextEditor|undefined) {
-    if (editor?.document.uri) {
-        vscode.workspace.workspaceFolders?.forEach(value => {
-            if (isBisWorkspace(value)) {
-                let relative = path.relative(value.uri.fsPath, editor?.document.uri.fsPath);
-                // Is there a more elegant way?
-                if (!relative.startsWith("../")) {
-                    refresh(relative);
+type Context = {
+    lastRefreshedPath: string
+};
+
+export function onDidChangeActiveTextEditorMaker() {
+
+    let context:Context = {
+        lastRefreshedPath: ""
+    };
+
+    return function(editor: vscode.TextEditor|undefined) {
+        if (editor?.document.uri) {
+            vscode.workspace.workspaceFolders?.forEach(value => {
+                if (isBisWorkspace(value)) {
+                    let relative = path.relative(value.uri.fsPath, editor?.document.uri.fsPath);
+                    // Is there a more elegant way?
+                    const supportExt = ['swift', '.m', '.mm'];
+                    if (!relative.startsWith("../") && supportExt.includes(path.extname(relative))) {
+                        refresh(relative, context);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
+    };
 }
 
-async function refresh(filePath: string)
+async function refresh(filePath: string, context: Context)
 {
+    if (context.lastRefreshedPath === filePath) {
+        return;
+    }
+    context.lastRefreshedPath = filePath;
+
     const buildType: string = "bis.build";
     return Promise.all([
         inputer.buildTarget(),

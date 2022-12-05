@@ -8,7 +8,7 @@ import * as cpuProvider from './cpuProvider';
 import * as launchGenerator from './launchGenerator';
 import configuration from './configuration';
 import { BuildTaskProvider } from './buildTaskProvider';
-import { onDidChangeActiveTextEditor } from './refreshCompileCommands';
+import { onDidChangeActiveTextEditorMaker } from './refreshCompileCommands';
 import { isBazelWorkspace, launchConfigurationExists } from './utils';
 
 // This method is called when your extension is activated
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.tasks.registerTaskProvider(BuildTaskProvider.ScriptType, new BuildTaskProvider()));
 
 	// Hook event
-	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
+	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditorMaker()));
 
 	// Auto generateLaunchJson
 	if (configuration.autoGenerateLaunchJson && isBazelWorkspace() && !launchConfigurationExists()) {
