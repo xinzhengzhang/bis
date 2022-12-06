@@ -5,11 +5,20 @@ load(":providers.bzl", "BisProjInfo")
 load(":bisproject_aspect.bzl", "bis_aspect")
 
 def _refresh_compile_commands_imp(ctx):
-    
+
+    def _filter_modules(depset_modules, filter):
+        if filter:
+            modules = depset_modules.to_list()
+            return depset([module for module in modules if module.extension == "modulemap"])
+        else:
+            return depset_modules
+
     # Prebuild modules
-    modules = depset([])
-    if ctx.attr.pre_compile_swift_module:
-        modules = depset([], transitive = [target[BisProjInfo].transitive_modules for target in ctx.attr.targets])
+    modules = depset([], transitive = [
+        _filter_modules(
+            target[BisProjInfo].transitive_modules,
+            not ctx.attr.pre_compile_swift_module
+        ) for target in ctx.attr.targets])
 
     # Extractor 
     extractor = ctx.attr.extractor
