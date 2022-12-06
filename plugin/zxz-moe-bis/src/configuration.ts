@@ -10,6 +10,9 @@ const configuration = {
     },
     get autoGenerateLaunchJson(): boolean {
         return vscode.workspace.getConfiguration("bis").get<boolean>("auto_generate_launch_json") ?? true;
+    },
+    get bazelBackgroundOutputBase(): string {
+        return vscode.workspace.getConfiguration("bis").get<string>("bazel_background_output_base") ?? "/tmp/.bis_cache";
     }
 };
 

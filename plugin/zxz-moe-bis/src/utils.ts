@@ -2,6 +2,9 @@ import { promisify } from "util";
 import * as vscode from "vscode";
 import * as path from 'path';
 import * as fs from 'fs';
+import { execFile } from "child_process";
+
+export let _execFile = promisify(execFile);
 
 export function isBisWorkspace(workspace: vscode.WorkspaceFolder) {
     return fs.existsSync(workspace.uri.fsPath + "/.bis/BUILD");
