@@ -61,6 +61,10 @@ This extension contributes the following commands:
 
 This extension contributes the following settings:
 
+* `bis.auto_generate_launch_json`
+
+    Auto generate .vscode/launch.json when deteched a bis project
+
 * `bis.prebuild_swift_when_indexing`
 
     Prebuild swiftmodule used in compile commands
@@ -68,6 +72,12 @@ This extension contributes the following settings:
 * `bis.simulator_cpu_string`
 
     Default cpu string for simulator ( | ios_x86_64)
+
+* `bazel_background_output_base`
+
+    Temporary output_base when building
+
+    Notice: it may affect the bazel-out symbol link
 
 ---
 ## How bis work
