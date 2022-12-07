@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as logger from './logger';
 
 const INPUTED_LABEL_STRING = "inputed_label_string";
-const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-]*:[\\w-]+");
+const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-/]*:[\\w-]+");
 
 let context: vscode.ExtensionContext;
 let statusBarTargetInputer: vscode.StatusBarItem;
@@ -35,7 +35,7 @@ export async function inputBuildTarget()
         validateInput(value) {
             let message: vscode.InputBoxValidationMessage = {
                 message: "Unexpected label format",
-                severity: vscode.InputBoxValidationSeverity.Error
+                severity: vscode.InputBoxValidationSeverity.Warning
             };
             return value.match(LABEL_REGEX) ? null : message;
         },
