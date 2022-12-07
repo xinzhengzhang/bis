@@ -106,6 +106,10 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.0.6
+* Fix target path validation in inputer
+* Change validationSeverity from Error to Warning
+
 ### 0.0.5
 Optimization
 * Speed up the generation of launch.json
