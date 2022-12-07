@@ -13,6 +13,15 @@ const configuration = {
     },
     get bazelBackgroundOutputBase(): string {
         return vscode.workspace.getConfiguration("bis").get<string>("bazel_background_output_base") ?? "/tmp/.bis_cache";
+    },
+    get preLaunchTaskName(): string {
+        return vscode.workspace.getConfiguration("bis").get<string>("pre_launch_task_name") ?? "bis.build: build";
+    },
+    get buildOptions(): string {
+        return vscode.workspace.getConfiguration("bis").get<string>("build_options") ?? "";
+    },
+    get compileCommandsRollingSize(): number {
+        return vscode.workspace.getConfiguration("bis").get<number>("compile_commands_rolling_size") ?? 300000000;
     }
 };
 

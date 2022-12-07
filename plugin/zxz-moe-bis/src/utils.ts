@@ -21,3 +21,16 @@ export function launchConfigurationExists() {
 
     return exists;
 }
+
+export function getCompileCommandsSize() {
+    let workspaces = vscode.workspace.workspaceFolders;
+    if(workspaces?.length !== 1) {
+        return undefined;
+    }
+    let workspace = workspaces[0];
+    let path = workspace.uri.fsPath + "/compile_commands.json";
+    if(!fs.existsSync(path)) {
+        return undefined;
+    }
+    return fs.statSync(path).size;
+}

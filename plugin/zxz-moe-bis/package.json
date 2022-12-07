@@ -45,13 +45,31 @@
             "type": "string",
             "markdownDescription": "CPU string of simulator",
             "order": 3,
-            "default": ""
+            "default": "ios_x86_64"
           },
           "bis.bazel_background_output_base": {
             "type": "string",
             "markdownDescription": "Temporary output_base when building",
             "order": 4,
             "default": "/tmp/.bis_cache"
+          },
+          "bis.pre_launch_task_name": {
+            "type": "string",
+            "markdownDescription": "Pre launch task name before build",
+            "order": 5,
+            "default": "bis.build: build"
+          },
+          "bis.build_options": {
+            "type": "string",
+            "markdownDescription": "Build options append on bazel build commands",
+            "order": 6,
+            "default": ""
+          },
+          "bis.compile_commands_rolling_size": {
+            "type": "integer",
+            "markdownDescription": "Rolling size of compile_commands.json",
+            "order": 7,
+            "default": "300000000"
           }
         }
       }

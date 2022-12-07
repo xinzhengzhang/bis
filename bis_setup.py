@@ -29,53 +29,59 @@ parser.add_argument('--compilation_mode', default = 'dbg', type = str, help='dbg
 parser.add_argument('--cpu', default = '', type = str, help='ios_arm64')
 parser.add_argument('--target', required=True, type = str, help='target labels')
 parser.add_argument('--file_path', default = '.*', type = str, help='source code path')
+parser.add_argument('--pre_launch_task_name', default = 'bis.build: build', type = str, help='pre launch task before build')
 parser.add_argument('--pre_compile_swift_module', default = True, type = str2bool, help='pre compile swift module')
+parser.add_argument('--ignore_parsing_targets', default = False, type = str2bool, help='ignoring parsing targets phase just pass --target to targets in `refresh_compile_commands`')
 
 args = parser.parse_args()
-
-aquery_args = [
-  'bazel',
-  'aquery',
-  f"mnemonic('(Swift|Objc|Cpp)Compile', inputs('{query_escape(args.file_path)}', deps({args.target})))",
-  '--output=jsonproto',
-  '--include_artifacts=false',
-  '--ui_event_filters=-info',
-  '--noshow_progress',
-  # Disable layering_check during, because it causes large-scale dependence on generated module map files that prevent header extraction before their generation
-      # For more context, see https://github.com/hedronvision/bazel-compile-commands-extractor/issues/83
-      # If https://github.com/clangd/clangd/issues/123 is resolved and we're not doing header extraction, we could try removing this, checking that there aren't erroneous red squigglies squigglies before the module maps are generated.
-      # If Bazel starts supporting modules (https://github.com/bazelbuild/bazel/issues/4005), we'll probably need to make changes that subsume this.
-  '--features=-layering_check',
-  f'--cpu={args.cpu}',
-  f'--compilation_mode={args.compilation_mode}'
-]
 
 # process start
 os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
 
-print("Run process start !!!")
-print("It may tooks a few minutes depends on the size of target")
-print(f"command = {' '.join(aquery_args)}")
+targets = f'"{args.target}"'
 
-aquery_process = subprocess.run(
-	aquery_args,
-	capture_output= True,
-	encoding=locale.getpreferredencoding(),
-)
+if not args.ignore_parsing_targets:
+  aquery_args = [
+    'bazel',
+    'aquery',
+    f"mnemonic('(Swift|Objc|Cpp)Compile', inputs('{query_escape(args.file_path)}', deps({args.target})))",
+    '--output=jsonproto',
+    '--include_artifacts=false',
+    '--ui_event_filters=-info',
+    '--noshow_progress',
+    # Disable layering_check during, because it causes large-scale dependence on generated module map files that prevent header extraction before their generation
+        # For more context, see https://github.com/hedronvision/bazel-compile-commands-extractor/issues/83
+        # If https://github.com/clangd/clangd/issues/123 is resolved and we're not doing header extraction, we could try removing this, checking that there aren't erroneous red squigglies squigglies before the module maps are generated.
+        # If Bazel starts supporting modules (https://github.com/bazelbuild/bazel/issues/4005), we'll probably need to make changes that subsume this.
+    '--features=-layering_check',
+    f'--cpu={args.cpu}',
+    f'--compilation_mode={args.compilation_mode}'
+  ]
 
-print("Run process end !!!")
+  print("Run process start !!!")
+  print("It may tooks a few minutes depends on the size of target")
+  print(f"command = {' '.join(aquery_args)}")
 
-for line in aquery_process.stderr.splitlines():
-	print(line, file=sys.stderr)
+  aquery_process = subprocess.run(
+    aquery_args,
+    capture_output= True,
+    encoding=locale.getpreferredencoding(),
+  )
 
-try:
-  parsed_aquery_output = json.loads(aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
-  if not hasattr(parsed_aquery_output, 'targets'):
-    parsed_aquery_output.targets = []
-except json.JSONDecodeError:
-  print("Bazel aquery failed. Command:", aquery_args, file=sys.stderr)
+  print("Run process end !!!")
 
-targets = ', '.join([f'"{target.label}"' for target in parsed_aquery_output.targets])
+  for line in aquery_process.stderr.splitlines():
+    print(line, file=sys.stderr)
+
+  try:
+    parsed_aquery_output = json.loads(aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
+    if not hasattr(parsed_aquery_output, 'targets'):
+      parsed_aquery_output.targets = []
+  except json.JSONDecodeError:
+    print("Bazel aquery failed. Command:", aquery_args, file=sys.stderr)
+
+  targets = ', '.join([f'"{target.label}"' for target in parsed_aquery_output.targets])
+
 optionals = f'"--compilation_mode={args.compilation_mode} --cpu={args.cpu}"'
 
 template = f"""
@@ -96,6 +102,7 @@ refresh_compile_commands(
 refresh_launch_json(
   name = "refresh_launch_json",
   target = "{args.target}",
+  pre_launch_task_name = "{args.pre_launch_task_name}",
   tags = ["manual"],
 )
 

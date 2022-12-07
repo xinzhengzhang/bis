@@ -73,11 +73,26 @@ This extension contributes the following settings:
 
     Default cpu string for simulator ( | ios_x86_64)
 
-* `bazel_background_output_base`
+* `bis.bazel_background_output_base`
 
     Temporary output_base when building
 
     Notice: it may affect the bazel-out symbol link
+
+* `bis.pre_launch_task_name`
+
+    Task executed before launch. Default value is bis.build: build
+    
+    We can specify custom build task
+
+* `bis.build_options`
+    
+    Custom build options append to `bazel build`
+
+* `bis.compile_commands_rolling_size`
+    
+    Less than it would merge `compile_commands.json` automatically
+    We can it to 0 if we don't want to auto merge
 
 ---
 ## How bis work
@@ -90,6 +105,24 @@ This extension contributes the following settings:
 * It only support ios_application for now
 
 ## Release Notes
+
+### 0.0.5
+Optimization
+* Speed up the generation of launch.json
+* Change default action in iosTarget from `select` to `last-selected`
+* Change default value of simulator cpu from `""` to `"ios_x86_64"`
+
+Features:
+* Add some extension settings
+    1. Custom pre launch task name
+    2. Custom build options append on `bazel build`
+* Automatic merge of `compile_commands.json`
+    * Default rolling size is `300000000`
+    * Set it to `0` turn off the automatic merge
+
+### 0.0.4
+Features:
+* Support background refreshing
 
 ### 0.0.3
 * fix wrong registation

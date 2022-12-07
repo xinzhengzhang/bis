@@ -6,15 +6,17 @@ def _refresh_launch_json(ctx):
     launch_items = []
 
     target = ctx.attr.target
+    pre_launch_task_name = ctx.attr.pre_launch_task_name
     bundle_info = target[AppleBundleInfo]
+
     launch_items.append(struct(
         name = "Launch",
         type = "lldb",
         request = "launch",
         program = '${workspaceFolder}/'+ "{}/Payload/{}.app".format(bundle_info.archive_root, bundle_info.bundle_name),
         iosBundleId = bundle_info.bundle_id,
-        iosTarget = "select",
-        preLaunchTask = "bis.build: build",
+        iosTarget = "last-selected",
+        preLaunchTask = pre_launch_task_name,
         sourceMap = {"./": "${workspaceFolder}"}
     ))
     launch_items.append(struct(
@@ -23,7 +25,7 @@ def _refresh_launch_json(ctx):
         request = "attach",
         program = "${workspaceFolder}/"+ "{}/Payload/{}.app".format(bundle_info.archive_root, bundle_info.bundle_name),
         iosBundleId = bundle_info.bundle_id,
-        iosTarget = "select",
+        iosTarget = "last-selected",
         sourceMap = {"./": "${workspaceFolder}"}
     ))
     launch_configuration = struct(
@@ -56,7 +58,10 @@ refresh_launch_json = rule(
             mandatory = True,
             providers = [AppleBundleInfo],
         ),
-       "_runner_template": attr.label(
+        "pre_launch_task_name": attr.string(
+            default = "bis.build: build"
+        ),
+        "_runner_template": attr.label(
             allow_single_file = True,
             default = Label("//:json.template.py"),
         ), 

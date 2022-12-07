@@ -1,13 +1,13 @@
-import { isBisWorkspace, _execFile } from "./utils";
 import * as vscode from 'vscode';
 import * as picker from './picker';
 import * as inputer from './inputer';
 import * as cpuProvider from './cpuProvider';
 import * as path from 'path';
-import configuration from "./configuration";
-import { ChildProcess, ChildProcessWithoutNullStreams, exec, execFile, spawn } from "child_process";
-import { Transform } from "stream";
 import * as logger from "./logger";
+import configuration from "./configuration";
+import { isBisWorkspace, getCompileCommandsSize } from "./utils";
+import { ChildProcess, execFile } from "child_process";
+import { Transform } from "stream";
 import { TextDecoder } from "util";
 
 type Context = {
@@ -119,7 +119,12 @@ class CustomBuildTaskTerminal {
                 }
                 logger.log(`Ending setup...\r\n${filePath}\r\n`);
                 logger.log(`Starting refresh...\r\n${filePath}\r\n`);
+                const needMerge = (getCompileCommandsSize() ?? Number.MAX_SAFE_INTEGER) < configuration.compileCommandsRollingSize;
 
+                let extraArgs: string[] = [];
+                if (needMerge) {
+                    extraArgs = ["--", "--merge"];
+                }
                 this.process = this.runBazelProcess(
                     cwd,
                     [
@@ -128,13 +133,14 @@ class CustomBuildTaskTerminal {
                         "--check_visibility=false", 
                         `--compilation_mode=${compilationMode}`, 
                         `--cpu=${cpu}`, 
-                    ],
+                    ].concat(extraArgs),
                     (success) => {
                         if (!success) {
                             logger.error(`File path=${filePath} failed in refresh_compile_commands`);
                             return;
                         }
                         logger.log(`Ending refresh...\r\n${filePath}\r\n`);
+
                         this.currentFilePath = filePath;
                     } 
                 );

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as picker from './picker';
 import * as inputer from './inputer';
 import * as cpuProvider from './cpuProvider';
+import configuration from "./configuration";
 
 export class BuildTaskProvider implements vscode.TaskProvider {
 	static ScriptType = 'bis.build';
@@ -13,7 +14,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
             picker.compilationMode(),
             cpuProvider.cpu()
         ]).then(values => {
-            let executionCommands = `bazel build ${values[0]} --compilation_mode=${values[1]} --cpu="${values[2]}"`;
+            let executionCommands = `bazel build ${values[0]} --compilation_mode=${values[1]} --cpu="${values[2]}" ${configuration.buildOptions}`;
             return [new vscode.Task(
                 {type: BuildTaskProvider.ScriptType},
                 vscode.TaskScope.Workspace,
