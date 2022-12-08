@@ -3,6 +3,7 @@ load("@hedron_compile_commands//:refresh_compile_commands.bzl", hedron_refresh_c
 
 load(":providers.bzl", "BisProjInfo")
 load(":bisproject_aspect.bzl", "bis_aspect")
+load("@build_bazel_rules_apple//apple/internal:transition_support.bzl", "transition_support")
 
 def _refresh_compile_commands_imp(ctx):
 
@@ -14,6 +15,7 @@ def _refresh_compile_commands_imp(ctx):
             return depset_modules
 
     # Prebuild modules
+
     modules = depset([], transitive = [
         _filter_modules(
             target[BisProjInfo].transitive_modules,
@@ -41,10 +43,9 @@ def _refresh_compile_commands_imp(ctx):
 
     return [
         DefaultInfo(
-            files = modules,
             executable = output,
             runfiles = ctx.runfiles(
-                files = extractor_sources,
+                files = extractor_sources + modules.to_list(),
             ),
         ),
     ]
@@ -52,11 +53,13 @@ def _refresh_compile_commands_imp(ctx):
 
 _refresh_compile_commands = rule(
     implementation = _refresh_compile_commands_imp,
+    cfg = transition_support.apple_rule_transition,
     attrs = {
         "targets": attr.label_list(
             mandatory = True,
             allow_empty = True,
             aspects = [bis_aspect],
+            cfg = apple_common.multi_arch_split,
         ),
         "extractor": attr.label(mandatory = True),
         "pre_compile_swift_module": attr.bool(default = True),
@@ -64,12 +67,18 @@ _refresh_compile_commands = rule(
             allow_single_file = True,
             default = Label("//:runner.template.py"),
         ),
-        
+
+        "platform_type": attr.string(default = "ios"),
+        "minimum_os_version": attr.string(default = "11.0"),
+
+        "_allowlist_function_transition": attr.label(
+            default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
+        ),
     },
     executable = True,
 )
 
-def refresh_compile_commands(name, targets, optionals = "", file_path = ".*", pre_compile_swift_module = True, **kwargs):
+def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "", file_path = ".*", pre_compile_swift_module = True, minimum_os_version = "11.0", **kwargs):
     extractor_name = name + "_extractor"
 
     hedron_refresh_compile_commands(
@@ -81,7 +90,8 @@ def refresh_compile_commands(name, targets, optionals = "", file_path = ".*", pr
 
     _refresh_compile_commands(
         name = name,
-        targets = targets,
+        targets = pre_compile_targets,
         extractor = extractor_name,
         pre_compile_swift_module = pre_compile_swift_module,
+        minimum_os_version = minimum_os_version,
     )

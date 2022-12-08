@@ -28,11 +28,15 @@ def _transitive_infos(*, ctx):
 
 def _bis_aspect_impl(target, ctx):
     modules = []
-
     is_swift = SwiftInfo in target
     if is_swift:
         direct_modules = target[SwiftInfo].direct_modules
         for direct_module in direct_modules:
+            # Bridge with header system
+            if direct_module.clang.module_map:
+                modules.append(direct_module.clang.module_map)
+            modules.append(direct_module.swift.swiftmodule)
+
             compilation_context = direct_module.compilation_context
             if type(compilation_context) == list:
                 modules += compilation_context

@@ -39,6 +39,7 @@ args = parser.parse_args()
 os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
 
 targets = f'"{args.target}"'
+pre_compile_targets = f'"{args.target}"'
 
 if not args.ignore_parsing_targets:
   aquery_args = [
@@ -80,7 +81,7 @@ if not args.ignore_parsing_targets:
   except json.JSONDecodeError:
     print("Bazel aquery failed. Command:", aquery_args, file=sys.stderr)
 
-  targets = ', '.join([f'"{target.label}"' for target in parsed_aquery_output.targets])
+  pre_compile_targets = ', '.join([f'"{target.label}"' for target in parsed_aquery_output.targets])
 
 optionals = f'"--compilation_mode={args.compilation_mode} --cpu={args.cpu}"'
 
@@ -92,6 +93,9 @@ refresh_compile_commands(
   name = "refresh_compile_commands",
   targets = [
     {targets}
+  ],
+  pre_compile_targets = [
+    {pre_compile_targets}
   ],
   optionals = {optionals},
   file_path = "{args.file_path}",
