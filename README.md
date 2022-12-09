@@ -1,5 +1,5 @@
 # bis
-Bazel rule for developing iOS project on vscode
+Bazel rules and plugin for developing iOS project on vscode
 
 # Import
 ```WORKSPACE
@@ -21,13 +21,15 @@ bis_rules_dependencies()
 
 ## Install bis plugin
 ```
-cd plugin/zxz-moe-bis/
-vsce package
+code --install-extension zxz-moe.zxz-moe-bis
 ```
 
 # How to use
 
-see [README](plugin/zxz-moe-bis/README.md) of plugin 
+These independent rules are too complicated, it is recommended to use them in combination with plugin.
+
+See [README](plugin/zxz-moe-bis/README.md) of plugin 
+
 
 # Components
 ## Targets
@@ -51,6 +53,10 @@ This step is done automatically by the plugin
                             source code path
     --pre_compile_swift_module PRE_COMPILE_SWIFT_MODULE
                             pre compile swift module
+    --pre_launch_task_name PRE_LAUNCH_TASK_NAME
+                            custom pre launch task
+    --ignore_parsing_targets IGNORE_PARSING_TARGETS
+                            Ignore parsing the closest target which contains the file_path
     ``` 
 
 ## Rules
@@ -63,10 +69,24 @@ Create `compile_commands.json` into WORKSAPCE
     * this strings was passed to `inputs` in [bazel aquery](https://bazel.build/query/aquery)
     * `.*` means extract all path in targets
 * targets: build targets which you want to extract
+* pre_compile_targets: targets which you want to pre compile
 * optionals: to hedron_compile_commands
 * pre_compile_swift_module: should pre build swift module when refreshing `compile_commands.json`
+
+### refresh_compile_commands_ios_cfg
+---
+Exactly like `refresh_compile_commands`, except configured with ios cfg
+* minimum_os_version: the same attr with `ios_application`
 
 ### refresh_launch_json
 ---
 Create `.vscode/launch.json` for vscode plugins
 * target: ios_application
+
+## extract_target_info
+---
+Print output json of target attributes
+* target: ios_application
+
+## Thanks to
+* [zhao han](https://github.com/BarneyZhaoooo) - For his excellent icon design

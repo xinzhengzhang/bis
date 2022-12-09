@@ -10,6 +10,7 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 * Necessary UI for configure iOS project
 * Extract source info from build target and generate `compile_commands.json` for Sourcekit-lsp
 * Generate `launch.json` for debug
+* Auto provides build task that are depended on the build target `command + shift + b`
 
 ---
 ## Requirements
@@ -105,6 +106,10 @@ This extension contributes the following settings:
 * It only support ios_application for now
 
 ## Release Notes
+
+### 0.0.7
+* Differentiate target between ios with others and set the correct configuration to it for sharing the build cache
+* Auto provides build task that are depended on the build target (Try `command + shift + b`)
 
 ### 0.0.6
 * Fix target path validation in inputer
