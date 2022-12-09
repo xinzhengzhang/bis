@@ -107,6 +107,9 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.0.8
+* minor update
+
 ### 0.0.7
 * Differentiate target between ios with others and set the correct configuration to it for sharing the build cache
 * Auto provides build task that are depended on the build target (Try `command + shift + b`)

@@ -44,10 +44,10 @@ export class BuildTaskProvider implements vscode.TaskProvider {
             }
 
             return Promise.all(promises).then(values => {
-                result.push(this.createTask(buildTarget!, compilationMode, cpu));
+                result.push(this.createTask(buildTarget!, compilationMode, cpu, "build"));
                 values.forEach(value => {
                     value.forEach(target => {
-                        result.push(this.createTask(target, compilationMode, cpu));
+                        result.push(this.createTask(target, compilationMode, cpu, `build ${target}`));
                     });
                 });
                 return result;
@@ -55,7 +55,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         });
 	}
 
-    private createTask(target: string, compilationMode: string, cpu: string) {
+    private createTask(target: string, compilationMode: string, cpu: string, source: string) {
         const executionCommands = `bazel build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
 
         const task = new vscode.Task(
@@ -64,7 +64,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                 target: target
             },
             vscode.TaskScope.Workspace,
-            `build ${target}`,
+            source,
             BuildTaskProvider.ScriptType,
             new vscode.ShellExecution(executionCommands)
         );
