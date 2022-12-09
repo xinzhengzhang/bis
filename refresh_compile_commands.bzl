@@ -51,7 +51,7 @@ def _refresh_compile_commands_imp(ctx):
     ]
 
 
-_refresh_compile_commands = rule(
+_refresh_compile_commands_ios_cfg = rule(
     implementation = _refresh_compile_commands_imp,
     cfg = transition_support.apple_rule_transition,
     attrs = {
@@ -78,14 +78,51 @@ _refresh_compile_commands = rule(
     executable = True,
 )
 
-def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "", file_path = ".*", pre_compile_swift_module = True, minimum_os_version = "11.0", **kwargs):
+def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optionals = "", file_path = ".*", pre_compile_swift_module = True, minimum_os_version = "11.0", **kwargs):
     extractor_name = name + "_extractor"
 
     hedron_refresh_compile_commands(
         name = extractor_name,
         targets = { target : optionals for target in targets },
         input_filter = file_path,
-        **kwargs 
+        **kwargs
+    )
+
+    _refresh_compile_commands_ios_cfg(
+        name = name,
+        targets = pre_compile_targets,
+        extractor = extractor_name,
+        pre_compile_swift_module = pre_compile_swift_module,
+        minimum_os_version = minimum_os_version,
+    )
+
+
+_refresh_compile_commands = rule(
+    implementation = _refresh_compile_commands_imp,
+    attrs = {
+        "targets": attr.label_list(
+            mandatory = True,
+            allow_empty = True,
+            aspects = [bis_aspect],
+        ),
+        "extractor": attr.label(mandatory = True),
+        "pre_compile_swift_module": attr.bool(default = True),
+        "_runner_template": attr.label(
+            allow_single_file = True,
+            default = Label("//:runner.template.py"),
+        ),
+    },
+    executable = True,
+)
+
+def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "", file_path = ".*", pre_compile_swift_module = True, **kwargs):
+    extractor_name = name + "_extractor"
+
+    hedron_refresh_compile_commands(
+        name = extractor_name,
+        targets = { target : optionals for target in targets },
+        input_filter = file_path,
+        **kwargs
     )
 
     _refresh_compile_commands(
@@ -93,5 +130,4 @@ def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "",
         targets = pre_compile_targets,
         extractor = extractor_name,
         pre_compile_swift_module = pre_compile_swift_module,
-        minimum_os_version = minimum_os_version,
     )

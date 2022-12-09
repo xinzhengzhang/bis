@@ -35,9 +35,40 @@ parser.add_argument('--ignore_parsing_targets', default = False, type = str2bool
 
 args = parser.parse_args()
 
-# process start
 os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
+Path(".bis").mkdir(parents=True, exist_ok=True)
+Path(".bis/extractor").mkdir(parents=True, exist_ok=True)
 
+
+# Refresh ./bis/extractor/BUILD
+with open('.bis/extractor/BUILD', 'w') as output_file:
+  template = f"""
+load("@bis//:extract_target_info.bzl", "extract_target_info")
+
+extract_target_info(
+  name = "extract_target",
+  target = "{args.target}",
+  tags = ["manual"],
+)
+  """
+  output_file.write(template)
+
+# Refresh ./bis/target_info.json
+info_process = subprocess.run(
+  ["bazel", "run", "//.bis/extractor:extract_target", "--check_visibility=false"],
+  capture_output = True,
+  encoding = locale.getpreferredencoding(),
+)
+
+# Get target info
+for line in info_process.stderr.splitlines():
+  print(line, file=sys.stderr)
+try:
+  target_info = json.loads(info_process.stdout)
+except json.JSONDecodeError:
+  print("Bazel action failed. Command: //.bis/extractor:extract_target", file=sys.stderr)
+
+# process start
 targets = f'"{args.target}"'
 pre_compile_targets = f'"{args.target}"'
 
@@ -78,18 +109,20 @@ if not args.ignore_parsing_targets:
     parsed_aquery_output = json.loads(aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
     if not hasattr(parsed_aquery_output, 'targets'):
       parsed_aquery_output.targets = []
+    pre_compile_targets = ', '.join([f'"{target.label}"' for target in parsed_aquery_output.targets])
   except json.JSONDecodeError:
     print("Bazel aquery failed. Command:", aquery_args, file=sys.stderr)
 
-  pre_compile_targets = ', '.join([f'"{target.label}"' for target in parsed_aquery_output.targets])
-
 optionals = f'"--compilation_mode={args.compilation_mode} --cpu={args.cpu}"'
+refresh_rule = "refresh_compile_commands_ios_cfg" if target_info["is_ios"] else "refresh_compile_commands"
+minimum_os_version_string = f'minimum_os_version = "{target_info["minimum_os_version"]}",' if target_info["is_ios"] else ""
 
 template = f"""
 load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands")
+load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands_ios_cfg")
 load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
 
-refresh_compile_commands(
+{refresh_rule}(
   name = "refresh_compile_commands",
   targets = [
     {targets}
@@ -99,6 +132,7 @@ refresh_compile_commands(
   ],
   optionals = {optionals},
   file_path = "{args.file_path}",
+  {minimum_os_version_string}
   pre_compile_swift_module = {args.pre_compile_swift_module},
   tags = ["manual"],
 )
@@ -111,8 +145,6 @@ refresh_launch_json(
 )
 
 """
-
-Path(".bis").mkdir(parents=True, exist_ok=True)
 
 with open('.bis/BUILD', 'w') as output_file:
     output_file.write(template)
