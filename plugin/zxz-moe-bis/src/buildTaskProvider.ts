@@ -29,3 +29,11 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         return _task;
 	}
 }
+
+export async function build() {
+    return new BuildTaskProvider().provideTasks().then(values => {
+        values.forEach(value => {
+            vscode.tasks.executeTask(value);
+        });
+    });
+}

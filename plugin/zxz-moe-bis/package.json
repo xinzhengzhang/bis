@@ -23,7 +23,11 @@
     "commands": [
       {
         "command": "zxz-moe-bis.generateLaunchJson",
-        "title": "Generate bis launch json"
+        "title": "bis: Generate bis launch json"
+      },
+      {
+        "command": "zxz-moe-bis.build",
+        "title": "bis: Build target"
       }
     ],
     "configuration": [
