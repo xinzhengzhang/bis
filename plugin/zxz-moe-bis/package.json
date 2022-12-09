@@ -24,10 +24,6 @@
       {
         "command": "zxz-moe-bis.generateLaunchJson",
         "title": "bis: Generate bis launch json"
-      },
-      {
-        "command": "zxz-moe-bis.build",
-        "title": "bis: Build target"
       }
     ],
     "configuration": [
@@ -81,7 +77,14 @@
     ],
     "taskDefinitions": [
       {
-        "type": "bis.build"
+        "type": "bis.build",
+        "required": ["target"],
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Build label"
+          }
+        }
       }
     ]
   },

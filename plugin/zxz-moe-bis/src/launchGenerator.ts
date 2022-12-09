@@ -19,7 +19,7 @@ export async function generate()
             vscode.TaskScope.Workspace,
             "generate_launch_json",
             buildType,
-            new vscode.ShellExecution(executionCommands)	
+            new vscode.ShellExecution(executionCommands)
         );
         vscode.tasks.executeTask(task);
     });

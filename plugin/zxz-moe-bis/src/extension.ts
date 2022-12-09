@@ -7,7 +7,7 @@ import * as inputer from './inputer';
 import * as cpuProvider from './cpuProvider';
 import * as launchGenerator from './launchGenerator';
 import configuration from './configuration';
-import { BuildTaskProvider, build } from './buildTaskProvider';
+import { BuildTaskProvider } from './buildTaskProvider';
 import { onDidChangeActiveTextEditorMaker } from './refreshCompileCommands';
 import { launchConfigurationExists } from './utils';
 
@@ -31,8 +31,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Commands action
 	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.generateLaunchJson', launchGenerator.generate));
-
-	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.build', build));
 
 	context.subscriptions.push(vscode.commands.registerCommand('zxz-moe-bis.pickCompilationMode', picker.pickCompilationMode));
 
