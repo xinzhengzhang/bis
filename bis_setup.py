@@ -10,6 +10,10 @@ import sys
 
 from pathlib import Path
 
+
+# Error define
+ERR_NO_TARGET_FOUND = 166
+
 def str2bool(v):
   if isinstance(v, bool):
     return v
@@ -108,7 +112,7 @@ if not args.ignore_parsing_targets:
   try:
     parsed_aquery_output = json.loads(aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
     if not hasattr(parsed_aquery_output, 'targets'):
-      parsed_aquery_output.targets = []
+      os._exit(ERR_NO_TARGET_FOUND)
     pre_compile_targets = ', '.join([f'"{target.label}"' for target in parsed_aquery_output.targets])
   except json.JSONDecodeError:
     print("Bazel aquery failed. Command:", aquery_args, file=sys.stderr)

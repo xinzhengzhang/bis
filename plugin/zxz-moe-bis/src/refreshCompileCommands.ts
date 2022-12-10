@@ -6,6 +6,7 @@ import * as path from "path";
 import * as logger from "./logger";
 import configuration from "./configuration";
 import { isBisWorkspace, getCompileCommandsSize } from "./utils";
+import { showIfError } from "./error";
 import { ChildProcess, execFile } from "child_process";
 import { Transform } from "stream";
 import { TextDecoder } from "util";
@@ -135,6 +136,7 @@ class CustomBuildTaskTerminal {
             (success) => {
                 if (!success) {
                     logger.error(`File path=${filePath} failed in bis setup`);
+                    this.parsingFilePath = "";
                     return;
                 }
                 logger.log(`Ending setup...\r\n${filePath}\r\n`);
@@ -158,6 +160,7 @@ class CustomBuildTaskTerminal {
                         `--cpu=${cpu}`,
                     ].concat(extraArgs),
                     (success) => {
+                        this.parsingFilePath = "";
                         if (!success) {
                             logger.error(
                                 `File path=${filePath} failed in refresh_compile_commands`
@@ -195,6 +198,7 @@ class CustomBuildTaskTerminal {
 
         let process = execFile("bazel", cmd, { cwd: cwd }, (exception) => {
             callback(exception ? false : true);
+            showIfError(Number(exception?.code));
         });
         process.stdout?.pipe(new WriteStream(WriteStreamType.stdout));
         process.stderr?.pipe(new WriteStream(WriteStreamType.stderr));
