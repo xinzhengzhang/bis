@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
-import * as picker from './picker';
-import * as inputer from './inputer';
-import * as cpuProvider from './cpuProvider';
-import * as path from 'path';
+import * as vscode from "vscode";
+import * as picker from "./picker";
+import * as inputer from "./inputer";
+import * as cpuProvider from "./cpuProvider";
+import * as path from "path";
 import * as logger from "./logger";
 import configuration from "./configuration";
 import { isBisWorkspace, getCompileCommandsSize } from "./utils";
@@ -11,24 +11,29 @@ import { Transform } from "stream";
 import { TextDecoder } from "util";
 
 type Context = {
-    terminal: CustomBuildTaskTerminal
+    terminal: CustomBuildTaskTerminal;
 };
 
 export function onDidChangeActiveTextEditorMaker() {
-
-    let context:Context = {
-        terminal: new CustomBuildTaskTerminal()
+    let context: Context = {
+        terminal: new CustomBuildTaskTerminal(),
     };
 
-    return function(editor: vscode.TextEditor|undefined) {
+    return function (editor: vscode.TextEditor | undefined) {
         if (editor?.document.uri) {
-            vscode.workspace.workspaceFolders?.forEach(value => {
+            vscode.workspace.workspaceFolders?.forEach((value) => {
                 if (isBisWorkspace(value)) {
-                    let relative = path.relative(value.uri.fsPath, editor?.document.uri.fsPath);
+                    let relative = path.relative(
+                        value.uri.fsPath,
+                        editor?.document.uri.fsPath
+                    );
                     // Is there a more elegant way?
-                    const supportExt = ['.swift', '.m', '.mm'];
-                    if (!relative.startsWith("../") && supportExt.includes(path.extname(relative))) {
-                        refresh(relative, context, value.uri.fsPath);
+                    const supportExt = [".swift", ".m", ".mm"];
+                    if (
+                        !relative.startsWith("../") &&
+                        supportExt.includes(path.extname(relative))
+                    ) {
+                        refresh(relative, context, value);
                     }
                 }
             });
@@ -36,15 +41,25 @@ export function onDidChangeActiveTextEditorMaker() {
     };
 }
 
-async function refresh(filePath: string, context: Context, cwd: string)
-{
-    return Promise.all([
-        inputer.buildTarget(),
-        picker.compilationMode(),
-        cpuProvider.cpu()
-    ]).then(values => {
-        context.terminal.doTask(values[0], values[1], values[2], filePath, cwd);
-    });
+async function refresh(
+    filePath: string,
+    context: Context,
+    workspace: vscode.WorkspaceFolder
+) {
+    const buildTarget = await inputer.buildTarget();
+    if (!buildTarget) {
+        return;
+    }
+
+    const compilationMode = (await picker.compilationMode()) ?? "dbg";
+    const cpu = await cpuProvider.cpu();
+    context.terminal.doTask(
+        buildTarget,
+        compilationMode,
+        cpu,
+        filePath,
+        workspace
+    );
 }
 
 enum WriteStreamType {
@@ -53,14 +68,13 @@ enum WriteStreamType {
 }
 
 class WriteStream extends Transform {
-
     private decoder = new TextDecoder();
-    constructor(private type: WriteStreamType){
+    constructor(private type: WriteStreamType) {
         super();
     }
 
     _transform(chunk: any, encoding: BufferEncoding, callback: any) {
-        switch(this.type) {
+        switch (this.type) {
             case WriteStreamType.stdout:
                 logger.log(this.decoder.decode(chunk));
                 break;
@@ -77,11 +91,17 @@ class CustomBuildTaskTerminal {
     private currentFilePath = "";
     private parsingFilePath = "";
 
-    async doTask(buildTarget: string|undefined, compilationMode: string|undefined, cpu: string|undefined, filePath: string, cwd: string) {
-        if (this.parsingFilePath === filePath) {
-            return;
-        }
-        if (this.currentFilePath === filePath) {
+    async doTask(
+        buildTarget: string | undefined,
+        compilationMode: string | undefined,
+        cpu: string | undefined,
+        filePath: string,
+        workspace: vscode.WorkspaceFolder
+    ) {
+        if (
+            this.parsingFilePath === filePath ||
+            this.currentFilePath === filePath
+        ) {
             return;
         }
 
@@ -96,7 +116,7 @@ class CustomBuildTaskTerminal {
         logger.log(`Starting setup...\r\n${filePath}\r\n`);
 
         this.process = this.runBazelProcess(
-            cwd,
+            workspace.uri.fsPath,
             [
                 "run",
                 "@bis//:setup",
@@ -110,7 +130,7 @@ class CustomBuildTaskTerminal {
                 "--file_path",
                 `${filePath}`,
                 "--pre_compile_swift_module",
-                `${configuration.prebuildSwiftWhenIndexing}`
+                `${configuration.prebuildSwiftWhenIndexing}`,
             ],
             (success) => {
                 if (!success) {
@@ -119,52 +139,63 @@ class CustomBuildTaskTerminal {
                 }
                 logger.log(`Ending setup...\r\n${filePath}\r\n`);
                 logger.log(`Starting refresh...\r\n${filePath}\r\n`);
-                const needMerge = (getCompileCommandsSize() ?? Number.MAX_SAFE_INTEGER) < configuration.compileCommandsRollingSize;
+                const needMerge =
+                    (getCompileCommandsSize(workspace) ??
+                        Number.MAX_SAFE_INTEGER) <
+                    configuration.compileCommandsRollingSize;
 
                 let extraArgs: string[] = [];
                 if (needMerge) {
                     extraArgs = ["--", "--merge"];
                 }
                 this.process = this.runBazelProcess(
-                    cwd,
+                    workspace.uri.fsPath,
                     [
-                        "run", 
-                        "//.bis:refresh_compile_commands", 
-                        "--check_visibility=false", 
-                        `--compilation_mode=${compilationMode}`, 
-                        `--cpu=${cpu}`, 
+                        "run",
+                        "//.bis:refresh_compile_commands",
+                        "--check_visibility=false",
+                        `--compilation_mode=${compilationMode}`,
+                        `--cpu=${cpu}`,
                     ].concat(extraArgs),
                     (success) => {
                         if (!success) {
-                            logger.error(`File path=${filePath} failed in refresh_compile_commands`);
+                            logger.error(
+                                `File path=${filePath} failed in refresh_compile_commands`
+                            );
                             return;
                         }
                         logger.log(`Ending refresh...\r\n${filePath}\r\n`);
 
                         this.currentFilePath = filePath;
-                    } 
+                    }
                 );
             }
         );
     }
 
-    private runBazelProcess(cwd: string, cmd: string[], callback: ((success: boolean) => void)): ChildProcess {
-        const needAnotherOutputBase: boolean = vscode.tasks.taskExecutions.filter(value => {
-            return (value.task.name === "build" && value.task.source === "bis.build");
-        }).length > 0;
+    private runBazelProcess(
+        cwd: string,
+        cmd: string[],
+        callback: (success: boolean) => void
+    ): ChildProcess {
+        const needAnotherOutputBase: boolean =
+            vscode.tasks.taskExecutions.filter((value) => {
+                return (
+                    value.task.name === "build" &&
+                    value.task.source === "bis.build"
+                );
+            }).length > 0;
 
         if (needAnotherOutputBase) {
-            cmd = ["--output_base", configuration.bazelBackgroundOutputBase].concat(cmd);
+            cmd = [
+                "--output_base",
+                configuration.bazelBackgroundOutputBase,
+            ].concat(cmd);
         }
 
-        let process = execFile(
-            "bazel",
-            cmd,
-            {cwd: cwd},
-            (exception) => {
-                callback(exception?false:true);
-            }
-        );
+        let process = execFile("bazel", cmd, { cwd: cwd }, (exception) => {
+            callback(exception ? false : true);
+        });
         process.stdout?.pipe(new WriteStream(WriteStreamType.stdout));
         process.stderr?.pipe(new WriteStream(WriteStreamType.stderr));
         return process;

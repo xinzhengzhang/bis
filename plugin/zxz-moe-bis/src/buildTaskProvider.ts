@@ -1,78 +1,84 @@
-import * as vscode from 'vscode';
-import * as picker from './picker';
-import * as inputer from './inputer';
-import * as cpuProvider from './cpuProvider';
+import * as vscode from "vscode";
+import * as picker from "./picker";
+import * as inputer from "./inputer";
+import * as cpuProvider from "./cpuProvider";
 import configuration from "./configuration";
-import { _execFile } from "./utils";
-import { exec } from 'child_process';
+import { exec } from "child_process";
 import * as logger from "./logger";
-import { promisify } from 'util';
+import { promisify } from "util";
 
 export class BuildTaskProvider implements vscode.TaskProvider {
-	static ScriptType = 'bis.build';
-	private tasks: vscode.Task[] | undefined;
+    static scriptType = "bis.build";
 
-	public async provideTasks(): Promise<vscode.Task[]> {
-        return Promise.all([
-            inputer.buildTarget(),
-            picker.compilationMode(),
-            cpuProvider.cpu()
-        ]).then(values => {
-            const workspaceFolders = vscode.workspace.workspaceFolders;
-            const result: vscode.Task[] = [];
-            let promises: Promise<string[]>[] = [];
-            let buildTarget = values[0];
-            let compilationMode = values[1] ?? "dbg";
-            let cpu = values[2] ?? configuration.simulatorCpuString;
+    public async provideTasks(): Promise<vscode.Task[]> {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders?.length) {
+            return [];
+        }
+        const buildTarget = await inputer.buildTarget();
+        if (!buildTarget) {
+            return [];
+        }
 
-            if (!workspaceFolders || workspaceFolders.length === 0 || !buildTarget) {
-                return result;
-            }
-            for (const workspaceFolder of workspaceFolders) {
-                const folderString = workspaceFolder.uri.fsPath;
-                const promise = promisify(exec)(`bazel query 'kind("(swift|objc)_library", deps("${values[0]}"))' --output=label`, {cwd: folderString}).then(({stdout, stderr}) => {
-                    if (stdout) {
-                        const splited = stdout.split(/\r?\n/);
-                        return splited.filter(value => {return value.length !== 0;});
-                    }
-                    return [];
-                }).then(undefined, err => {
-                    logger.error(err);
-                    return [];
-                 });
-                promises.push(promise);
-            }
+        const compilationMode = (await picker.compilationMode()) ?? "dbg";
+        const cpu = await cpuProvider.cpu();
+        const result: vscode.Task[] = [
+            this.createTask(buildTarget!, compilationMode, cpu, "build"),
+        ];
 
-            return Promise.all(promises).then(values => {
-                result.push(this.createTask(buildTarget!, compilationMode, cpu, "build"));
-                values.forEach(value => {
-                    value.forEach(target => {
-                        result.push(this.createTask(target, compilationMode, cpu, `build ${target}`));
+        for (const workspaceFolder of workspaceFolders) {
+            const folderString = workspaceFolder.uri.fsPath;
+            try {
+                const { stdout } = await promisify(exec)(
+                    `bazel query 'kind("(swift|objc)_library", deps("${buildTarget}"))' --output=label`,
+                    { cwd: folderString }
+                );
+                if (stdout) {
+                    const splited = stdout.split(/\r?\n/);
+                    splited.forEach((str) => {
+                        if (!str) {
+                            return;
+                        }
+                        result.push(
+                            this.createTask(
+                                str,
+                                compilationMode,
+                                cpu,
+                                `build ${str}`
+                            )
+                        );
                     });
-                });
-                return result;
-            });
-        });
-	}
+                }
+            } catch (error) {
+                logger.error(error);
+            }
+        }
+        return result;
+    }
 
-    private createTask(target: string, compilationMode: string, cpu: string, source: string) {
+    private createTask(
+        target: string,
+        compilationMode: string,
+        cpu: string,
+        source: string
+    ) {
         const executionCommands = `bazel build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
 
         const task = new vscode.Task(
             {
-                type: BuildTaskProvider.ScriptType,
-                target: target
+                type: BuildTaskProvider.scriptType,
+                target: target,
             },
             vscode.TaskScope.Workspace,
             source,
-            BuildTaskProvider.ScriptType,
+            BuildTaskProvider.scriptType,
             new vscode.ShellExecution(executionCommands)
         );
         task.group = vscode.TaskGroup.Build;
         return task;
     }
 
-	public resolveTask(_task: vscode.Task): vscode.Task | undefined {
+    public resolveTask(_task: vscode.Task): vscode.Task | undefined {
         return _task;
-	}
+    }
 }

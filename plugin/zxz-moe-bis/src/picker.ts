@@ -1,6 +1,6 @@
-import exp = require('constants');
-import * as vscode from 'vscode';
-import * as logger from './logger';
+import exp = require("constants");
+import * as vscode from "vscode";
+import * as logger from "./logger";
 
 const SELECTED_COMPILATION_MODE_KEY = "selected_compilation_mode";
 
@@ -14,35 +14,34 @@ enum CompilationMode {
 
 // Status bar
 
-function setupStatusBarPicker()
-{
+function setupStatusBarPicker() {
     statusBarCompilationModePicker.command = "zxz-moe-bis.pickCompilationMode";
-    statusBarCompilationModePicker.tooltip = "Select iOS compilcation mode for debugging";
+    statusBarCompilationModePicker.tooltip =
+        "Select iOS compilcation mode for debugging";
 
-    let compilationMode: string|undefined = context.workspaceState.get(SELECTED_COMPILATION_MODE_KEY);
+    let compilationMode: string | undefined = context.workspaceState.get(
+        SELECTED_COMPILATION_MODE_KEY
+    );
 
-    if (compilationMode && compilationMode in CompilationMode)
-    {
+    if (compilationMode && compilationMode in CompilationMode) {
         _updateCompilationMode(compilationMode);
         statusBarCompilationModePicker.text = compilationMode;
-    }
-    else
-    {
+    } else {
         statusBarCompilationModePicker.text = CompilationMode.dbg;
     }
     statusBarCompilationModePicker.show();
 }
 
-export async function pickCompilationMode()
-{
+export async function pickCompilationMode() {
     let options = Object.values(CompilationMode);
 
     let quickPickOptions: vscode.QuickPickOptions = {
         title: "Select compilation mode",
         matchOnDescription: true,
+        ignoreFocusOut: true,
     };
 
-    let choose = (await vscode.window.showQuickPick(options, quickPickOptions));
+    let choose = await vscode.window.showQuickPick(options, quickPickOptions);
 
     if (choose) {
         await _updateCompilationMode(choose);
@@ -52,31 +51,33 @@ export async function pickCompilationMode()
     return choose;
 }
 
-export async function compilationMode()
-{
+export async function compilationMode() {
     return _getOrPickCompilationMode();
 }
 
-export function activate(c: vscode.ExtensionContext)
-{
+export function activate(c: vscode.ExtensionContext) {
     context = c;
-    statusBarCompilationModePicker = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
+    statusBarCompilationModePicker = vscode.window.createStatusBarItem(
+        vscode.StatusBarAlignment.Left,
+        0
+    );
     setupStatusBarPicker();
 }
 
-async function _getOrPickCompilationMode()
-{
-    let compilationMode: CompilationMode|undefined = context.workspaceState.get(SELECTED_COMPILATION_MODE_KEY);
-    if (!compilationMode)
-    {
+async function _getOrPickCompilationMode() {
+    let compilationMode: CompilationMode | undefined =
+        context.workspaceState.get(SELECTED_COMPILATION_MODE_KEY);
+    if (!compilationMode) {
         return pickCompilationMode();
     }
     return compilationMode;
 }
 
 // Storage
-async function _updateCompilationMode(compilationMode: string)
-{
-    await context.workspaceState.update(SELECTED_COMPILATION_MODE_KEY, compilationMode);
+async function _updateCompilationMode(compilationMode: string) {
+    await context.workspaceState.update(
+        SELECTED_COMPILATION_MODE_KEY,
+        compilationMode
+    );
     statusBarCompilationModePicker.text = compilationMode;
 }

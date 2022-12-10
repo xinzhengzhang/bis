@@ -1,57 +1,48 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 let channel: vscode.OutputChannel;
 
-function getFormattedTime()
-{
+function getFormattedTime() {
     let time = new Date();
-    return `${time.getFullYear()}-${time.getMonth()+1}-${time.getDate()} ${time.getHours()}:${time.getMinutes()}`;
+    return `${time.getFullYear()}-${
+        time.getMonth() + 1
+    }-${time.getDate()} ${time.getHours()}:${time.getMinutes()}`;
 }
 
-function formatSingleMessage(message: any)
-{
-    if (typeof(message) === "undefined") {
+function formatSingleMessage(message: any) {
+    if (typeof message === "undefined") {
         return "undefined";
-    }
-    else if (message === null) {
+    } else if (message === null) {
         return "null";
-    }
-    else if (typeof message === "object") {
+    } else if (typeof message === "object") {
         return JSON.stringify(message, undefined, 4);
-    }
-    else if (message.toString) {
+    } else if (message.toString) {
         return message.toString();
     }
 }
 
-function formatMessage(severity: "ERROR"|"WARN"|"INFO", messages: any[])
-{
-    let message = messages.map(formatSingleMessage).join(' ');
+function formatMessage(severity: "ERROR" | "WARN" | "INFO", messages: any[]) {
+    let message = messages.map(formatSingleMessage).join(" ");
 
     return `[${getFormattedTime()}] [${severity}] ${message}`;
 }
 
-export function activate()
-{
+export function activate() {
     channel = vscode.window.createOutputChannel("Bis");
 }
 
-export function error(...args: any[])
-{
+export function error(...args: any[]) {
     channel.appendLine(formatMessage("ERROR", args));
 }
 
-export function warn(...args: any[])
-{
+export function warn(...args: any[]) {
     channel.appendLine(formatMessage("WARN", args));
 }
 
-export function show()
-{
+export function show() {
     channel.show();
 }
 
-export function log(...args: any[])
-{
+export function log(...args: any[]) {
     channel.appendLine(formatMessage("INFO", args));
 }
