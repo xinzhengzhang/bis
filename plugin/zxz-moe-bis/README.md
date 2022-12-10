@@ -107,6 +107,11 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.0.9
+* Fix that UI overlaps each other when extract build target and pre build task
+* Show error if file not in target's dependencies
+* Adapt to multiple workspaces
+
 ### 0.0.8
 * minor update
 
