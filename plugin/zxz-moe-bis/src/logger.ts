@@ -39,8 +39,8 @@ export function warn(...args: any[]) {
     channel.appendLine(formatMessage("WARN", args));
 }
 
-export function show() {
-    channel.show();
+export function show(preserveFocus?: boolean) {
+    channel.show(preserveFocus);
 }
 
 export function log(...args: any[]) {

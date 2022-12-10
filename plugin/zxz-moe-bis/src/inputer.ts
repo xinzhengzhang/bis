@@ -29,6 +29,7 @@ function setupStatusBarInputer() {
 export async function inputBuildTarget() {
     let options: vscode.InputBoxOptions = {
         title: "Input label of target",
+        value: context.workspaceState.get(INPUTED_LABEL_STRING),
         prompt: "@<WORKSPACE>//:<PATH>",
         validateInput(value) {
             let message: vscode.InputBoxValidationMessage = {

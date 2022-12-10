@@ -107,8 +107,7 @@ class CustomBuildTaskTerminal {
         }
 
         this.parsingFilePath = filePath;
-
-        logger.show();
+        // logger.show(true);
         if (this.process) {
             logger.warn(`killed last process pid = ${this.process.pid}}`);
             this.process.kill();
@@ -181,18 +180,22 @@ class CustomBuildTaskTerminal {
         cmd: string[],
         callback: (success: boolean) => void
     ): ChildProcess {
-        const needAnotherOutputBase: boolean =
-            vscode.tasks.taskExecutions.filter((value) => {
+        const backgroudOutputBase = configuration.bazelBackgroundOutputBase;
+        let needBackgroundOutputBase: boolean = false;
+
+        if (backgroudOutputBase.length) {
+            needBackgroundOutputBase = vscode.tasks.taskExecutions.filter((value) => {
                 return (
                     value.task.name === "build" &&
                     value.task.source === "bis.build"
                 );
             }).length > 0;
+        }
 
-        if (needAnotherOutputBase) {
+        if (needBackgroundOutputBase) {
             cmd = [
                 "--output_base",
-                configuration.bazelBackgroundOutputBase,
+                backgroudOutputBase,
             ].concat(cmd);
         }
 
