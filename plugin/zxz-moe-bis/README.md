@@ -78,7 +78,7 @@ This extension contributes the following settings:
 
     Temporary output_base when building
 
-    Notice: it may affect the bazel-out symbol link
+    Notice: it may affect the bazel-out symbol link (Set to '' to disable it)
 
 * `bis.pre_launch_task_name`
 
@@ -106,6 +106,11 @@ This extension contributes the following settings:
 * It only support ios_application for now
 
 ## Release Notes
+
+### 0.0.10
+* Set last value into inputer when clicked
+* Do not display logs when refreshing commands
+* bis.bazel_background_output_base set to '' to disable background refreshing
 
 ### 0.0.9
 * Fix that UI overlaps each other when extract build target and pre build task

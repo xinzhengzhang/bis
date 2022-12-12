@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/xinzhengzhang/bis"
   },
-  "version": "0.0.9",
+  "version": "0.0.10",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -50,7 +50,7 @@
           },
           "bis.bazel_background_output_base": {
             "type": "string",
-            "markdownDescription": "Temporary output_base when building",
+            "markdownDescription": "Temporary output_base when building (This option may affect the symbol link of bazel-out for debuging. Set to '' to disable background indexing)",
             "order": 4,
             "default": "/tmp/.bis_cache"
           },
