@@ -59,7 +59,7 @@ refresh_launch_json = rule(
             providers = [AppleBundleInfo],
         ),
         "pre_launch_task_name": attr.string(
-            default = "bis.build: build"
+            default = "${config:bis.pre_launch_task_name}"
         ),
         "_runner_template": attr.label(
             allow_single_file = True,

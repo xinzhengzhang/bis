@@ -33,7 +33,6 @@ parser.add_argument('--compilation_mode', default = 'dbg', type = str, help='dbg
 parser.add_argument('--cpu', default = '', type = str, help='ios_arm64')
 parser.add_argument('--target', required=True, type = str, help='target labels')
 parser.add_argument('--file_path', default = '.*', type = str, help='source code path')
-parser.add_argument('--pre_launch_task_name', default = 'bis.build: build', type = str, help='pre launch task before build')
 parser.add_argument('--pre_compile_swift_module', default = True, type = str2bool, help='pre compile swift module')
 parser.add_argument('--ignore_parsing_targets', default = False, type = str2bool, help='ignoring parsing targets phase just pass --target to targets in `refresh_compile_commands`')
 
@@ -144,7 +143,6 @@ load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
 refresh_launch_json(
   name = "refresh_launch_json",
   target = "{args.target}",
-  pre_launch_task_name = "{args.pre_launch_task_name}",
   tags = ["manual"],
 )
 
