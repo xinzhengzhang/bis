@@ -107,6 +107,9 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.1.0
+* Remove pre_launch_task_name in setup.py set it to `$${config:bis.pre_launch_task_name}`
+
 ### 0.0.10
 * Set last value into inputer when clicked
 * Do not display logs when refreshing commands
