@@ -5,11 +5,9 @@ import * as cpuProvider from "./cpuProvider";
 import * as path from "path";
 import * as logger from "./logger";
 import configuration from "./configuration";
-import { isBisWorkspace, getCompileCommandsSize } from "./utils";
+import { isBisWorkspace, getCompileCommandsSize, getExtraOutputBaseString, WriteStream, WriteStreamType } from "./utils";
 import { showIfError } from "./error";
 import { ChildProcess, execFile } from "child_process";
-import { Transform } from "stream";
-import { TextDecoder } from "util";
 
 type Context = {
     terminal: CustomBuildTaskTerminal;
@@ -28,6 +26,7 @@ export function onDidChangeActiveTextEditorMaker() {
                         value.uri.fsPath,
                         editor?.document.uri.fsPath
                     );
+                    logger.log(`TextEditor changed...\r\n${relative}\r\n`);
                     // Is there a more elegant way?
                     const supportExt = [".swift", ".m", ".mm"];
                     if (
@@ -49,6 +48,7 @@ async function refresh(
 ) {
     const buildTarget = await inputer.buildTarget();
     if (!buildTarget) {
+        logger.log("Refresh Compile Commands: no target specified");
         return;
     }
 
@@ -61,30 +61,6 @@ async function refresh(
         filePath,
         workspace
     );
-}
-
-enum WriteStreamType {
-    stdout = 1,
-    stderr,
-}
-
-class WriteStream extends Transform {
-    private decoder = new TextDecoder();
-    constructor(private type: WriteStreamType) {
-        super();
-    }
-
-    _transform(chunk: any, encoding: BufferEncoding, callback: any) {
-        switch (this.type) {
-            case WriteStreamType.stdout:
-                logger.log(this.decoder.decode(chunk));
-                break;
-            case WriteStreamType.stderr:
-                logger.warn(this.decoder.decode(chunk));
-                break;
-        }
-        callback(null);
-    }
 }
 
 class CustomBuildTaskTerminal {
@@ -180,25 +156,6 @@ class CustomBuildTaskTerminal {
         cmd: string[],
         callback: (success: boolean) => void
     ): ChildProcess {
-        const backgroudOutputBase = configuration.bazelBackgroundOutputBase;
-        let needBackgroundOutputBase: boolean = false;
-
-        if (backgroudOutputBase.length) {
-            needBackgroundOutputBase = vscode.tasks.taskExecutions.filter((value) => {
-                return (
-                    value.task.name === "build" &&
-                    value.task.source === "bis.build"
-                );
-            }).length > 0;
-        }
-
-        if (needBackgroundOutputBase) {
-            cmd = [
-                "--output_base",
-                backgroudOutputBase,
-            ].concat(cmd);
-        }
-
         let process = execFile("bazel", cmd, { cwd: cwd }, (exception) => {
             callback(exception ? false : true);
             showIfError(Number(exception?.code));

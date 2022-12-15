@@ -106,6 +106,8 @@ This extension contributes the following settings:
 * It only support ios_application for now
 
 ## Release Notes
+### news
+* Add much more log
 
 ### 0.1.0
 * Remove pre_launch_task_name in setup.py set it to `$${config:bis.pre_launch_task_name}`
