@@ -30,7 +30,8 @@ export function onDidChangeActiveTextEditorMaker() {
                     );
                     logger.log(`TextEditor changed...\r\n${relative}\r\n`);
                     // Is there a more elegant way?
-                    const supportExt = [".swift", ".m", ".mm"];
+                    // cpp extension:... https://github.com/llvm/llvm-project/blob/b9f3b7f89a4cb4cf541b7116d9389c73690f78fa/clang/lib/Driver/Types.cpp#L293
+                    const supportExt = [".swift", ".m", ".mm", ".c", ".cc", ".cpp", ".cxx", ".c++", ".C", ".CC", ".CPP", ".CXX", ".C++"];
                     if (
                         !relative.startsWith("../") &&
                         supportExt.includes(path.extname(relative))

@@ -45,7 +45,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
             const extractOutputBaseString = getExtraOutputBaseString()??"";
-            const process = exec(`bazel query 'kind("(swift|objc)_library", deps("${buildTarget}"))' --output=label`, {
+            const process = exec(`bazel query 'kind("(swift|objc|cc)_library", deps("${buildTarget}"))' --output=label`, {
                 cwd: folderString
             }, (exception, stdout, stderr) => {
                 if (stdout) {

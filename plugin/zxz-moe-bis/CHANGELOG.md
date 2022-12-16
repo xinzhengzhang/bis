@@ -1,6 +1,11 @@
 # Change Log
 
 ## [Unreleased]
+
+### 0.1.3
+Features:
+* support extension `[".swift", ".m", ".mm", ".c", ".cc", ".cpp", ".cxx", ".c++", ".C", ".CC", ".CPP", ".CXX", ".C++"]`
+
 ### 0.1.2
 Features
 * bis.check_duplicate_compile_commands
