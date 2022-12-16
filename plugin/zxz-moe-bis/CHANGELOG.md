@@ -1,6 +1,13 @@
 # Change Log
 
 ## [Unreleased]
+### 0.1.2
+Features
+* bis.check_duplicate_compile_commands
+
+    Whether to ignore repeated refresh commands.
+
+    Note: Different compilation parameters will still reuse the same copy. It doesn't matter in most cases, you can choose to delete the local ./compile_commands.json or disable it
 
 ### 0.1.1 
 * Add much more log
