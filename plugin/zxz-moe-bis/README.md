@@ -44,6 +44,8 @@ This extension contributes the following commands:
 * Setup bis project: `zxz-moe-bis.generateLaunchJson`
     * generate `.vscode/launch.json`
 
+        Notice: the target must have mandatory providers: 'AppleBundleInfo'
+
 * Variable
     * `zxz-moe-bis.buildTarget`
         * Label of selected target
