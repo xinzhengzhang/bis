@@ -14,15 +14,16 @@ import json
 # os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
 workspace_path = os.environ["BUILD_WORKSPACE_DIRECTORY"]
 # extractor path
-extractor_path="%python_sources%"
+extractor_path = "%python_sources%"
 # get relative path for extractor_path based workspace
-relative_path=os.path.relpath(extractor_path, workspace_path)
+relative_path = os.path.relpath(extractor_path, workspace_path)
 
 # cd workspace root
 os.chdir(workspace_path)
 
 parser = argparse.ArgumentParser(description='refresh_compile_commands')
-parser.add_argument('--merge', action=argparse.BooleanOptionalAction, default = False)
+parser.add_argument(
+    '--merge', action=argparse.BooleanOptionalAction, default=False)
 args = parser.parse_args()
 
 if args.merge and os.path.isfile('compile_commands.json'):
@@ -57,8 +58,8 @@ if args.merge and os.path.isfile('compile_commands.json'):
             json.dump(
                 result1 + filterd,
                 output_file,
-                indent=2, # Yay, human readability!
-                check_circular=False # For speed.
+                indent=2,  # Yay, human readability!
+                check_circular=False  # For speed.
             )
 else:
     call(["python3", relative_path])
