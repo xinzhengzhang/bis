@@ -42,34 +42,40 @@
             "order": 2,
             "default": true
           },
+          "bis.check_duplicate_compile_commands": {
+            "type": "boolean",
+            "markdownDescription": "Whether to ignore repeated refresh commands. Note: Different compilation parameters will still reuse the same copy. It doesn't matter in most cases, you can choose to delete the local ./compile_commands.json or disable it",
+            "order": 3,
+            "default": true
+          },
           "bis.simulator_cpu_string": {
             "type": "string",
             "markdownDescription": "CPU string of simulator",
-            "order": 3,
+            "order": 4,
             "default": "ios_x86_64"
           },
           "bis.bazel_background_output_base": {
             "type": "string",
             "markdownDescription": "Temporary output_base when building (This option may affect the symbol link of bazel-out for debuging. Set to '' to disable background indexing)",
-            "order": 4,
+            "order": 5,
             "default": "/tmp/.bis_cache"
           },
           "bis.pre_launch_task_name": {
             "type": "string",
             "markdownDescription": "Pre launch task name before build",
-            "order": 5,
+            "order": 6,
             "default": "bis.build: build"
           },
           "bis.build_options": {
             "type": "string",
             "markdownDescription": "Build options append on bazel build commands",
-            "order": 6,
+            "order": 7,
             "default": ""
           },
           "bis.compile_commands_rolling_size": {
             "type": "integer",
             "markdownDescription": "Rolling size of compile_commands.json",
-            "order": 7,
+            "order": 8,
             "default": "300000000"
           }
         }

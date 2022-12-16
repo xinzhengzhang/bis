@@ -8,6 +8,8 @@ import configuration from "./configuration";
 import { isBisWorkspace, getCompileCommandsSize, getExtraOutputBaseString, WriteStream, WriteStreamType } from "./utils";
 import { showIfError } from "./error";
 import { ChildProcess, execFile } from "child_process";
+import * as readline from "readline";
+import * as fs from "fs";
 
 type Context = {
     terminal: CustomBuildTaskTerminal;
@@ -52,6 +54,15 @@ async function refresh(
         return;
     }
 
+    if (configuration.checkDuplicateCompileCommands) {
+        if (await containesFiles(workspace, filePath)) {
+            logger.log(`Refresh Compile Commands: ${filePath} in cache`);
+            return;
+        } else {
+            logger.log(`Refresh Compile Commands: ${filePath} not in cache`);
+        }
+    }
+
     const compilationMode = (await picker.compilationMode()) ?? "dbg";
     const cpu = await cpuProvider.cpu();
     context.terminal.doTask(
@@ -61,6 +72,26 @@ async function refresh(
         filePath,
         workspace
     );
+}
+
+async function containesFiles(workspace: vscode.WorkspaceFolder,filePath: string) {
+    let containts = false;
+    if (getCompileCommandsSize(workspace)) {
+        let path = workspace.uri.fsPath + "/compile_commands.json";
+        const rl = readline.createInterface({
+            input: fs.createReadStream(path),
+            crlfDelay: Infinity
+        });
+        rl.on('line', (line) => {
+            if (line.includes(`"file": "${filePath}"`)) {
+                containts = true;
+                rl.close();
+            }
+        });
+    
+        await new Promise((res) => rl.once('close', res));
+    }
+    return containts;
 }
 
 class CustomBuildTaskTerminal {

@@ -21,6 +21,13 @@ const configuration = {
                 .get<boolean>("auto_generate_launch_json") ?? true
         );
     },
+    get checkDuplicateCompileCommands(): boolean {
+        return (
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<boolean>("check_duplicate_compile_commands") ?? true
+        );
+    },
     get bazelBackgroundOutputBase(): string {
         return (
             vscode.workspace
