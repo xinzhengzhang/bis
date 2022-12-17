@@ -1,8 +1,8 @@
 import exp = require("constants");
 import * as vscode from "vscode";
 import * as logger from "./logger";
+import { targetVariable } from "./variables";
 
-const INPUTED_LABEL_STRING = "inputed_label_string";
 const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-/]*:[\\w-]+");
 
 let context: vscode.ExtensionContext;
@@ -14,8 +14,7 @@ function setupStatusBarInputer() {
     statusBarTargetInputer.command = "zxz-moe-bis.inputBuildTarget";
     statusBarTargetInputer.tooltip = "Input build target for debugging";
 
-    let target: string | undefined =
-        context.workspaceState.get(INPUTED_LABEL_STRING);
+    let target: string | undefined = targetVariable.get();
 
     if (target && target.match(LABEL_REGEX)) {
         _updateLabel(target);
@@ -29,7 +28,7 @@ function setupStatusBarInputer() {
 export async function inputBuildTarget() {
     let options: vscode.InputBoxOptions = {
         title: "Input label of target",
-        value: context.workspaceState.get(INPUTED_LABEL_STRING),
+        value: targetVariable.get(),
         prompt: "@<WORKSPACE>//:<PATH>",
         validateInput(value) {
             let message: vscode.InputBoxValidationMessage = {
@@ -66,15 +65,14 @@ export function activate(c: vscode.ExtensionContext) {
 
 async function _getOrInputLabel() {
     let labelString: string | undefined =
-        context.workspaceState.get(INPUTED_LABEL_STRING);
+        targetVariable.get();
     if (!labelString) {
         return inputBuildTarget();
     }
     return labelString;
 }
 
-// Storage
 async function _updateLabel(labelString: string) {
-    await context.workspaceState.update(INPUTED_LABEL_STRING, labelString);
+    targetVariable.update(labelString);
     statusBarTargetInputer.text = labelString;
 }

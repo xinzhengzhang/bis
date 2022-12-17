@@ -10,6 +10,9 @@ import configuration from "./configuration";
 import { BuildTaskProvider } from "./buildTaskProvider";
 import { onDidChangeActiveTextEditorMaker } from "./refreshCompileCommands";
 import { launchConfigurationExists } from "./utils";
+import { targetVariable, compilationModeVariable, cpuVariable } from "./variables";
+import { combineLatest, distinctUntilChanged, filter } from "rxjs";
+import { isEqual } from "lodash";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -19,8 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "zxz-moe-bis" is now active!');
 
     // Component
+    targetVariable.active(context);
+    compilationModeVariable.active(context);
     picker.activate(context);
     inputer.activate(context);
+    cpuProvider.tryGetCpu();
 
     // Commands get variable
     context.subscriptions.push(
@@ -78,9 +84,21 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     // Auto generateLaunchJson
-    if (configuration.autoGenerateLaunchJson && !launchConfigurationExists()) {
-        vscode.commands.executeCommand("zxz-moe-bis.generateLaunchJson");
-    }
+    combineLatest([
+        targetVariable.subject.pipe(filter( x=> x!== undefined)),
+        compilationModeVariable.subject,
+        cpuVariable.subject.pipe(filter( x=> x!== undefined))
+    ])
+    .pipe(distinctUntilChanged(isEqual))
+    .subscribe(
+        ([target, compilationMode, cpu]) => {
+            logger.log(`Diff detected target = ${target} compilationMode = ${compilationMode} cpu = ${cpu}`);
+            if (configuration.autoGenerateLaunchJson) {
+                logger.log("Auto generate LaunchJson");
+                vscode.commands.executeCommand("zxz-moe-bis.generateLaunchJson");
+            }
+        }
+    );
 }
 
 export function deactivate() {}

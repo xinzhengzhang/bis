@@ -1,27 +1,18 @@
 import exp = require("constants");
 import * as vscode from "vscode";
 import * as logger from "./logger";
-
-const SELECTED_COMPILATION_MODE_KEY = "selected_compilation_mode";
+import { compilationModeVariable, CompilationMode } from "./variables";
 
 let context: vscode.ExtensionContext;
 let statusBarCompilationModePicker: vscode.StatusBarItem;
 
-enum CompilationMode {
-    dbg = "dbg",
-    opt = "opt",
-}
-
 // Status bar
-
 function setupStatusBarPicker() {
     statusBarCompilationModePicker.command = "zxz-moe-bis.pickCompilationMode";
     statusBarCompilationModePicker.tooltip =
         "Select iOS compilcation mode for debugging";
 
-    let compilationMode: string | undefined = context.workspaceState.get(
-        SELECTED_COMPILATION_MODE_KEY
-    );
+    let compilationMode: string | undefined = compilationModeVariable.get();
 
     if (compilationMode && compilationMode in CompilationMode) {
         _updateCompilationMode(compilationMode);
@@ -66,7 +57,7 @@ export function activate(c: vscode.ExtensionContext) {
 
 async function _getOrPickCompilationMode() {
     let compilationMode: CompilationMode | undefined =
-        context.workspaceState.get(SELECTED_COMPILATION_MODE_KEY);
+        compilationModeVariable.get();
     if (!compilationMode) {
         return pickCompilationMode();
     }
@@ -75,9 +66,6 @@ async function _getOrPickCompilationMode() {
 
 // Storage
 async function _updateCompilationMode(compilationMode: string) {
-    await context.workspaceState.update(
-        SELECTED_COMPILATION_MODE_KEY,
-        compilationMode
-    );
+    compilationModeVariable.update(compilationMode as CompilationMode);
     statusBarCompilationModePicker.text = compilationMode;
 }
