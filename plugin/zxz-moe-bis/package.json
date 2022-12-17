@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/xinzhengzhang/bis"
   },
-  "version": "0.1.3",
+  "version": "0.1.4",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -54,28 +54,22 @@
             "order": 4,
             "default": "ios_x86_64"
           },
-          "bis.bazel_background_output_base": {
-            "type": "string",
-            "markdownDescription": "Temporary output_base when building (This option may affect the symbol link of bazel-out for debuging. Set to '' to disable background indexing)",
-            "order": 5,
-            "default": "/tmp/.bis_cache"
-          },
           "bis.pre_launch_task_name": {
             "type": "string",
             "markdownDescription": "Pre launch task name before build",
-            "order": 6,
+            "order": 5,
             "default": "bis.build: build"
           },
           "bis.build_options": {
             "type": "string",
             "markdownDescription": "Build options append on bazel build commands",
-            "order": 7,
+            "order": 6,
             "default": ""
           },
           "bis.compile_commands_rolling_size": {
             "type": "integer",
             "markdownDescription": "Rolling size of compile_commands.json",
-            "order": 8,
+            "order": 7,
             "default": "300000000"
           }
         }

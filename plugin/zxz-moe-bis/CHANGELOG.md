@@ -1,6 +1,17 @@
 # Change Log
 
 ## [Unreleased]
+### 0.1.4
+Features
+* Redesign bis.auto_generate_launch_json
+
+    Now the default value is `true`
+
+    The flag meaning is changing to automatically update launch.json when the configuration changes. (build_target, compilation_mode, host_target)
+* Inputer: query all ios_application as potential options
+
+Changes
+* Remove error prone flag `bazel_background_output_base`
 
 ### 0.1.3
 Features:
