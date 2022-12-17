@@ -6,7 +6,12 @@ import configuration from "./configuration";
 import { exec, execFile, ChildProcess } from "child_process";
 import * as logger from "./logger";
 import { promisify } from "util";
-import { getExtraOutputBaseString, WriteStream, WriteStreamType, onExit } from "./utils";
+import {
+    getExtraOutputBaseString,
+    WriteStream,
+    WriteStreamType,
+    onExit,
+} from "./utils";
 
 export class BuildTaskProvider implements vscode.TaskProvider {
     static scriptType = "bis.build";
@@ -30,7 +35,12 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         for (const workspaceFolder of workspaceFolders) {
             const folderString = workspaceFolder.uri.fsPath;
             try {
-                const r = await this.execResult(buildTarget, folderString, compilationMode, cpu);
+                const r = await this.execResult(
+                    buildTarget,
+                    folderString,
+                    compilationMode,
+                    cpu
+                );
                 result.push(...r);
             } catch (error) {
                 logger.error(error);
@@ -39,38 +49,47 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         return result;
     }
 
-    private execResult(buildTarget: string, folderString: string, compilationMode: string, cpu: string) : Promise<vscode.Task[]> {
+    private execResult(
+        buildTarget: string,
+        folderString: string,
+        compilationMode: string,
+        cpu: string
+    ): Promise<vscode.Task[]> {
         const _this = this;
 
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
-            const extractOutputBaseString = getExtraOutputBaseString()??"";
-            const process = exec(`bazel query 'kind("(swift|objc|cc)_library", deps("${buildTarget}"))' --output=label`, {
-                cwd: folderString
-            }, (exception, stdout, stderr) => {
-                if (stdout) {
-                    const splited = stdout.split(/\r?\n/);
-                    splited.forEach((str) => {
-                        if (!str) {
-                            return;
+            const extractOutputBaseString = getExtraOutputBaseString() ?? "";
+            const process = exec(
+                `bazel ${extractOutputBaseString} query 'kind("(swift|objc|cc)_library", deps("${buildTarget}"))' --output=label`,
+                {
+                    cwd: folderString,
+                },
+                (exception, stdout, stderr) => {
+                    if (stdout) {
+                        const splited = stdout.split(/\r?\n/);
+                        splited.forEach((str) => {
+                            if (!str) {
+                                return;
+                            }
+                            result.push(
+                                _this.createTask(
+                                    str,
+                                    compilationMode,
+                                    cpu,
+                                    `build ${str}`
+                                )
+                            );
+                        });
+                        resolve(result);
+                    } else {
+                        if (exception) {
+                            logger.error(exception);
                         }
-                        result.push(
-                            _this.createTask(
-                                str,
-                                compilationMode,
-                                cpu,
-                                `build ${str}`
-                            )
-                        );
-                    });
-                    resolve(result);
-                } else {
-                    if (exception) {
-                        logger.error(exception);
+                        reject(exception);
                     }
-                    reject(exception);
                 }
-            });
+            );
             process.stdout?.pipe(new WriteStream(WriteStreamType.stdout));
             process.stderr?.pipe(new WriteStream(WriteStreamType.stderr));
         });

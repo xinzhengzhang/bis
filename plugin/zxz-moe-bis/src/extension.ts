@@ -9,9 +9,12 @@ import * as launchGenerator from "./launchGenerator";
 import configuration from "./configuration";
 import { BuildTaskProvider } from "./buildTaskProvider";
 import { onDidChangeActiveTextEditorMaker } from "./refreshCompileCommands";
-import { launchConfigurationExists } from "./utils";
-import { targetVariable, compilationModeVariable, cpuVariable } from "./variables";
-import { combineLatest, distinctUntilChanged, filter } from "rxjs";
+import {
+    targetVariable,
+    compilationModeVariable,
+    cpuVariable,
+} from "./variables";
+import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
 
 // This method is called when your extension is activated
@@ -85,20 +88,23 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Auto generateLaunchJson
     combineLatest([
-        targetVariable.subject.pipe(filter( x=> x!== undefined)),
+        targetVariable.subject.pipe(filter((x) => x !== undefined)),
         compilationModeVariable.subject,
-        cpuVariable.subject.pipe(filter( x=> x!== undefined))
+        cpuVariable.subject.pipe(filter((x) => x !== undefined)),
     ])
-    .pipe(distinctUntilChanged(isEqual))
-    .subscribe(
-        ([target, compilationMode, cpu]) => {
-            logger.log(`Diff detected target = ${target} compilationMode = ${compilationMode} cpu = ${cpu}`);
+        .pipe(distinctUntilChanged(isEqual))
+        .pipe(skip(1))
+        .subscribe(([target, compilationMode, cpu]) => {
+            logger.log(
+                `Diff detected target = ${target} compilationMode = ${compilationMode} cpu = ${cpu}`
+            );
             if (configuration.autoGenerateLaunchJson) {
                 logger.log("Auto generate LaunchJson");
-                vscode.commands.executeCommand("zxz-moe-bis.generateLaunchJson");
+                vscode.commands.executeCommand(
+                    "zxz-moe-bis.generateLaunchJson"
+                );
             }
-        }
-    );
+        });
 }
 
 export function deactivate() {}
