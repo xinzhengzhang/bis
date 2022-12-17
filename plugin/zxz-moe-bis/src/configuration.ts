@@ -28,14 +28,6 @@ const configuration = {
                 .get<boolean>("check_duplicate_compile_commands") ?? true
         );
     },
-    get bazelBackgroundOutputBase(): string {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<string>("bazel_background_output_base") ??
-            "/tmp/.bis_cache"
-        );
-    },
     get preLaunchTaskName(): string {
         return (
             vscode.workspace

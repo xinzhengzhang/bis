@@ -7,7 +7,6 @@ import { exec, execFile, ChildProcess } from "child_process";
 import * as logger from "./logger";
 import { promisify } from "util";
 import {
-    getExtraOutputBaseString,
     WriteStream,
     WriteStreamType,
     onExit,
@@ -59,9 +58,8 @@ export class BuildTaskProvider implements vscode.TaskProvider {
 
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
-            const extractOutputBaseString = getExtraOutputBaseString() ?? "";
             const process = exec(
-                `bazel ${extractOutputBaseString} query 'kind("(swift|objc|cc)_library", deps("${buildTarget}"))' --output=label`,
+                 `bazel query 'kind("(swift|objc|cc)_library", deps("${buildTarget}"))' --output=label`,
                 {
                     cwd: folderString,
                 },

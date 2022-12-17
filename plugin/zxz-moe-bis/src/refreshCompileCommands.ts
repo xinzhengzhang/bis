@@ -5,7 +5,7 @@ import * as cpuProvider from "./cpuProvider";
 import * as path from "path";
 import * as logger from "./logger";
 import configuration from "./configuration";
-import { isBisWorkspace, getCompileCommandsSize, getExtraOutputBaseString, WriteStream, WriteStreamType } from "./utils";
+import { isBisWorkspace, getCompileCommandsSize, WriteStream, WriteStreamType } from "./utils";
 import { showIfError } from "./error";
 import { ChildProcess, execFile } from "child_process";
 import * as readline from "readline";

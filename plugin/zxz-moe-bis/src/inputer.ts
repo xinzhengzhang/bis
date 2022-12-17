@@ -4,7 +4,6 @@ import * as logger from "./logger";
 import { targetVariable } from "./variables";
 import { exec } from "child_process";
 import {
-    getExtraOutputBaseString,
     WriteStream,
     WriteStreamType,
 } from "./utils";
@@ -34,9 +33,8 @@ function setupStatusBarInputer() {
 function execResult(folderString: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
         let result: string[] = [];
-        const extractOutputBaseString = getExtraOutputBaseString() ?? "";
         const process = exec(
-            `bazel query 'kind("ios_application", //...)' --output=label`,
+            `bazel query 'kind("ios_application", "//...")' --output=label`,
             {
                 cwd: folderString,
             },

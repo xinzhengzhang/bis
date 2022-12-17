@@ -32,26 +32,6 @@ export function getCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
     return fs.statSync(path).size;
 }
 
-export function getExtraOutputBaseString(): string|undefined {
-    const backgroudOutputBase = configuration.bazelBackgroundOutputBase;
-    let needBackgroundOutputBase: boolean = false;
-
-    if (backgroudOutputBase.length) {
-        needBackgroundOutputBase = vscode.tasks.taskExecutions.filter((value) => {
-            return (
-                value.task.name === "build" &&
-                value.task.source === "bis.build"
-            );
-        }).length > 0;
-    }
-
-    if (needBackgroundOutputBase) {
-        return `--output_base ${backgroudOutputBase}`;
-    } else {
-        return undefined;
-    }
-}
-
 export function onExit(childProcess: ChildProcess): Promise<void> {
     return new Promise((resolve, reject) => {
       childProcess.once('exit', (code: number, signal: string) => {
