@@ -42,6 +42,13 @@ const configuration = {
                 .get<string>("build_options") ?? ""
         );
     },
+    get startupOptions(): string {
+        return (
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<string>("startup_options") ?? ""
+        );
+    },
     get compileCommandsRollingSize(): number {
         return (
             vscode.workspace

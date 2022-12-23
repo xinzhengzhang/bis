@@ -1,6 +1,12 @@
 # Change Log
 
 ## [Unreleased]
+### 0.1.5
+Features
+* Add option `bis.startup_options`
+    
+    Customize bazel startup options
+    like `custom.bazelrc`
 ### 0.1.4
 Features
 * Redesign bis.auto_generate_launch_json

@@ -39,6 +39,9 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 
 ---
 
+## Usage Visuals
+
+---
 ## Extension Commands
 This extension contributes the following commands:
 * Setup bis project: `zxz-moe-bis.generateLaunchJson`
@@ -60,6 +63,7 @@ This extension contributes the following commands:
 
             ex: `dbg` or `opt`
 
+---
 ## Extension Settings
 
 This extension contributes the following settings:
@@ -92,6 +96,10 @@ This extension contributes the following settings:
     
     Custom build options append to `bazel build`
 
+* `bis.startup_options`
+
+    Custom startup options append to `bazel`
+
 * `bis.compile_commands_rolling_size`
     
     Less than it would merge `compile_commands.json` automatically
@@ -103,9 +111,30 @@ This extension contributes the following settings:
 1. It bridged rules_apple with CodeLLDB and generate `launch.json` automatically
 2. It generate and refresh `compile_commands.json` automatically which is provided to SourceKit-lsp embed in [swift extension](https://marketplace.visualstudio.com/items?itemName=sswg.swift-lang)
 
+---
 ## Acknowledge
 
 * It only support ios_application for now
+
+---
+## Frequently Asked Questions
+
+* Why is my swift code hinting not working?
+
+   We need to disable some features like `--features=swift.vfsoverlay` `--features=swift.use_explicit_swift_module_map` because sourcekit-lsp does not fully support the full set of swift features.
+
+* Why is my `jump to swift modules` not working?
+
+    We need to build a `sourcekit-lsp` version which more closer to the trunk and includes `https://github.com/apple/sourcekit-lsp/pull/668` and set it to the settings which named `Sourcekit-lsp: Server Path`
+
+    ```
+        git clone git@github.com:apple/sourcekit-lsp.git
+        export TOOLCHAINS=swift
+        swift package update
+        swift build
+    ```
+
+
 
 ## For more information
 

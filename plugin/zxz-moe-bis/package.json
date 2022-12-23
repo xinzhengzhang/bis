@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/xinzhengzhang/bis"
   },
-  "version": "0.1.4",
+  "version": "0.1.5",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -60,16 +60,22 @@
             "order": 5,
             "default": "bis.build: build"
           },
+          "bis.startup_options": {
+            "type": "string",
+            "markdownDescription": "Startup options append on bazel build commands",
+            "order": 6,
+            "default": ""
+          },
           "bis.build_options": {
             "type": "string",
             "markdownDescription": "Build options append on bazel build commands",
-            "order": 6,
+            "order": 7,
             "default": ""
           },
           "bis.compile_commands_rolling_size": {
             "type": "integer",
             "markdownDescription": "Rolling size of compile_commands.json",
-            "order": 7,
+            "order": 8,
             "default": "300000000"
           }
         }

@@ -99,7 +99,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         cpu: string,
         source: string
     ) {
-        const executionCommands = `bazel build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
+        const executionCommands = `bazel ${configuration.startupOptions} build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
 
         const task = new vscode.Task(
             {
