@@ -35,7 +35,7 @@ if args.merge and os.path.isfile('compile_commands.json'):
         # -----------------------------------
         # compile_commands.json
         # python3 "${relative_path}"
-        call(["python3", relative_path])
+        call(["python3", relative_path, "--file=%filter_file_path%"])
 
         f1 = open('compile_commands.json')
         f2 = open(dst)
@@ -62,4 +62,4 @@ if args.merge and os.path.isfile('compile_commands.json'):
                 check_circular=False  # For speed.
             )
 else:
-    call(["python3", relative_path])
+    call(["python3", relative_path, "--file=%filter_file_path%"])

@@ -38,6 +38,7 @@ def _refresh_compile_commands_imp(ctx):
         is_executable = True,
         substitutions = {
             "%python_sources%": extractor_source_name,
+            "%filter_file_path%": ctx.attr.filter_file_path,
         },
     )
 
@@ -63,6 +64,7 @@ _refresh_compile_commands_ios_cfg = rule(
         ),
         "extractor": attr.label(mandatory = True),
         "pre_compile_swift_module": attr.bool(default = True),
+        "filter_file_path": attr.string(default = ".*"),
         "_runner_template": attr.label(
             allow_single_file = True,
             default = Label("//:runner.template.py"),
@@ -84,7 +86,6 @@ def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optiona
     hedron_refresh_compile_commands(
         name = extractor_name,
         targets = { target : optionals for target in targets },
-        input_filter = file_path,
         **kwargs
     )
 
@@ -94,6 +95,7 @@ def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optiona
         extractor = extractor_name,
         pre_compile_swift_module = pre_compile_swift_module,
         minimum_os_version = minimum_os_version,
+        filter_file_path = file_path,
     )
 
 
@@ -107,6 +109,7 @@ _refresh_compile_commands = rule(
         ),
         "extractor": attr.label(mandatory = True),
         "pre_compile_swift_module": attr.bool(default = True),
+        "filter_file_path": attr.string(default = ".*"),
         "_runner_template": attr.label(
             allow_single_file = True,
             default = Label("//:runner.template.py"),
@@ -121,7 +124,6 @@ def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "",
     hedron_refresh_compile_commands(
         name = extractor_name,
         targets = { target : optionals for target in targets },
-        input_filter = file_path,
         **kwargs
     )
 
@@ -130,4 +132,5 @@ def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "",
         targets = pre_compile_targets,
         extractor = extractor_name,
         pre_compile_swift_module = pre_compile_swift_module,
+        filter_file_path = file_path,
     )
