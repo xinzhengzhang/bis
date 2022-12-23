@@ -40,6 +40,8 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 ---
 
 ## Usage Visuals
+![out_2](https://user-images.githubusercontent.com/1487445/209274772-9b0e8230-dd9c-47ef-86f6-e295d5ae4451.gif)
+![out_1](https://user-images.githubusercontent.com/1487445/209274776-b4c8c7b3-0b1b-4376-88c4-c1739422fc90.gif)
 
 ---
 ## Extension Commands
