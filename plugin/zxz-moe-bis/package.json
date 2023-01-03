@@ -24,6 +24,15 @@
       {
         "command": "zxz-moe-bis.generateLaunchJson",
         "title": "bis: Generate bis launch json"
+      },
+      {
+        "command": "zxz-moe-bis.copyLibFullPath",
+        "title": "Copy Lib Full Path",
+        "enablement": ""
+      },
+      {
+        "command": "zxz-moe-bis.lib-deps",
+        "title": "bis: Resolve lib deps"
       }
     ],
     "configuration": [
@@ -94,7 +103,20 @@
           }
         }
       }
-    ]
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "zxz-moe-bis.copyLibFullPath",
+          "when": "false"
+        }
+      ],
+      "editor/context/copy": [
+        {
+          "command": "zxz-moe-bis.copyLibFullPath"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
