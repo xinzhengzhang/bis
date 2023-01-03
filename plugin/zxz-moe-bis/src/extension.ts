@@ -16,6 +16,8 @@ import {
 } from "./variables";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
+import { libDeps } from "./libdeps";
+import { libPath } from "./libpath";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -51,6 +53,9 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     // Commands action
+    libPath(context)
+    libDeps(context)
+
     context.subscriptions.push(
         vscode.commands.registerCommand(
             "zxz-moe-bis.generateLaunchJson",
