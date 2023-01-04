@@ -27,12 +27,16 @@
       },
       {
         "command": "zxz-moe-bis.copyLibFullPath",
-        "title": "Copy Lib Full Path",
+        "title": "Lib Full Path",
         "enablement": ""
       },
       {
         "command": "zxz-moe-bis.lib-deps",
         "title": "bis: Resolve lib deps"
+      },
+      {
+        "command": "zxz-moe-bis.workspace",
+        "title": "bis: Set workspace"
       }
     ],
     "configuration": [
@@ -86,6 +90,13 @@
             "markdownDescription": "Rolling size of compile_commands.json",
             "order": 8,
             "default": "300000000"
+          },
+          "bis.default_workspace": {
+            "type": "string",
+            "default": "",
+            "scope": "window",
+            "order": 8,
+            "description": "Default workspace location"
           }
         }
       }

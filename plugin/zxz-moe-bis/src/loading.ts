@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
 
-export type IRunLoading = vscode.ProgressOptions
+export type IRunLoading = vscode.ProgressOptions;
 
 export function RunLoading(opt?: IRunLoading): any {
     return function (target: any, methodName: string, descriptor: PropertyDescriptor) {
