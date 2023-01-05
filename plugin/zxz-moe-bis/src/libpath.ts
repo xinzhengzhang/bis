@@ -1,29 +1,31 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { Command, Service } from './services';
+import { Workspace } from './workspace';
+import { promisify } from 'util';
+import * as cp from 'child_process';
 
-export function libPath(context: vscode.ExtensionContext) {
-    context.subscriptions.push(
-        vscode.commands.registerCommand('zxz-moe-bis.copyLibFullPath', copyLibFullPath)
-    );
-}
+const exec = promisify(cp.exec);
+export default class LibPathService extends Service {
 
-function copyLibFullPath() {
-    let editor = vscode.window.activeTextEditor;
-    let libName = editor?.document.getText(editor.selection);
-    let libPath = editor?.document.uri.fsPath;
-    let wsRoot = resolvedWorkspaceRoot(libPath);
-    if (!wsRoot) { return; }
-    let libDir = path.parse(libPath?.replace(wsRoot!, '')!).dir;
-    let libBazelPath = `/${libDir}:${libName}`;
-    vscode.env.clipboard.writeText(libBazelPath);
-    Paths.add(libBazelPath);
-    return libBazelPath;
-}
+    @Command({ cmd: "zxz-moe-bis.copyLibFullPath", useContext: true })
+    @Workspace()
+    async copyLibFullPath() {
+        try {
+            let editor = vscode.window.activeTextEditor;
+            let libName = editor?.document.getText(editor.selection);
+            let libPath = editor?.document.uri.fsPath;
+            let { stdout: wsRoot } = await exec('pwd');
+            if (!wsRoot) { return; }
+            let libDir = path.parse(libPath?.replace(wsRoot.trim(), '')!).dir;
+            let libBazelPath = `/${libDir}:${libName}`;
+            vscode.env.clipboard.writeText(libBazelPath);
+            Paths.add(libBazelPath);
+            return libBazelPath;
+        } catch (e) {
 
-function resolvedWorkspaceRoot(p: string | undefined) {
-    if (!p) { return undefined; }
-    let wsRoot = vscode.workspace.workspaceFolders?.filter(e => p.indexOf(e.uri.fsPath) >= 0);
-    return (wsRoot && wsRoot.length > 0) ? wsRoot[0].uri.fsPath : undefined;
+        }
+    }
 }
 
 export class Paths {
