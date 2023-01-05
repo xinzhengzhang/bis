@@ -3,6 +3,7 @@ import * as cp from "child_process";
 import { Paths } from './libpath';
 import { Workspace } from './workspace';
 import * as fs from 'fs';
+import * as path from 'path';
 import { promisify } from 'util';
 import { Command, RunLoading, Service } from './services';
 
@@ -35,9 +36,11 @@ export default class LibDepsService extends Service {
                 {}
             );
             webviewPanel.webview.html = `<img src="data:image/svg+xml;base64, ${Buffer.from(fs.readFileSync(output)).toString('base64')}">`;
-            vscode.window.showInformationMessage("Completed! \nOpen in browser?", "Yes", "No").then(res => {
-                if (res === 'Yes') {
+            vscode.window.showInformationMessage("Completed!", "Open in Browser", "Reveal in Finder").then(res => {
+                if (res === 'Open in Browser') {
                     exec(`open ${output}`);
+                } else if (res === 'Reveal in Finder') {
+                    exec(`open ${path.parse(output).dir}`);
                 }
             });
         } catch (e) {
