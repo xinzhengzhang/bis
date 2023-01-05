@@ -13,12 +13,14 @@ export default class WorkspaceService extends Service {
             return undefined;
         }
 
-        // Signle
+        // Single
         if (bazelWss?.length === 1) {
             return bazelWss[0].uri.fsPath;
         }
 
-        // Default
+        // User Defaults
+        // from cmd palette: always show pick
+        // from cmd call: return with the default exists
         let defaultWorkspace = vscode.workspace.getConfiguration("bis").get<string>("default_workspace");
         if (defaultWorkspace && args.length > 0 && args[0]) {
             return defaultWorkspace;
@@ -34,6 +36,8 @@ export default class WorkspaceService extends Service {
             description: t.uri.fsPath
         }));
         let target = (await vscode.window.showQuickPick(quickPickItems, quickPickOptions))?.description;
+
+        // Store
         target && (await vscode.workspace.getConfiguration("bis").update("default_workspace", target));
         return target;
     }
