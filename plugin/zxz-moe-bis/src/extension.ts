@@ -16,9 +16,9 @@ import {
 } from "./variables";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
-import { libDeps } from "./libdeps";
-import { libPath } from "./libpath";
-import { workspace } from './workspace';
+import LibDepsService from "./libdeps";
+import LibPathService from "./libpath";
+import WorkspaceService from './workspace';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -54,9 +54,9 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     // Commands action
-    workspace(context);
-    libPath(context);
-    libDeps(context);
+    WorkspaceService.setup(context);
+    LibPathService.setup(context);
+    LibDepsService.setup(context);
 
     context.subscriptions.push(
         vscode.commands.registerCommand(
