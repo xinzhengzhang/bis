@@ -26,8 +26,8 @@
         "title": "bis: Generate bis launch json"
       },
       {
-        "command": "zxz-moe-bis.copyLibFullPath",
-        "title": "Lib Full Path",
+        "command": "zxz-moe-bis.copyTargetPath",
+        "title": "Copy target path",
         "enablement": ""
       },
       {
@@ -36,7 +36,7 @@
       },
       {
         "command": "zxz-moe-bis.workspace",
-        "title": "bis: Set workspace"
+        "title": "bis: Set workspace root"
       }
     ],
     "configuration": [
@@ -118,13 +118,13 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "zxz-moe-bis.copyLibFullPath",
+          "command": "zxz-moe-bis.copyTargetPath",
           "when": "false"
         }
       ],
       "editor/context/copy": [
         {
-          "command": "zxz-moe-bis.copyLibFullPath"
+          "command": "zxz-moe-bis.copyTargetPath"
         }
       ]
     }
