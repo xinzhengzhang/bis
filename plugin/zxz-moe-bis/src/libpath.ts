@@ -10,14 +10,12 @@ export default class LibPathService extends Service {
 
     @Command({ cmd: "zxz-moe-bis.copyTargetPath", useContext: true })
     @Workspace()
-    async copyLibFullPath() {
+    async copyLibFullPath(ws: string) {
         try {
             let editor = vscode.window.activeTextEditor;
             let libName = editor?.document.getText(editor.selection);
             let libPath = editor?.document.uri.fsPath;
-            let { stdout: wsRoot } = await exec('pwd');
-            if (!wsRoot) { return; }
-            let libDir = path.parse(libPath?.replace(wsRoot.trim(), '')!).dir;
+            let libDir = path.parse(libPath?.replace(ws, '')!).dir;
             let libBazelPath = `/${libDir}:${libName}`;
             vscode.env.clipboard.writeText(libBazelPath);
             Paths.add(libBazelPath);

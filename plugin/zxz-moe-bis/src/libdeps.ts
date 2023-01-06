@@ -11,24 +11,24 @@ const exec = promisify(cp.exec);
 
 export default class LibDepsService extends Service {
 
-    @Workspace()
     @Command({ cmd: "zxz-moe-bis.lib-deps" })
-    async resolveLibDeps() {
+    @Workspace()
+    async resolveLibDeps(ws: string) {
         let lib1 = await vscode.window.showInputBox({ title: 'First Lib', value: Paths.first });
         let lib2 = await vscode.window.showInputBox({ title: 'Second Lib', value: Paths.second });
         if (!lib1 || !lib2) { return; }
-        this.computeLibDepsc(lib1, lib2);
+        this.computeLibDepsc(ws, lib1, lib2);
     }
 
     @RunLoading()
-    async computeLibDepsc(lib1: string, lib2: string) {
+    async computeLibDepsc(cwd: string, lib1: string, lib2: string) {
         try {
-            let { stdout: bazelOutput } = await exec('bazel info output_path');
+            let { stdout: bazelOutput } = await exec('bazel info output_path', { cwd });
             if (!bazelOutput) { return; }
             bazelOutput = bazelOutput.trim();
             let output = `${bazelOutput}/deps-${new Date().getTime()}.svg`;
             let cmd = `bazel query 'allpaths(${lib1}, ${lib2})' --noimplicit_deps --keep_going --output graph | dot -Tsvg > ${output}`;
-            await exec(cmd);
+            await exec(cmd, { cwd });
             let webviewPanel = vscode.window.createWebviewPanel(
                 output,
                 output,

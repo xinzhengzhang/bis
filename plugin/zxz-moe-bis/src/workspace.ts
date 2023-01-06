@@ -32,7 +32,7 @@ export default class WorkspaceService extends Service {
             matchOnDescription: true,
         };
         let quickPickItems = bazelWss.map((t): vscode.QuickPickItem => ({
-            label: `${t.uri.fsPath === defaultWorkspace ? '$(check)' : '' }\t${path.parse(t.uri.fsPath).base}`,
+            label: `${t.uri.fsPath === defaultWorkspace ? '$(check)' : ''}\t${path.parse(t.uri.fsPath).base}`,
             description: t.uri.fsPath
         }));
         let target = (await vscode.window.showQuickPick(quickPickItems, quickPickOptions))?.description;
@@ -53,11 +53,10 @@ export function Workspace(): any {
         descriptor.value = async function (...args: any[]) {
             const ws = await vscode.commands.executeCommand<string | undefined>('zxz-moe-bis.workspace', true);
             if (!ws) {
-                vscode.window.showErrorMessage("Please selecte a workspace");
+                vscode.window.showErrorMessage("Please select a workspace");
                 return;
             }
-            process.chdir(ws);
-            return originalMethod.call(this, ...args);
+            return originalMethod.call(this, ws, ...args);
         };
         return descriptor;
     };
