@@ -8,7 +8,7 @@ import * as cp from 'child_process';
 const exec = promisify(cp.exec);
 export default class LibPathService extends Service {
 
-    @Command({ cmd: "zxz-moe-bis.copyLibFullPath", useContext: true })
+    @Command({ cmd: "zxz-moe-bis.copyTargetPath", useContext: true })
     @Workspace()
     async copyLibFullPath() {
         try {
