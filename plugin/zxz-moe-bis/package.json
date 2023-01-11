@@ -85,9 +85,9 @@
             "order": 7,
             "default": ""
           },
-          "bis.query_rule": {
+          "bis.query_kind_filter": {
             "type": "string",
-            "markdownDescription": "Bazel query rules, bazel query 'kind(\"{YOUR CONFIG}\", ...)' --output label",
+            "markdownDescription": "Bazel query rules, bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
             "order": 7,
             "default": "(swift|objc|cc)_library"
           },

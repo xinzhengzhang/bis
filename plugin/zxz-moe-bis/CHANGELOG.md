@@ -2,10 +2,15 @@
 
 ## [Unreleased]
 ### 0.1.6
+Features
 * Copy target path from BUILD file
 * Show target dependencies
 * Specify WORKSPACE(bazel) root on demand
+* Add configuration `query_kind_filter` for specifying rules kind which will be queried
 * In order to prevent intrusion into other bazel projects only start to set the cpu strings after the bis rules are detected
+
+Thanks
+* [MilkerLiu](https://github.com/MilkerLiu)
 
 ### 0.1.5
 Features

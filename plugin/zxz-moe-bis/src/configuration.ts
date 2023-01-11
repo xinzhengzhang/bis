@@ -56,6 +56,13 @@ const configuration = {
                 .get<number>("compile_commands_rolling_size") ?? 300000000
         );
     },
+    get queryKindFilter(): string {
+        return (
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<string>("query_kind_filter") ?? "(swift|objc|cc)_library"
+        );
+    }
 };
 
 export default configuration;
