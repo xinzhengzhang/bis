@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
+import * as cp from "child_process";
 import * as fs from 'fs';
 import * as path from 'path';
+import { promisify } from 'util';
 import { Command, Service } from './services';
+
+const exec = promisify(cp.exec);
 
 export default class WorkspaceService extends Service {
 
@@ -40,6 +44,16 @@ export default class WorkspaceService extends Service {
         // Store
         target && (await vscode.workspace.getConfiguration("bis").update("default_workspace", target));
         return target;
+    }
+
+    @Command({ cmd: "zxz-moe-bis.libs" })
+    @Workspace()
+    async libs(cwd: string) {
+        let rule = vscode.workspace.getConfiguration("bis").get<string>("query_rule");
+        rule = rule || "(swift|objc|cc)_library";
+        let cmd = `bazel query 'kind("${rule}", //...)' --output label`;
+        let { stdout } = await exec(cmd, { cwd });
+        return stdout.split('\n').map(e => e.trim());
     }
 }
 

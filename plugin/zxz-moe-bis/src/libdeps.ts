@@ -9,13 +9,27 @@ import { Command, RunLoading, Service } from './services';
 
 const exec = promisify(cp.exec);
 
+async function showChooseLibsInputer(opt: { title: string, placeHolder: string, items: string[] }) {
+    let quickPickOptions: vscode.QuickPickOptions = {
+        title: opt.title || "Choose lib",
+        matchOnDescription: true,
+        placeHolder: opt.placeHolder || "Choose lib",
+    };
+
+    let choose = await vscode.window.showQuickPick(
+        opt.items,
+        quickPickOptions
+    );
+    return choose;
+}
 export default class LibDepsService extends Service {
 
     @Command({ cmd: "zxz-moe-bis.lib-deps" })
     @Workspace()
     async resolveLibDeps(ws: string) {
-        let lib1 = await vscode.window.showInputBox({ title: 'First Lib', value: Paths.first });
-        let lib2 = await vscode.window.showInputBox({ title: 'Second Lib', value: Paths.second });
+        var items = await vscode.commands.executeCommand<string[]>("zxz-moe-bis.libs");
+        let lib1 = await showChooseLibsInputer({ title: 'First Lib', items, placeHolder: "First Lib" });
+        let lib2 = await showChooseLibsInputer({ title: 'Second Lib', items, placeHolder: "Second Lib" });
         if (!lib1 || !lib2) { return; }
         this.computeLibDepsc(ws, lib1, lib2);
     }
