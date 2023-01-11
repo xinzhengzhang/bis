@@ -85,6 +85,12 @@
             "order": 7,
             "default": ""
           },
+          "bis.query_rule": {
+            "type": "string",
+            "markdownDescription": "Bazel query rules, bazel query 'kind(\"<YOUR CONFIG>\", ...)' --output label",
+            "order": 7,
+            "default": "(swift|objc|cc)_library"
+          },
           "bis.compile_commands_rolling_size": {
             "type": "integer",
             "markdownDescription": "Rolling size of compile_commands.json",
