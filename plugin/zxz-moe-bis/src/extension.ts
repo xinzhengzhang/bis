@@ -117,8 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
         // Try to get CPU info if bis installed
         cpuProvider.tryGetCpu();
     }).catch(error => {
-        logger.log("Bis not detected");
-        logger.log(error);
+        vscode.window.showInformationMessage("Bis rule not detected");
         logger.log("If you confirmed you have installed, try running \nbazel query 'loadfiles(//...)' | grep @bis// \nin your command line");
     });
 }
