@@ -87,7 +87,7 @@
           },
           "bis.query_rule": {
             "type": "string",
-            "markdownDescription": "Bazel query rules, bazel query 'kind(\"<YOUR CONFIG>\", ...)' --output label",
+            "markdownDescription": "Bazel query rules, bazel query 'kind(\"{YOUR CONFIG}\", ...)' --output label",
             "order": 7,
             "default": "(swift|objc|cc)_library"
           },
