@@ -29,8 +29,9 @@ export default class LibDepsService extends Service {
     async resolveLibDeps(ws: string) {
         var items = await vscode.commands.executeCommand<string[]>("zxz-moe-bis.libs");
         let lib1 = await showChooseLibsInputer({ title: 'First Lib', items, placeHolder: "First Lib" });
+        if (!lib1) { return; }
         let lib2 = await showChooseLibsInputer({ title: 'Second Lib', items, placeHolder: "Second Lib" });
-        if (!lib1 || !lib2) { return; }
+        if (!lib2) { return; }
         this.computeLibDepsc(ws, lib1, lib2);
     }
 
