@@ -16,6 +16,7 @@ import {
 } from "./variables";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
+import { isBisInstalled } from "./utils";
 import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
 import WorkspaceService from './workspace';
@@ -32,8 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
     compilationModeVariable.active(context);
     picker.activate(context);
     inputer.activate(context);
-    cpuProvider.tryGetCpu();
-
+    
     // Commands get variable
     context.subscriptions.push(
         vscode.commands.registerCommand("zxz-moe-bis.cpu", cpuProvider.cpu)
@@ -112,6 +112,15 @@ export function activate(context: vscode.ExtensionContext) {
                 );
             }
         });
+    
+    isBisInstalled().then(()=>{
+        // Try to get CPU info if bis installed
+        cpuProvider.tryGetCpu();
+    }).catch(error => {
+        logger.log("Bis not detected");
+        logger.log(error);
+        logger.log("If you confirmed you have installed, try running \nbazel query 'loadfiles(//...)' | grep @bis// \nin your command line");
+    });
 }
 
 export function deactivate() { }

@@ -32,18 +32,26 @@ export function getCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
     return fs.statSync(path).size;
 }
 
-export function onExit(childProcess: ChildProcess): Promise<void> {
+export function isBisInstalled(): Promise<void> {
     return new Promise((resolve, reject) => {
-      childProcess.once('exit', (code: number, signal: string) => {
-        if (code === 0) {
-          resolve(undefined);
-        } else {
-          reject(new Error('Exit with error code: '+code));
-        }
-      });
-      childProcess.once('error', (err: Error) => {
-        reject(err);
-      });
+        vscode.commands.executeCommand<string | undefined>('zxz-moe-bis.workspace', true).then((workspaceRoot) => {
+            promisify(execFile)("bazel", ["query", '"filter(@bis//, loadfiles(//...))"'], {
+                shell: true,
+                cwd: workspaceRoot,
+            }).then((value) => {
+                const splited = value.stdout.split(/\r?\n/);
+                const containsBis =  splited.some((item) => {
+                    return item.startsWith("@bis//");
+                });
+                if (containsBis) {
+                    resolve(undefined);
+                } else {
+                    reject(new Error('no @bis found'));
+                }
+            }).catch(error => {
+                reject(error);
+            });
+        });
     });
 }
 

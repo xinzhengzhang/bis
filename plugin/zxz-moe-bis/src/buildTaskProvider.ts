@@ -9,7 +9,6 @@ import { promisify } from "util";
 import {
     WriteStream,
     WriteStreamType,
-    onExit,
 } from "./utils";
 
 export class BuildTaskProvider implements vscode.TaskProvider {

@@ -1,6 +1,12 @@
 # Change Log
 
 ## [Unreleased]
+### 0.1.6
+* Copy target path from BUILD file
+* Show target dependencies
+* Specify WORKSPACE(bazel) root on demand
+* In order to prevent intrusion into other bazel projects only start to set the cpu strings after the bis rules are detected
+
 ### 0.1.5
 Features
 * Add option `bis.startup_options`

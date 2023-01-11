@@ -10,6 +10,10 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 * UE for iOS developing
 * Extract source info from build target and generate `compile_commands.json` for Sourcekit-lsp
 * Generate `launch.json` for debug
+* Copy target path from BUILD file
+* Show target dependencies
+    * Install graphviz before using this feature
+    * https://blog.bazel.build/2015/06/17/visualize-your-build.html
 * Auto provides build task that are depended on the build target `command + shift + b`
 
 ---
