@@ -35,7 +35,8 @@ def _bis_aspect_impl(target, ctx):
             # Bridge with header system
             if direct_module.clang and direct_module.clang.module_map:
                 modules.append(direct_module.clang.module_map)
-            modules.append(direct_module.swift.swiftmodule)
+            if direct_module.swift:
+                modules.append(direct_module.swift.swiftmodule)
 
             compilation_context = direct_module.compilation_context
             if type(compilation_context) == list:
