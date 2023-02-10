@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased]
+### 0.1.8
+* Add configuration `target_query_kind_filter` for specifying rules kind which will be queried in target selection
+
 ### 0.1.7
 Features
 * Add configuration `query_kind_filter` for specifying rules kind which will be queried

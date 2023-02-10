@@ -62,6 +62,13 @@ const configuration = {
                 .getConfiguration("bis")
                 .get<string>("query_kind_filter") ?? "(swift|objc|cc)_library"
         );
+    },
+    get targetQueryKindFilter(): string {
+        return (
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<string>("target_query_kind_filter") ?? "ios_application"
+        );
     }
 };
 

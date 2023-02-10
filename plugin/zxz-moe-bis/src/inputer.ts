@@ -7,6 +7,7 @@ import {
     WriteStream,
     WriteStreamType,
 } from "./utils";
+import configuration from "./configuration";
 
 const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-/]*:[\\w-]+");
 
@@ -34,7 +35,7 @@ function execResult(folderString: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
         let result: string[] = [];
         const process = exec(
-            `bazel query 'kind("ios_application", "//...")' --output=label`,
+            `bazel query 'kind("${configuration.targetQueryKindFilter}", "//...")' --output=label`,
             {
                 cwd: folderString,
             },

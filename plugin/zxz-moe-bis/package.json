@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/xinzhengzhang/bis"
   },
-  "version": "0.1.7",
+  "version": "0.1.8",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -87,21 +87,27 @@
           },
           "bis.query_kind_filter": {
             "type": "string",
-            "markdownDescription": "Bazel query rules, bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
+            "markdownDescription": "Bazel query rules (Build task), bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
             "order": 7,
             "default": "(swift|objc|cc)_library"
+          },
+          "bis.target_query_kind_filter": {
+            "type": "string",
+            "markdownDescription": "Bazel query rules (Target selection), bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
+            "order": 8,
+            "default": "(ios_application)"
           },
           "bis.compile_commands_rolling_size": {
             "type": "integer",
             "markdownDescription": "Rolling size of compile_commands.json",
-            "order": 8,
+            "order": 9,
             "default": "300000000"
           },
           "bis.default_workspace": {
             "type": "string",
             "default": "",
             "scope": "window",
-            "order": 8,
+            "order": 10,
             "description": "Default workspace location"
           }
         }
