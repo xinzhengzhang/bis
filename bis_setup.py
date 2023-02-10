@@ -34,7 +34,6 @@ load("@bis//:extract_target_info.bzl", "extract_target_info")
 extract_target_info(
   name = "extract_target",
   target = "{args.target}",
-  testonly = True,
   tags = ["manual"],
   testonly = True,
 
