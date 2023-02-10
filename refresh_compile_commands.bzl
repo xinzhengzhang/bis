@@ -96,6 +96,7 @@ def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optiona
         pre_compile_swift_module = pre_compile_swift_module,
         minimum_os_version = minimum_os_version,
         filter_file_path = file_path,
+        testonly = True,
     )
 
 
@@ -133,4 +134,5 @@ def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "",
         extractor = extractor_name,
         pre_compile_swift_module = pre_compile_swift_module,
         filter_file_path = file_path,
+        testonly = True,
     )

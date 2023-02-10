@@ -32,9 +32,12 @@ def get_target_info(args):
 load("@bis//:extract_target_info.bzl", "extract_target_info")
 
 extract_target_info(
-name = "extract_target",
-target = "{args.target}",
-tags = ["manual"],
+  name = "extract_target",
+  target = "{args.target}",
+  testonly = True,
+  tags = ["manual"],
+  testonly = True,
+
 )
   """
         output_file.write(template)
@@ -71,9 +74,7 @@ def create_bis_build(args, target_info):
             '--include_artifacts=false',
             '--ui_event_filters=-info',
             '--noshow_progress',
-            '--features=-layering_check',
-            f'--cpu={args.cpu}',
-            f'--compilation_mode={args.compilation_mode}'
+            '--features=-layering_check'
         ]
 
         print("Run process start !!!")
@@ -125,12 +126,14 @@ load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
   {minimum_os_version_string}
   pre_compile_swift_module = {args.pre_compile_swift_module},
   tags = ["manual"],
+  testonly = True,
 )
 
 refresh_launch_json(
   name = "refresh_launch_json",
   target = "{args.target}",
   tags = ["manual"],
+  testonly = True,
 )
 
 """
