@@ -3,7 +3,13 @@ import configuration from "./configuration";
 import { cpuVariable } from "./variables";
 
 export function tryGetCpu() {
-    cpu();
+    getCpuRepeatly();
+}
+
+async function getCpuRepeatly() {
+    setTimeout(() => {
+        cpu().then(getCpuRepeatly);
+    }, 1000);
 }
 
 export async function cpu() {

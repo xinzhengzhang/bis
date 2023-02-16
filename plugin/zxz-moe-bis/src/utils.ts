@@ -35,7 +35,7 @@ export function getCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
 export function isBisInstalled(): Promise<void> {
     return new Promise((resolve, reject) => {
         vscode.commands.executeCommand<string | undefined>('zxz-moe-bis.workspace', true).then((workspaceRoot) => {
-            promisify(execFile)("bazel", ["query", '"filter(@bis//, loadfiles(//...))"'], {
+            promisify(execFile)("bazel", ["query", '"filter(@bis//, @bis//...)"'], {
                 shell: true,
                 cwd: workspaceRoot,
             }).then((value) => {
@@ -53,6 +53,18 @@ export function isBisInstalled(): Promise<void> {
             });
         });
     });
+}
+
+export function touchBisBuild() {
+    // Touch .bis/BUILD
+    const task = new vscode.Task(
+        { type: "bis.build" },
+        vscode.TaskScope.Workspace,
+        "touch_bis_build",
+        "bis.build",
+        new vscode.ShellExecution("mkdir -p .bis && touch .bis/BUILD")
+    );
+    vscode.tasks.executeTask(task);
 }
 
 export enum WriteStreamType {

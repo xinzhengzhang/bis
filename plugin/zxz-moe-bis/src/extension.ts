@@ -6,6 +6,7 @@ import * as picker from "./picker";
 import * as inputer from "./inputer";
 import * as cpuProvider from "./cpuProvider";
 import * as launchGenerator from "./launchGenerator";
+import * as refreshInjection from "./refreshInjectioniiiProject";
 import configuration from "./configuration";
 import { BuildTaskProvider } from "./buildTaskProvider";
 import { onDidChangeActiveTextEditorMaker } from "./refreshCompileCommands";
@@ -16,7 +17,7 @@ import {
 } from "./variables";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
-import { isBisInstalled } from "./utils";
+import { isBisInstalled, touchBisBuild } from "./utils";
 import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
 import WorkspaceService from './workspace';
@@ -67,6 +68,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand(
+            "zxz-moe-bis.refreshDummyProjectForInjectionIII",
+            refreshInjection.refreshInjectionIIIProject
+        )
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
             "zxz-moe-bis.pickCompilationMode",
             picker.pickCompilationMode
         )
@@ -111,9 +119,16 @@ export function activate(context: vscode.ExtensionContext) {
                     "zxz-moe-bis.generateLaunchJson"
                 );
             }
+            if (configuration.autoRefreshDummyProjectForInjectionIII) {
+                logger.log("Auto refresh InjectionIII project");
+                vscode.commands.executeCommand(
+                    "zxz-moe-bis.refreshDummyProjectForInjectionIII"
+                ); 
+            }
         });
     
     isBisInstalled().then(()=>{
+        touchBisBuild();
         // Try to get CPU info if bis installed
         cpuProvider.tryGetCpu();
     }).catch(error => {

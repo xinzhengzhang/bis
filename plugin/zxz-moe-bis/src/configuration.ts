@@ -69,7 +69,14 @@ const configuration = {
                 .getConfiguration("bis")
                 .get<string>("target_query_kind_filter") ?? "ios_application"
         );
-    }
+    },
+    get autoRefreshDummyProjectForInjectionIII(): boolean {
+        return (
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<boolean>("auto_refresh_dummy_project_for_InjectionIII") ?? true
+        );
+    },
 };
 
 export default configuration;
