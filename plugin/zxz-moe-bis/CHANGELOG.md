@@ -1,6 +1,19 @@
 # Change Log
 
 ## [Unreleased]
+
+### 0.2.0
+Features
+* Compatible with [InjectionIII](https://github.com/johnno1962/InjectionIII)
+* Add setting `bis.auto_refresh_dummy_project_for_InjectionIII` for auto refreshing compile commands used by hot reload
+
+Commands
+* Add `zxz-moe-bis.refreshDummyProjectForInjectionIII` for refreshing dummy project and compile commands used by hotreload
+
+Enhance
+* Optimize the logic of detecting whether it is a bis project
+* Using poll targetSDK to achieve the purpose of observation
+
 ### 0.1.8
 * Add configuration `target_query_kind_filter` for specifying rules kind which will be queried in target selection
 
