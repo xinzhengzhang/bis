@@ -35,13 +35,13 @@ export function getCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
 export function isBisInstalled(): Promise<void> {
     return new Promise((resolve, reject) => {
         vscode.commands.executeCommand<string | undefined>('zxz-moe-bis.workspace', true).then((workspaceRoot) => {
-            promisify(execFile)("bazel", ["query", '"filter(@bis//, @bis//...)"'], {
+            promisify(execFile)("bazel", ["cquery", "@bis//...", "--output=starlark"], {
                 shell: true,
                 cwd: workspaceRoot,
             }).then((value) => {
                 const splited = value.stdout.split(/\r?\n/);
                 const containsBis =  splited.some((item) => {
-                    return item.startsWith("@bis//");
+                    return item.startsWith("@bis");
                 });
                 if (containsBis) {
                     resolve(undefined);

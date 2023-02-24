@@ -58,13 +58,13 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
             const process = exec(
-                 `bazel query 'kind("${configuration.queryKindFilter}", deps("${buildTarget}"))' --output=label`,
+                 `bazel cquery 'kind("${configuration.queryKindFilter}", deps("${buildTarget}"))' --output=starlark`,
                 {
                     cwd: folderString,
                 },
                 (exception, stdout, stderr) => {
                     if (stdout) {
-                        const splited = stdout.split(/\r?\n/);
+                        const splited = [... new Set(stdout.split(/\r?\n/))];
                         splited.forEach((str) => {
                             if (!str) {
                                 return;
