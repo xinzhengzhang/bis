@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 0.2.1
+Enhance
+* Since bazel query has not yet supported bzlmod, most of the implementations have been modified to cquery
+
 ### 0.2.0
 Features
 * Compatible with [InjectionIII](https://github.com/johnno1962/InjectionIII)
