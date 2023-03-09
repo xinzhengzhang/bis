@@ -35,7 +35,7 @@ export function getCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
 export function isBisInstalled(): Promise<void> {
     return new Promise((resolve, reject) => {
         vscode.commands.executeCommand<string | undefined>('zxz-moe-bis.workspace', true).then((workspaceRoot) => {
-            promisify(execFile)("bazel", ["cquery", "@bis//...", "--output=starlark"], {
+            promisify(execFile)("bazel", ["cquery", "@bis//:setup", "--output=starlark"], {
                 shell: true,
                 cwd: workspaceRoot,
             }).then((value) => {
