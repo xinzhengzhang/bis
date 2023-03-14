@@ -35,13 +35,13 @@ function execResult(folderString: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
         let result: string[] = [];
         const process = exec(
-            `bazel cquery 'kind("${configuration.targetQueryKindFilter}", "//...")' --output=starlark`,
+            `bazel query 'kind("${configuration.targetQueryKindFilter}", "//...")' --output=label`,
             {
                 cwd: folderString,
             },
             (exception, stdout, stderr) => {
                 if (stdout) {
-                    const splited = [... new Set(stdout.split(/\r?\n/))];
+                    const splited = stdout.split(/\r?\n/);
                     splited.forEach((str) => {
                         if (!str) {
                             return;

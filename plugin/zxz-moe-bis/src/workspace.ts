@@ -51,9 +51,9 @@ export default class WorkspaceService extends Service {
     @Workspace()
     async libs(cwd: string) {
         let statement = configuration.queryKindFilter;
-        let cmd = `bazel cquery 'kind("${statement}", //...)' --output=starlark`;
+        let cmd = `bazel query 'kind("${statement}", //...)' --output label`;
         let { stdout } = await exec(cmd, { cwd });
-        return [... new Set(stdout.split('\n').map(e => e.trim()))];
+        return stdout.split('\n').map(e => e.trim());
     }
 }
 
