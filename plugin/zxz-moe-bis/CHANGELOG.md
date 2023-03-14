@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 0.2.3
+Revert
+* 0.2.1 Most projects will have package problem exceptions, and using too strict cquery will cause the problem of not being able to query. If you use bzlmod, add query `--enable_bzlmod` in the bazelrc of the project
+
 ### 0.2.2
 Enhance
 * Use smaller granularity to detect if bis is in the project

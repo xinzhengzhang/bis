@@ -133,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
         cpuProvider.tryGetCpu();
     }).catch(error => {
         vscode.window.showInformationMessage("Bis rule not detected");
-        logger.log("If you confirmed you have installed, try running \nbazel query 'loadfiles(//...)' | grep @bis// \nin your command line");
+        logger.log("If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line");
     });
 }
 
