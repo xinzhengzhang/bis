@@ -1,8 +1,19 @@
 # bis
 Bazel rules and plugin for developing iOS project on vscode
 
-# Import
-```WORKSPACE
+# Bzlmod
+```sh
+# MODULE.bazel
+bazel_dep(name = "bis", version = "0.2.4", dev_dependency = True)
+archive_override(
+    module_name = "bis",
+    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.2.4.tar.gz",
+    strip_prefix = "bis-0.2.4"
+)
+```
+# Non-bzlmod
+```sh
+# WORKSPACE
 load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
 
 git_repository(

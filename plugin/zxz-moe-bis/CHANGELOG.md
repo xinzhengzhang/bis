@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### 0.2.4
+* Index hints for headers are supported. Please be sure to upgrade the matching rules to 0.2.4, otherwise the index header may cause long waits
+
 ### 0.2.3
 Revert
 * 0.2.1 Most projects will have package problem exceptions, and using too strict cquery will cause the problem of not being able to query. If you use bzlmod, add query `--enable_bzlmod` in the bazelrc of the project
