@@ -5,7 +5,7 @@ import * as cpuProvider from "./cpuProvider";
 import * as path from "path";
 import * as logger from "./logger";
 import configuration from "./configuration";
-import { isBisWorkspace, getCompileCommandsSize, WriteStream, WriteStreamType } from "./utils";
+import { isBisWorkspace, getCompileCommandsSize, WriteStream, WriteStreamType, deleteCompileCommandsSize } from "./utils";
 import { showIfError } from "./error";
 import { ChildProcess, execFile } from "child_process";
 import * as readline from "readline";
@@ -148,14 +148,12 @@ class CustomBuildTaskTerminal {
                 }
                 logger.log(`Ending setup...\r\n${filePath}\r\n`);
                 logger.log(`Starting refresh...\r\n${filePath}\r\n`);
-                const needMerge =
+                const shouldCleanCompileCommands =
                     (getCompileCommandsSize(workspace) ??
                         Number.MAX_SAFE_INTEGER) <
                     configuration.compileCommandsRollingSize;
-
-                let extraArgs: string[] = [];
-                if (needMerge) {
-                    extraArgs = ["--", "--merge"];
+                if (shouldCleanCompileCommands) {
+                    deleteCompileCommandsSize(workspace);
                 }
                 this.process = this.runBazelProcess(
                     workspace.uri.fsPath,
@@ -165,7 +163,7 @@ class CustomBuildTaskTerminal {
                         "--check_visibility=false",
                         `--compilation_mode=${compilationMode}`,
                         `--cpu=${cpu}`,
-                    ].concat(extraArgs),
+                    ],
                     (success) => {
                         this.parsingFilePath = "";
                         if (!success) {

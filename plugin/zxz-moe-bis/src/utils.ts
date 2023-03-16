@@ -32,6 +32,13 @@ export function getCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
     return fs.statSync(path).size;
 }
 
+export function deleteCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
+    let path = workspace.uri.fsPath + "/compile_commands.json";
+    if (fs.existsSync(path)) {
+        fs.unlinkSync(path);
+    }
+}
+
 export function isBisInstalled(): Promise<void> {
     return new Promise((resolve, reject) => {
         vscode.commands.executeCommand<string | undefined>('zxz-moe-bis.workspace', true).then((workspaceRoot) => {
