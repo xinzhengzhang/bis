@@ -12,6 +12,19 @@ def _maybe(repo_rule, name, **kwargs):
     if not native.existing_rule(name):
         repo_rule(name = name, **kwargs)
 
+def bis_rules_dependencies_hedron_compile_commands(remote = "git@github.com:hedronvision/bazel-compile-commands-extractor.git"):
+    git_repository(
+        name = "hedron_compile_commands",
+        remote = remote,
+        commit = "f02c9a82e4ea166584a7e2e58d566872121fba7c",
+        patch_args = ["-p1"],
+        patches = [
+            ":patches/file_filter.patch",
+            ":patches/swift_support.patch"
+        ]
+    )
+
+
 def bis_rules_dependencies():
 
     _maybe(
@@ -28,9 +41,5 @@ def bis_rules_dependencies():
         url = "https://github.com/bazelbuild/rules_apple/releases/download/1.1.3/rules_apple.1.1.3.tar.gz",
     )
 
-    _maybe(
-        git_repository,
-        name = "hedron_compile_commands",
-        remote = "git@github.com:xinzhengzhang/bazel-compile-commands-extractor.git",
-        branch = "feature/bis-support-rb2"
-    )
+    if not native.existing_rule("hedron_compile_commands"):
+        bis_rules_dependencies_hedron_compile_commands()
