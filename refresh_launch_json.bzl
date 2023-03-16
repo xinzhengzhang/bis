@@ -8,12 +8,17 @@ def _refresh_launch_json(ctx):
     target = ctx.attr.target
     pre_launch_task_name = ctx.attr.pre_launch_task_name
     bundle_info = target[AppleBundleInfo]
+    program = "{}{}".format(bundle_info.bundle_name, bundle_info.bundle_extension)
+
+    # ios-debug cannot run .app so we need to convert it into executable in payload
+    if bundle_info.bundle_extension == ".app":
+        program = "Payload/{}.app".format(bundle_info.bundle_name)
 
     launch_items.append(struct(
         name = "Launch",
         type = "lldb",
         request = "launch",
-        program = '${workspaceFolder}/'+ "{}/Payload/{}.app".format(bundle_info.archive_root, bundle_info.bundle_name),
+        program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
         iosBundleId = bundle_info.bundle_id,
         iosTarget = "last-selected",
         preLaunchTask = pre_launch_task_name,
@@ -23,7 +28,7 @@ def _refresh_launch_json(ctx):
         name = "Attach",
         type = "lldb",
         request = "attach",
-        program = "${workspaceFolder}/"+ "{}/Payload/{}.app".format(bundle_info.archive_root, bundle_info.bundle_name),
+        program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
         iosBundleId = bundle_info.bundle_id,
         iosTarget = "last-selected",
         sourceMap = {"./": "${workspaceFolder}"}
