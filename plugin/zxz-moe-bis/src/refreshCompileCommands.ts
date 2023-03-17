@@ -136,9 +136,7 @@ class CustomBuildTaskTerminal {
                 "--cpu",
                 `'${cpu}'`,
                 "--file_path",
-                `${filePath}`,
-                "--pre_compile_swift_module",
-                `${configuration.prebuildSwiftWhenIndexing}`,
+                `${filePath}`
             ],
             (success) => {
                 if (!success) {

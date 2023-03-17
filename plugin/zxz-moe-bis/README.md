@@ -78,10 +78,6 @@ This extension contributes the following settings:
 
     Auto generate .vscode/launch.json when configuration changing deteched 
 
-* `bis.prebuild_swift_when_indexing`
-
-    Prebuild swiftmodule used in compile commands
-
 * `bis.simulator_cpu_string`
 
     Default cpu string for simulator ( | ios_x86_64)

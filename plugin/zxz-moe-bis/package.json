@@ -53,40 +53,34 @@
             "order": 1,
             "default": true
           },
-          "bis.prebuild_swift_when_indexing": {
-            "type": "boolean",
-            "markdownDescription": "Prebuild swift module when indexing",
-            "order": 2,
-            "default": true
-          },
           "bis.check_duplicate_compile_commands": {
             "type": "boolean",
             "markdownDescription": "Whether to ignore repeated refresh commands. Note: Different compilation parameters will still reuse the same copy. It doesn't matter in most cases, you can choose to delete the local ./compile_commands.json or disable it",
-            "order": 3,
+            "order": 2,
             "default": true
           },
           "bis.simulator_cpu_string": {
             "type": "string",
             "markdownDescription": "CPU string of simulator",
-            "order": 4,
+            "order": 3,
             "default": "ios_x86_64"
           },
           "bis.pre_launch_task_name": {
             "type": "string",
             "markdownDescription": "Pre launch task name before build",
-            "order": 5,
+            "order": 4,
             "default": "bis.build: build"
           },
           "bis.startup_options": {
             "type": "string",
             "markdownDescription": "Startup options append on bazel build commands",
-            "order": 6,
+            "order": 5,
             "default": ""
           },
           "bis.build_options": {
             "type": "string",
             "markdownDescription": "Build options append on bazel build commands",
-            "order": 7,
+            "order": 6,
             "default": ""
           },
           "bis.query_kind_filter": {
