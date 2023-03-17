@@ -7,6 +7,7 @@ import types
 import locale
 import os
 import sys
+import re
 
 from pathlib import Path
 
@@ -59,16 +60,17 @@ extract_target_info(
 
 
 def create_bis_build(args, target_info):
-    def query_escape(str):
-        return str.replace("+", "\+").replace("-", "\-")
 
     targets = f'"{args.target}"'
     pre_compile_targets = f'"{args.target}"'
     if not args.ignore_parsing_targets:
+        target_stetment = f'deps({args.target})'
+        fname = os.path.basename(args.file_path)
+        target_stetment = f"let v = {target_stetment} in inputs('{re.escape(args.file_path)}', $v) + attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)"
         aquery_args = [
             'bazel',
             'aquery',
-            f"mnemonic('(Swift|Objc|Cpp)Compile', inputs('{query_escape(args.file_path)}', deps({args.target})))",
+            f"mnemonic('(Swift|Objc|Cpp)Compile', {target_stetment})",
             '--output=jsonproto',
             '--include_artifacts=false',
             '--ui_event_filters=-info',
@@ -96,8 +98,9 @@ def create_bis_build(args, target_info):
                 aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
             if not hasattr(parsed_aquery_output, 'targets'):
                 os._exit(ERR_NO_TARGET_FOUND)
+            # Compiling up to 3 targets should suffice
             pre_compile_targets = ', '.join(
-                [f'"{target.label}"' for target in parsed_aquery_output.targets])
+                [f'"{target.label}"' for target in parsed_aquery_output.targets[:3]])
         except json.JSONDecodeError:
             print("Bazel aquery failed. Command:",
                   aquery_args, file=sys.stderr)
