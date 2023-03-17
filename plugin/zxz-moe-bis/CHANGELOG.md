@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 0.2.5
+* Greatly accelerate the speed of generating swift dependencies for index dependencies and removed the `bis.prebuild_swift_when_indexing` configuration because it was fast enough
+* Greatly optimize the range of finding compile instructions
+
 ### 0.2.4
 * Index hints for headers are supported. Please be sure to upgrade the matching rules to 0.2.4, otherwise the index header may cause long waits
 
