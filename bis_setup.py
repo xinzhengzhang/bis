@@ -46,6 +46,7 @@ extract_target_info(
             "--check_visibility=false"],
         capture_output=True,
         encoding=locale.getpreferredencoding(),
+        check=False
     )
 
     # Get target info
@@ -56,11 +57,11 @@ extract_target_info(
     except json.JSONDecodeError:
         print(
             "Bazel action failed. Command: //.bis/extractor:extract_target", file=sys.stderr)
+    print("Complete parsing target information", flush=True)
     return target_info
 
 
 def create_bis_build(args, target_info):
-
     targets = f'"{args.target}"'
     pre_compile_targets = f'"{args.target}"'
     if not args.ignore_parsing_targets:
@@ -78,17 +79,15 @@ def create_bis_build(args, target_info):
             '--features=-layering_check'
         ]
 
-        print("Run process start !!!")
-        print("It may tooks a few minutes depends on the size of target")
-        print(f"command = {' '.join(aquery_args)}")
+        print("Start generating .bis/BUILD")
+        print(f"Start query command = {' '.join(aquery_args)}", flush=True)
 
         aquery_process = subprocess.run(
             aquery_args,
             capture_output=True,
             encoding=locale.getpreferredencoding(),
+            check=False
         )
-
-        print("Run process end !!!")
 
         for line in aquery_process.stderr.splitlines():
             print(line, file=sys.stderr)
@@ -104,6 +103,7 @@ def create_bis_build(args, target_info):
         except json.JSONDecodeError:
             print("Bazel aquery failed. Command:",
                   aquery_args, file=sys.stderr)
+
 
     optionals = f'"--compilation_mode={args.compilation_mode} --cpu={args.cpu}"'
     refresh_rule = "refresh_compile_commands_ios_cfg" if target_info[
