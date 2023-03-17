@@ -55,19 +55,15 @@ This step is done automatically by the plugin
     bazel run @bis//:setup -- -h
 
     optional arguments:
-    -h, --help            show this help message and exit
-    --compilation_mode COMPILATION_MODE
-                            dbg or opt
-    --cpu CPU             ios_arm64
-    --target TARGET       target labels
-    --file_path FILE_PATH
-                            source code path
-    --pre_compile_swift_module PRE_COMPILE_SWIFT_MODULE
-                            pre compile swift module
-    --pre_launch_task_name PRE_LAUNCH_TASK_NAME
-                            custom pre launch task
-    --ignore_parsing_targets IGNORE_PARSING_TARGETS
-                            Ignore parsing the closest target which contains the file_path
+        -h, --help            show this help message and exit
+        --compilation_mode COMPILATION_MODE
+                                dbg or opt
+        --cpu CPU             ios_arm64
+        --target TARGET       target labels
+        --file_path FILE_PATH
+                                source code path
+        --ignore_parsing_targets IGNORE_PARSING_TARGETS
+                                skip searching compile targets
     ``` 
 
 ## Rules

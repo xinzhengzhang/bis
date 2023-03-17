@@ -6,21 +6,13 @@ load(":bisproject_aspect.bzl", "bis_aspect")
 load("@build_bazel_rules_apple//apple/internal:transition_support.bzl", "transition_support")
 
 def _refresh_compile_commands_imp(ctx):
-
-    def _filter_modules(depset_modules, filter):
-        if filter:
-            modules = depset_modules.to_list()
-            return depset([module for module in modules if module.extension == "modulemap"])
-        else:
-            return depset_modules
-
     # Prebuild modules
+    depfiles = depset([]
+        , transitive = [
+            target[BisProjInfo].transitive_modules
+            for target in ctx.attr.targets])
 
-    modules = depset([], transitive = [
-        _filter_modules(
-            target[BisProjInfo].transitive_modules,
-            not ctx.attr.pre_compile_swift_module
-        ) for target in ctx.attr.targets])
+    target_outputs = depset([], transitive = [target[DefaultInfo].files for target in ctx.attr.targets]) if ctx.attr.build_artifacts else depset([])
 
     # Extractor 
     extractor = ctx.attr.extractor
@@ -46,8 +38,9 @@ def _refresh_compile_commands_imp(ctx):
         DefaultInfo(
             executable = output,
             runfiles = ctx.runfiles(
-                files = extractor_sources + modules.to_list(),
+                files = extractor_sources + depfiles.to_list(),
             ),
+            files = target_outputs
         ),
     ]
 
@@ -63,7 +56,7 @@ _refresh_compile_commands_ios_cfg = rule(
             cfg = apple_common.multi_arch_split,
         ),
         "extractor": attr.label(mandatory = True),
-        "pre_compile_swift_module": attr.bool(default = True),
+        "build_artifacts": attr.bool(default = False),
         "filter_file_path": attr.string(default = ".*"),
         "_runner_template": attr.label(
             allow_single_file = True,
@@ -80,7 +73,7 @@ _refresh_compile_commands_ios_cfg = rule(
     executable = True,
 )
 
-def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optionals = "", file_path = ".*", pre_compile_swift_module = True, minimum_os_version = "11.0", **kwargs):
+def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optionals = "", file_path = ".*", build_artifacts = False, minimum_os_version = "11.0", **kwargs):
     extractor_name = name + "_extractor"
 
     hedron_refresh_compile_commands(
@@ -93,7 +86,7 @@ def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optiona
         name = name,
         targets = pre_compile_targets,
         extractor = extractor_name,
-        pre_compile_swift_module = pre_compile_swift_module,
+        build_artifacts = build_artifacts,
         minimum_os_version = minimum_os_version,
         filter_file_path = file_path,
         testonly = True,
@@ -109,7 +102,7 @@ _refresh_compile_commands = rule(
             aspects = [bis_aspect],
         ),
         "extractor": attr.label(mandatory = True),
-        "pre_compile_swift_module": attr.bool(default = True),
+        "build_artifacts": attr.bool(default = False),
         "filter_file_path": attr.string(default = ".*"),
         "_runner_template": attr.label(
             allow_single_file = True,
@@ -119,7 +112,7 @@ _refresh_compile_commands = rule(
     executable = True,
 )
 
-def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "", file_path = ".*", pre_compile_swift_module = True, **kwargs):
+def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "", file_path = ".*", build_artifacts = False, **kwargs):
     extractor_name = name + "_extractor"
 
     hedron_refresh_compile_commands(
@@ -132,7 +125,7 @@ def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "",
         name = name,
         targets = pre_compile_targets,
         extractor = extractor_name,
-        pre_compile_swift_module = pre_compile_swift_module,
+        build_artifacts = build_artifacts,
         filter_file_path = file_path,
         testonly = True,
     )

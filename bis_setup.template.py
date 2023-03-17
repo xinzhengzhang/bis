@@ -63,11 +63,14 @@ extract_target_info(
 
 def create_bis_build(args, target_info):
     targets = f'"{args.target}"'
-    pre_compile_targets = f'"{args.target}"'
+    pre_compile_targets = targets
+
     if not args.ignore_parsing_targets:
         target_stetment = f'deps({args.target})'
         fname = os.path.basename(args.file_path)
-        target_stetment = f"let v = {target_stetment} in inputs('{re.escape(args.file_path)}', $v) + attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)"
+
+        target_stetment = f"let v = {target_stetment} in attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)"
+
         aquery_args = [
             'bazel',
             'aquery',
@@ -103,6 +106,7 @@ def create_bis_build(args, target_info):
         except json.JSONDecodeError:
             print("Bazel aquery failed. Command:",
                   aquery_args, file=sys.stderr)
+        print(f"End query", flush=True)
 
 
     optionals = f'"--compilation_mode={args.compilation_mode} --cpu={args.cpu}"'
@@ -126,7 +130,6 @@ load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
   optionals = {optionals},
   file_path = "{args.file_path}",
   {minimum_os_version_string}
-  pre_compile_swift_module = {args.pre_compile_swift_module},
   tags = ["manual"],
   testonly = True,
 )
@@ -153,10 +156,8 @@ parser.add_argument('--cpu', default='', type=str, help='ios_arm64')
 parser.add_argument('--target', required=True, type=str, help='target labels')
 parser.add_argument('--file_path', default='.*',
                     type=str, help='source code path')
-parser.add_argument('--pre_compile_swift_module', default=True,
-                    type=str2bool, help='pre compile swift module')
 parser.add_argument('--ignore_parsing_targets', default=False, type=str2bool,
-                    help='ignoring parsing targets phase just pass --target to targets in `refresh_compile_commands`')
+                    help='skip searching compile targets')
 
 args = parser.parse_args()
 

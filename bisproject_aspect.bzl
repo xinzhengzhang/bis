@@ -30,21 +30,7 @@ def _bis_aspect_impl(target, ctx):
     modules = []
     is_swift = SwiftInfo in target
     if is_swift:
-        direct_modules = target[SwiftInfo].direct_modules
-        for direct_module in direct_modules:
-            # Bridge with header system
-            if direct_module.clang and direct_module.clang.module_map:
-                modules.append(direct_module.clang.module_map)
-            if direct_module.swift:
-                modules.append(direct_module.swift.swiftmodule)
-
-            compilation_context = direct_module.compilation_context
-            if type(compilation_context) == list:
-                modules += compilation_context
-            elif compilation_context:
-                modules += list(compilation_context.swiftmodules)
-                modules += list(compilation_context.module_maps)
-
+        modules = [module for module in target[DefaultInfo].files.to_list() if module.extension in ["h", "swiftmodule"]]
 
     transitive_infos = _transitive_infos(ctx = ctx)
     infos = [info for attr, info in transitive_infos]
