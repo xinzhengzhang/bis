@@ -16,7 +16,7 @@ def bis_rules_dependencies_hedron_compile_commands(remote = "git@github.com:hedr
     git_repository(
         name = "hedron_compile_commands",
         remote = remote,
-        commit = "f02c9a82e4ea166584a7e2e58d566872121fba7c",
+        commit = "f7388651ee99608fb5f6336764657596e2f84b97",
         patch_args = ["-p1"],
         patches = [
             ":patches/file_filter.patch",

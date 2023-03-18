@@ -1,5 +1,5 @@
 diff --git a/refresh.template.py b/refresh.template.py
-index 3cb871f..38303a7 100644
+index 03f28ec..e8b2dd6 100644
 --- a/refresh.template.py
 +++ b/refresh.template.py
 @@ -3,8 +3,9 @@ As a template, this file helps implement the refresh_compile_commands rule and i
@@ -13,7 +13,7 @@ index 3cb871f..38303a7 100644
      - Requires being run under Bazel so we can access the workspace root environment variable.
  - Output: a compile_commands.json in the workspace root that clang tooling (or you!) can look at to figure out how files are being compiled by Bazel
      - Crucially, this output is de-Bazeled; The result is a command that could be run from the workspace root directly, with no Bazel-specific requirements, environment variables, etc.
-@@ -34,6 +35,8 @@ import tempfile
+@@ -36,6 +37,8 @@ import tempfile
  import time
  import types
  import typing # MIN_PY=3.9: Switch e.g. typing.List[str] -> list[str]
@@ -22,7 +22,7 @@ index 3cb871f..38303a7 100644
  
  
  @enum.unique
-@@ -177,6 +180,7 @@ def _get_cached_adjusted_modified_time(path: str):
+@@ -181,6 +184,7 @@ def _get_cached_adjusted_modified_time(path: str):
  # Roughly 1 year into the future. This is safely below bazel's 10 year margin, but large enough that no sane normal file should be past this.
  BAZEL_INTERNAL_SOURCE_CUTOFF = time.time() + 60*60*24*365
  
@@ -30,7 +30,7 @@ index 3cb871f..38303a7 100644
  
  def _get_headers_gcc(compile_args: typing.List[str], source_path: str, action_key: str):
      """Gets the headers used by a particular compile command that uses gcc arguments formatting (including clang.)
-@@ -759,11 +763,15 @@ def _all_platform_patch(compile_args: typing.List[str]):
+@@ -765,11 +769,15 @@ def _all_platform_patch(compile_args: typing.List[str]):
      return compile_args
  
  
@@ -47,7 +47,7 @@ index 3cb871f..38303a7 100644
      # Patch command by platform
      compile_action.arguments = _all_platform_patch(compile_action.arguments)
      compile_action.arguments = _apple_platform_patch(compile_action.arguments)
-@@ -771,10 +779,12 @@ def _get_cpp_command_for_files(compile_action):
+@@ -777,10 +785,12 @@ def _get_cpp_command_for_files(compile_action):
  
      source_files, header_files = _get_files(compile_action)
  
@@ -61,7 +61,7 @@ index 3cb871f..38303a7 100644
      """Converts from Bazel's aquery format to de-Bazeled compile_commands.json entries.
  
      Input: jsonproto output from aquery, pre-filtered to (Objective-)C(++) compile actions for a given build.
-@@ -798,8 +808,8 @@ def _convert_compile_commands(aquery_output):
+@@ -804,8 +814,8 @@ def _convert_compile_commands(aquery_output):
      with concurrent.futures.ThreadPoolExecutor(
          max_workers=min(32, (os.cpu_count() or 1) + 4) # Backport. Default in MIN_PY=3.8. See "using very large resources implicitly on many-core machines" in https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
      ) as threadpool:
@@ -72,7 +72,7 @@ index 3cb871f..38303a7 100644
      # Yield as compile_commands.json entries
      header_files_already_written = set()
      for source_files, header_files, compile_command_args in outputs:
-@@ -825,16 +835,100 @@ def _convert_compile_commands(aquery_output):
+@@ -831,16 +841,104 @@ def _convert_compile_commands(aquery_output):
  
  
  def _get_commands(target: str, flags: str):
@@ -121,23 +121,21 @@ index 3cb871f..38303a7 100644
 +
 +        aquery_process = subprocess.run(
 +            aquery_args,
-+            capture_output=True,
++            # MIN_PY=3.7: Replace PIPEs with capture_output.
++            stdout=subprocess.PIPE,
++            stderr=subprocess.PIPE,
 +            encoding=locale.getpreferredencoding(),
 +            check=False, # We explicitly ignore errors from `bazel aquery` and carry on.
 +        )
 +
 +
 +        # Filter aquery error messages to just those the user should care about.
++        # Shush known warnings about missing graph targets.
++        # The missing graph targets are not things we want to introspect anyway.
++        # Tracking issue https://github.com/bazelbuild/bazel/issues/13007
 +        missing_targets_warning: typing.Pattern[str] = re.compile(r'(\(\d+:\d+:\d+\) )?(\033\[[\d;]+m)?WARNING: (\033\[[\d;]+m)?Targets were missing from graph:') # Regex handles --show_timestamps and --color=yes. Could use "in" if we ever need more flexibility.
-+        for line in aquery_process.stderr.splitlines():
-+            # Shush known warnings about missing graph targets.
-+            # The missing graph targets are not things we want to introspect anyway.
-+            # Tracking issue https://github.com/bazelbuild/bazel/issues/13007.
-+            if missing_targets_warning.match(line):
-+                continue
-+
-+            print(line, file=sys.stderr)
-+
++        aquery_process.stderr = '\n'.join(line for line in aquery_process.stderr.splitlines() if not missing_targets_warning.match(line))
++        if aquery_process.stderr: print(aquery_process.stderr, file=sys.stderr)
 +
 +        # Parse proto output from aquery
 +        try:
@@ -149,10 +147,16 @@ index 3cb871f..38303a7 100644
 +            return []
 +
 +        if not getattr(parsed_aquery_output, 'actions', None): # Unifies cases: No actions (or actions list is empty)
++            if aquery_process.stderr:
++                log_warning(f""">>> Bazel lists no applicable compile commands for {target}, probably because of errors in your BUILD files, printed above.
++        Continuing gracefully...""")
++            else:
++                log_warning(f""">>> Bazel lists no applicable compile commands for {target}
++        If this is a header-only library, please instead specify a test or binary target that compiles it (search "header-only" in README.md).
++        Continuing gracefully...""")
 +            return []
 +
 +        return _convert_compile_commands(parsed_aquery_output, lambda _, headers: _should_stop(headers, file_path))
-+
 +
      # Log clear completion messages
      log_info(f">>> Analyzing commands used in {target}")
@@ -177,7 +181,7 @@ index 3cb871f..38303a7 100644
          or any(re.match(r'-?(@|:|//)', f) for f in additional_flags)):
          log_warning(""">>> The flags you passed seem to contain targets.
      Try adding them as targets in your refresh_compile_commands rather than flags.
-@@ -847,79 +941,46 @@ def _get_commands(target: str, flags: str):
+@@ -853,81 +951,46 @@ def _get_commands(target: str, flags: str):
      Try adding them as flags in your refresh_compile_commands rather than targets.
      In a moment, Bazel will likely fail to parse.""")
  
@@ -217,18 +221,42 @@ index 3cb871f..38303a7 100644
 -
 -    aquery_process = subprocess.run(
 -        aquery_args,
--        capture_output=True,
+-        # MIN_PY=3.7: Replace PIPEs with capture_output.
+-        stdout=subprocess.PIPE,
+-        stderr=subprocess.PIPE,
 -        encoding=locale.getpreferredencoding(),
 -        check=False, # We explicitly ignore errors from `bazel aquery` and carry on.
 -    )
+-
  
+-    # Filter aquery error messages to just those the user should care about.
+-    # Shush known warnings about missing graph targets.
+-    # The missing graph targets are not things we want to introspect anyway.
+-    # Tracking issue https://github.com/bazelbuild/bazel/issues/13007
+-    missing_targets_warning: typing.Pattern[str] = re.compile(r'(\(\d+:\d+:\d+\) )?(\033\[[\d;]+m)?WARNING: (\033\[[\d;]+m)?Targets were missing from graph:') # Regex handles --show_timestamps and --color=yes. Could use "in" if we ever need more flexibility.
+-    aquery_process.stderr = '\n'.join(line for line in aquery_process.stderr.splitlines() if not missing_targets_warning.match(line))
+-    if aquery_process.stderr: print(aquery_process.stderr, file=sys.stderr)
+-
+-    # Parse proto output from aquery
+-    try:
+-        # object_hook -> SimpleNamespace allows object.member syntax, like a proto, while avoiding the protobuf dependency
+-        parsed_aquery_output = json.loads(aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
+-    except json.JSONDecodeError:
+-        print("Bazel aquery failed. Command:", aquery_args, file=sys.stderr)
+-        log_warning(f">>> Failed extracting commands for {target}\n    Continuing gracefully...")
+-        return
+-
+-    if not getattr(parsed_aquery_output, 'actions', None): # Unifies cases: No actions (or actions list is empty)
+-        if aquery_process.stderr:
+-            log_warning(f""">>> Bazel lists no applicable compile commands for {target}, probably because of errors in your BUILD files, printed above.
+-    Continuing gracefully...""")
 +    if file_flags:
 +        file_path = file_flags[0]
 +        found = False
 +        target_statment_canidates = []
 +        if file_flags[0].endswith(_get_files.source_extensions):
 +            target_statment_canidates.append(f"inputs('{re.escape(file_path)}', {target_statment})")
-+        else:
+         else:
 +            fname = os.path.basename(file_path)
 +            target_statment_canidates.extend([
 +                f"let v = {target_statment} in attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)",
@@ -244,45 +272,21 @@ index 3cb871f..38303a7 100644
 +        if not found:
 +            log_warning(f""">>> Bazel lists no applicable compile commands for {file_path} in {target}.
 +        Continuing gracefully...""")
- 
--    # Filter aquery error messages to just those the user should care about.
--    missing_targets_warning: typing.Pattern[str] = re.compile(r'(\(\d+:\d+:\d+\) )?(\033\[[\d;]+m)?WARNING: (\033\[[\d;]+m)?Targets were missing from graph:') # Regex handles --show_timestamps and --color=yes. Could use "in" if we ever need more flexibility.
--    for line in aquery_process.stderr.splitlines():
--        # Shush known warnings about missing graph targets.
--        # The missing graph targets are not things we want to introspect anyway.
--        # Tracking issue https://github.com/bazelbuild/bazel/issues/13007.
--        if missing_targets_warning.match(line):
--            continue
--
--        print(line, file=sys.stderr)
--
--
--    # Parse proto output from aquery
--    try:
--        # object_hook -> SimpleNamespace allows object.member syntax, like a proto, while avoiding the protobuf dependency
--        parsed_aquery_output = json.loads(aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
--    except json.JSONDecodeError:
--        print("Bazel aquery failed. Command:", aquery_args, file=sys.stderr)
--        log_warning(f">>> Failed extracting commands for {target}\n    Continuing gracefully...")
--        return
--
--    if not getattr(parsed_aquery_output, 'actions', None): # Unifies cases: No actions (or actions list is empty)
--        log_warning(f""">>> Bazel lists no applicable compile commands for {target}
--    If this is a header-only library, please instead specify a test or binary target that compiles it (search "header-only" in README.md).
--    Continuing gracefully...""")
--        return
--
--    yield from _convert_compile_commands(parsed_aquery_output)
--
 +    else:
 +        if {exclude_external_sources}:
 +            # For efficiency, have bazel filter out external targets (and therefore actions) before they even get turned into actions or serialized and sent to us. Note: this is a different mechanism than is used for excluding just external headers.
 +            target_statment = f"filter('^(//|@//)',{target_statment})"
 +        compile_commands.extend(_get_commands(target_statment, None))
 +        if len(compile_commands) == 0:
-+            log_warning(f""">>> Bazel lists no applicable compile commands for {target}
+             log_warning(f""">>> Bazel lists no applicable compile commands for {target}
+-    If this is a header-only library, please instead specify a test or binary target that compiles it (search "header-only" in README.md).
+-    Continuing gracefully...""")
+-        return
+-
+-    yield from _convert_compile_commands(parsed_aquery_output)
 +        If this is a header-only library, please instead specify a test or binary target that compiles it (search "header-only" in README.md).
 +        Continuing gracefully...""")
+ 
  
      # Log clear completion messages
      log_success(f">>> Finished extracting commands for {target}")
@@ -290,10 +294,10 @@ index 3cb871f..38303a7 100644
  
  
  def _ensure_external_workspaces_link_exists():
-@@ -1055,6 +1116,18 @@ if __name__ == '__main__':
-     for (target, flags) in target_flag_pairs:
-         compile_command_entries.extend(_get_commands(target, flags))
- 
+@@ -1067,6 +1130,17 @@ if __name__ == '__main__':
+         log_error(""">>> Not (over)writing compile_commands.json, since no commands were extracted and an empty file is of no use.
+     There should be actionable warnings, above, that led to this.""")
+         sys.exit(1)
 +    # --file triggers incremental update of compile_commands.json
 +    if any(arg.startswith('--file=') for arg in sys.argv[1:]) and os.path.isfile('compile_commands.json'):
 +        previous_compile_command_entries = []
@@ -305,10 +309,9 @@ index 3cb871f..38303a7 100644
 +        else:
 +            updated_files = set(entry['file'] for entry in compile_command_entries)
 +            compile_command_entries += [entry for entry in previous_compile_command_entries if entry['file'] not in updated_files]
-+
+ 
      # Chain output into compile_commands.json
      with open('compile_commands.json', 'w') as output_file:
-         json.dump(
 diff --git a/refresh_compile_commands.bzl b/refresh_compile_commands.bzl
 index b9c5d32..70cf8f5 100644
 --- a/refresh_compile_commands.bzl
