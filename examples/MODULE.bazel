@@ -1,0 +1,16 @@
+module(
+    name = "sample",
+    version = "0.0.1",
+    repo_name = "sample",
+)
+
+bazel_dep(name = "rules_swift", version = "1.6.0", repo_name = "build_bazel_rules_swift")
+bazel_dep(name = "rules_apple", version = "2.1.0", repo_name = "build_bazel_rules_apple")
+
+# vscode plugin
+bazel_dep(name = "bis", version = "0.0.1", dev_dependency = True)
+local_path_override(
+    module_name = "bis",
+    path = "../",
+)
+
