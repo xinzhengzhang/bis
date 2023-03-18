@@ -9,7 +9,7 @@ def _refresh_compile_commands_imp(ctx):
     # Prebuild modules
     depfiles = depset([]
         , transitive = [
-            target[BisProjInfo].transitive_modules
+            target[BisProjInfo].transitive_index_dependents
             for target in ctx.attr.targets])
 
     target_outputs = depset([], transitive = [target[DefaultInfo].files for target in ctx.attr.targets]) if ctx.attr.build_artifacts else depset([])

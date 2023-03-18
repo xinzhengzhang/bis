@@ -27,19 +27,28 @@ def _transitive_infos(*, ctx):
 
 
 def _bis_aspect_impl(target, ctx):
-    modules = []
+    direct_index_dependents = []
+    direct_outputs = [("bis artifacts {}".format(target.label), target.files)]
+
     is_swift = SwiftInfo in target
     if is_swift:
-        modules = [module for module in target[DefaultInfo].files.to_list() if module.extension in ["h", "swiftmodule"]]
+        direct_index_dependents = [direct_index_dependent for direct_index_dependent in target[DefaultInfo].files.to_list() if direct_index_dependent.extension in ["h", "swiftmodule"]]
 
     transitive_infos = _transitive_infos(ctx = ctx)
     infos = [info for attr, info in transitive_infos]
-    transitive_modules = depset(modules, transitive = [info.transitive_modules for info in infos])
 
-    return [BisProjInfo(
-        direct_modules = modules,
-        transitive_modules = transitive_modules,
-    )]
+    transitive_index_dependents = depset(direct_index_dependents, transitive = [info.transitive_index_dependents for info in infos])
+    transitive_outputs = depset(direct_outputs, transitive = [info.transitive_outputs for info in infos])
+
+    return [
+        BisProjInfo(
+            direct_index_dependents = direct_index_dependents,
+            transitive_index_dependents = transitive_index_dependents,
+            direct_outputs = direct_outputs,
+            transitive_outputs = transitive_outputs
+        ),
+        OutputGroupInfo(**{k: v for k, v in transitive_outputs.to_list()})
+    ]
 
 
 bis_aspect = aspect(
