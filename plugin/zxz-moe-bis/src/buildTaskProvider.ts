@@ -27,7 +27,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         const compilationMode = (await picker.compilationMode()) ?? "dbg";
         const cpu = await cpuProvider.cpu();
         const result: vscode.Task[] = [
-            this.createTask(buildTarget!, compilationMode, cpu, "build"),
+            this.createTask(buildTarget!, undefined, compilationMode, cpu, "build"),
         ];
 
         for (const workspaceFolder of workspaceFolders) {
@@ -71,6 +71,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                             }
                             result.push(
                                 _this.createTask(
+                                    buildTarget,
                                     str,
                                     compilationMode,
                                     cpu,
@@ -94,16 +95,22 @@ export class BuildTaskProvider implements vscode.TaskProvider {
 
     private createTask(
         target: string,
+        library: string|undefined,
         compilationMode: string,
         cpu: string,
         source: string
     ) {
-        const executionCommands = `bazel ${configuration.startupOptions} build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
-
+        let executionCommands = `bazel ${configuration.startupOptions} build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
+        if (library) {
+            executionCommands += " --aspects=@bis//:bisproject_aspect.bzl%bis_aspect";
+            executionCommands += ` --output_groups="bis artifacts @${library}"`;
+            // There are two @for adapting bzlmod
+            executionCommands += ` --output_groups="bis artifacts @@${library}"`;
+        }
         const task = new vscode.Task(
             {
                 type: BuildTaskProvider.scriptType,
-                target: target,
+                target: target + library,
             },
             vscode.TaskScope.Workspace,
             source,
