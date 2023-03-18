@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 0.2.6
+Features
+* Add tree viewer
+* Modify the way you compile sublibraries from independent compile to share the same configuration of the root target. This makes it possible to share the cache
 ### 0.2.5
 * Greatly accelerate the speed of generating swift dependencies for index dependencies and removed the `bis.prebuild_swift_when_indexing` configuration because it was fast enough
 * Greatly optimize the range of finding compile instructions
