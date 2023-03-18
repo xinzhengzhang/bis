@@ -57,8 +57,9 @@ export class BuildTaskProvider implements vscode.TaskProvider {
 
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
+            const command = `bazel ${configuration.startupOptions} build ${buildTarget} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && bazel ${configuration.startupOptions} cquery ${buildTarget} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"  | xargs -I{} cat bazel-bin/{}`;
             const process = exec(
-                 `bazel query 'kind("${configuration.queryKindFilter}", deps("${buildTarget}"))' --output=label`,
+                 command,
                 {
                     cwd: folderString,
                 },
@@ -75,7 +76,8 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                                     str,
                                     compilationMode,
                                     cpu,
-                                    `build ${str}`
+                                    // Delete the starting character string
+                                    `build ${str.replace(/^bis artifacts /, "")}`
                                 )
                             );
                         });
@@ -95,22 +97,19 @@ export class BuildTaskProvider implements vscode.TaskProvider {
 
     private createTask(
         target: string,
-        library: string|undefined,
+        labelIdentifier: string|undefined,
         compilationMode: string,
         cpu: string,
         source: string
     ) {
         let executionCommands = `bazel ${configuration.startupOptions} build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
-        if (library) {
-            executionCommands += " --aspects=@bis//:bisproject_aspect.bzl%bis_aspect";
-            executionCommands += ` --output_groups="bis artifacts @${library}"`;
-            // There are two @for adapting bzlmod
-            executionCommands += ` --output_groups="bis artifacts @@${library}"`;
+        if (labelIdentifier) {
+            executionCommands += ` --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="${labelIdentifier}"`;
         }
         const task = new vscode.Task(
             {
                 type: BuildTaskProvider.scriptType,
-                target: target + library,
+                target: target + labelIdentifier,
             },
             vscode.TaskScope.Workspace,
             source,

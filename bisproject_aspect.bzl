@@ -40,6 +40,12 @@ def _bis_aspect_impl(target, ctx):
     transitive_index_dependents = depset(direct_index_dependents, transitive = [info.transitive_index_dependents for info in infos])
     transitive_outputs = depset(direct_outputs, transitive = [info.transitive_outputs for info in infos])
 
+    output_groups = {k: v for k, v in transitive_outputs.to_list()}
+
+    artifacts_labels_file = ctx.actions.declare_file("{}_bis_artifacts_labels.txt".format(target.label.name))
+    ctx.actions.write(artifacts_labels_file, '\n'.join(list(output_groups.keys())))
+    output_groups["bis artifacts labels"] =  [artifacts_labels_file]
+
     return [
         BisProjInfo(
             direct_index_dependents = direct_index_dependents,
@@ -47,7 +53,7 @@ def _bis_aspect_impl(target, ctx):
             direct_outputs = direct_outputs,
             transitive_outputs = transitive_outputs
         ),
-        OutputGroupInfo(**{k: v for k, v in transitive_outputs.to_list()})
+        OutputGroupInfo(**output_groups),
     ]
 
 
