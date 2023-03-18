@@ -143,6 +143,14 @@
           "command": "zxz-moe-bis.copyTargetPath"
         }
       ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "buildWorkspace",
+          "name": "Bis Build Targets"
+        }
+      ]
     }
   },
   "scripts": {

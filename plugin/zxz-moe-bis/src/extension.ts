@@ -21,6 +21,7 @@ import { isBisInstalled, touchBisBuild } from "./utils";
 import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
 import WorkspaceService from './workspace';
+import { TreeProvider } from "./treeProvider";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -58,6 +59,15 @@ export function activate(context: vscode.ExtensionContext) {
     WorkspaceService.setup(context);
     LibPathService.setup(context);
     LibDepsService.setup(context);
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+            "zxz-moe-bis.build",
+            (task: vscode.Task) => {
+                vscode.tasks.executeTask(task);
+            }
+        )
+    );
 
     context.subscriptions.push(
         vscode.commands.registerCommand(
@@ -99,6 +109,11 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.onDidChangeActiveTextEditor(
             onDidChangeActiveTextEditorMaker()
         )
+    );
+
+    // View
+    context.subscriptions.push(
+        vscode.window.registerTreeDataProvider("buildWorkspace", new TreeProvider(context))
     );
 
     // Auto generateLaunchJson
