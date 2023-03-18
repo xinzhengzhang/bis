@@ -5,29 +5,79 @@ export interface ITreeItem {
   getLabel(): string;
   getIcon(): vscode.ThemeIcon | string | undefined;
   getChildren(): Thenable<ITreeItem[]>;
-  mightHaveChildren(): boolean;
+  collapsibleState(): vscode.TreeItemCollapsibleState;
   getTooltip(): string | undefined;
   getCommand(): vscode.Command | undefined;
   getContextValue(): string | undefined;
 }
 
 class TreeItem implements ITreeItem {
-  task: vscode.Task;
-  constructor(task: vscode.Task) {
+  task: vscode.Task|undefined;
+  path: string;
+  children: TreeItem[] = [];
+
+  constructor(task: vscode.Task|undefined, path: string) {
     this.task = task;
+    this.path = path;
+  }
+
+  public insertItem(item: TreeItem) {
+    let node: TreeItem = this;
+    for (const child of this.children) {
+      if (item.path.includes(child.path)) {
+        node = child;
+        break;
+      }
+    }
+
+    const index = item.path.indexOf(node.path);
+    if (index > -1) {
+      const components = item.path.substring(index + node.path.length).split("/");
+      let path = node.path;
+      for (const idx in components) {
+        let component = components[idx];
+        if (+idx === components.length - 1) {
+          component = component.replace(/:.*$/, "");
+        }
+        if (component === "") { continue; }
+        path += `${path === "" ? "" : "/"}${component}`;
+        const candidate = node.children.concat(node).filter(child => child.path === path);
+        if (candidate.length > 0) {
+          node = candidate[0];
+        } else {
+          const newItem = new TreeItem(undefined, path);
+          node.children.push(newItem);
+          node = newItem;
+        }
+      }
+      node.children.push(item);
+    } else {
+      console.log("error");
+      return;
+    }
   }
 
   getLabel(): string {
-    return this.task.name;
+    if (this.task) {
+      return this.task.name;
+    } else {
+      return this.path.split("/").pop() ?? this.path;
+    }
   }
   getIcon(): string | vscode.ThemeIcon | undefined {
     return undefined;
   }
   getChildren(): Thenable<ITreeItem[]> {
-    return Promise.resolve([]);
+    return Promise.resolve(this.children);
   }
-  mightHaveChildren(): boolean {
-    return false;
+
+  collapsibleState(): vscode.TreeItemCollapsibleState {
+    if (this.children.length === 0) {
+      return vscode.TreeItemCollapsibleState.None;
+    } else {
+      return vscode.TreeItemCollapsibleState.Collapsed;
+    }
+   
   }
   getTooltip(): string | undefined {
     return undefined;
@@ -35,7 +85,7 @@ class TreeItem implements ITreeItem {
   getCommand(): vscode.Command | undefined {
     return {
       arguments: [this.task],
-      title: this.task.name,
+      title: this.task?.name ?? "",
       command: "zxz-moe-bis.build"
     };
   }
@@ -103,10 +153,7 @@ export class TreeProvider
 
   public getTreeItem(element: ITreeItem): vscode.TreeItem {
     const label = element.getLabel();
-    const collapsibleState = element.mightHaveChildren()
-      ? vscode.TreeItemCollapsibleState.Collapsed
-      : vscode.TreeItemCollapsibleState.None;
-
+    const collapsibleState = element.collapsibleState();
     const treeItem = new vscode.TreeItem(label, collapsibleState);
     treeItem.contextValue = element.getContextValue();
     treeItem.iconPath = element.getIcon();
@@ -118,7 +165,6 @@ export class TreeProvider
   /** Forces a re-query and refresh of the tree's contents. */
   public refresh() {
     this.updateWorkspaceFolderTreeItems();
-    // this.onDidChangeTreeDataEmitter.fire();
   }
 
   private onBuildFilesChanged(uri: vscode.Uri) {
@@ -131,7 +177,12 @@ export class TreeProvider
       console.log(value);
     });
     new BuildTaskProvider().provideTasks().then( tasks => {
-      this.cachedTreeItems = tasks.map((task) => new TreeItem(task));
+      const items = tasks.map((task) => new TreeItem(task, task.name.replace(/^build /, "")));
+      const root = new TreeItem(undefined, "");
+      for (const item of items) {
+        root.insertItem(item);
+      }
+      this.cachedTreeItems = root.children;
       this.onDidChangeTreeDataEmitter.fire();
     });
   }

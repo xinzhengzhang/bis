@@ -55,6 +55,8 @@ This extension contributes the following commands:
 
         Notice: the target must have mandatory providers: 'AppleBundleInfo'
 
+* Refresh tree viewer: `zxz-moe-bis.refreshTreeViewer`
+
 * Variable
     * `zxz-moe-bis.buildTarget`
         * Label of selected target

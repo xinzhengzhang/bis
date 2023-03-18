@@ -22,25 +22,29 @@
   "contributes": {
     "commands": [
       {
+        "command": "zxz-moe-bis.refreshTreeViewer",
+        "title": "bis: refresh tree viewer"
+      },
+      {
         "command": "zxz-moe-bis.generateLaunchJson",
-        "title": "bis: Generate bis launch json"
+        "title": "bis: generate bis launch json"
       },
       {
         "command": "zxz-moe-bis.copyTargetPath",
-        "title": "Copy Target Path",
+        "title": "bis: copy Target Path",
         "enablement": ""
       },
       {
         "command": "zxz-moe-bis.lib-deps",
-        "title": "bis: Resolve lib deps"
+        "title": "bis: resolve lib deps"
       },
       {
         "command": "zxz-moe-bis.workspace",
-        "title": "bis: Set workspace root"
+        "title": "bis: set workspace root"
       },
       {
         "command": "zxz-moe-bis.refreshDummyProjectForInjectionIII",
-        "title": "bis: Refresh dummy project for InjectionIII"
+        "title": "bis: refresh dummy project for InjectionIII"
       }
     ],
     "configuration": [

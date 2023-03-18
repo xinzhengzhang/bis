@@ -112,8 +112,13 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     // View
+    const treeProvider = new TreeProvider(context);
     context.subscriptions.push(
-        vscode.window.registerTreeDataProvider("buildWorkspace", new TreeProvider(context))
+        vscode.window.registerTreeDataProvider("buildWorkspace", treeProvider)
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+        "zxz-moe-bis.refreshTreeViewer", treeProvider.refresh)
     );
 
     // Auto generateLaunchJson
@@ -140,6 +145,9 @@ export function activate(context: vscode.ExtensionContext) {
                     "zxz-moe-bis.refreshDummyProjectForInjectionIII"
                 ); 
             }
+            vscode.commands.executeCommand(
+                "zxz-moe-bis.refreshTreeViewer"
+            );
         });
     
     isBisInstalled().then(()=>{
