@@ -28,11 +28,11 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 * Import bis rules in your MODULE.bazel
     ```
     # MODULE.bazel
-    bazel_dep(name = "bis", version = "0.2.6", dev_dependency = True)
+    bazel_dep(name = "bis", version = "0.2.7", dev_dependency = True)
     archive_override(
         module_name = "bis",
-        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.2.6.tar.gz",
-        strip_prefix = "bis-0.2.6"
+        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.2.7.tar.gz",
+        strip_prefix = "bis-0.2.7"
     )
 
     # If you are not in bzlmod please check the bis rules README.md

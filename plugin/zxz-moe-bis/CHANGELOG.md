@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### 0.2.7
+Fix
+* Refresh tree viewer command not working
+* Default behavior without file_path
+
+Enhance
+* Add icon for cell in tree viewer
+
 ### 0.2.6
 Features
 * Add tree viewer
