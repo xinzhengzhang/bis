@@ -14,17 +14,19 @@ export interface ITreeItem {
 class TreeItem implements ITreeItem {
   task: vscode.Task|undefined;
   path: string;
+  label: string;
   children: TreeItem[] = [];
 
   constructor(task: vscode.Task|undefined, path: string) {
     this.task = task;
     this.path = path;
+    this.label = path.split("/").pop() ?? path;
   }
 
   public insertItem(item: TreeItem) {
     let node: TreeItem = this;
     for (const child of this.children) {
-      if (item.path.includes(child.path)) {
+      if (item.path.startsWith(child.path)) {
         node = child;
         break;
       }
@@ -61,7 +63,7 @@ class TreeItem implements ITreeItem {
     if (this.task) {
       return this.task.name;
     } else {
-      return this.path.split("/").pop() ?? this.path;
+      return this.label;
     }
   }
   getIcon(): string | vscode.ThemeIcon | undefined {
