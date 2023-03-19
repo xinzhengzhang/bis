@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 0.2.8
+Fix
+* Fix bad path handling logic
+
 ### 0.2.7
 Fix
 * Refresh tree viewer command not working
