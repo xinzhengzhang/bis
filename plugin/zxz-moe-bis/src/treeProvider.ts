@@ -65,7 +65,11 @@ class TreeItem implements ITreeItem {
     }
   }
   getIcon(): string | vscode.ThemeIcon | undefined {
-    return undefined;
+    if (this.task) {
+      return new vscode.ThemeIcon("debug-start");
+    } else {
+      return vscode.ThemeIcon.Folder;
+    }
   }
   getChildren(): Thenable<ITreeItem[]> {
     return Promise.resolve(this.children);
@@ -101,6 +105,8 @@ export class TreeProvider
   private onDidChangeTreeDataEmitter = new vscode.EventEmitter<
   ITreeItem | void
   >();
+  private isPending = false;
+  private isProcessing = false;
 
   private cachedTreeItems: ITreeItem[] | undefined;
 
@@ -173,17 +179,27 @@ export class TreeProvider
 
   /** Refresh the cached BazelWorkspaceFolderTreeItems. */
   private updateWorkspaceFolderTreeItems() {
-    vscode.commands.getCommands().then( value => {
-      console.log(value);
-    });
-    new BuildTaskProvider().provideTasks().then( tasks => {
-      const items = tasks.map((task) => new TreeItem(task, task.name.replace(/^build /, "")));
-      const root = new TreeItem(undefined, "");
-      for (const item of items) {
-        root.insertItem(item);
-      }
-      this.cachedTreeItems = root.children;
-      this.onDidChangeTreeDataEmitter.fire();
-    });
+    if (this.isProcessing) {
+      this.isPending = true;
+      return;
+    }
+    const run = () => {
+      this.isProcessing = true;
+      new BuildTaskProvider().provideTasks().then( tasks => {
+        const items = tasks.map((task) => new TreeItem(task, task.name.replace(/^build /, "")));
+        const root = new TreeItem(undefined, "");
+        for (const item of items) {
+          root.insertItem(item);
+        }
+        this.cachedTreeItems = root.children;
+        this.onDidChangeTreeDataEmitter.fire();
+        if (this.isPending) {
+          this.isPending = false;
+          run();
+        }
+        this.isProcessing = false;
+      });
+    };
+    run();
   }
 }

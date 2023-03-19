@@ -118,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
     context.subscriptions.push(
         vscode.commands.registerCommand(
-        "zxz-moe-bis.refreshTreeViewer", treeProvider.refresh)
+        "zxz-moe-bis.refreshTreeViewer", () => treeProvider.refresh())
     );
 
     // Auto generateLaunchJson

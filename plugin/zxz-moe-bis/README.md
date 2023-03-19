@@ -8,6 +8,7 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 ## Features
 
 * UE for iOS developing
+* Tree viewer for buildable targets
 * Extract source info from build target and generate `compile_commands.json` for Sourcekit-lsp
 * Generate `launch.json` for debug
 * Copy target path from BUILD file
@@ -24,23 +25,24 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 ---
 ## Usage
 
-* Import bis rules in your WORKSPACE
+* Import bis rules in your MODULE.bazel
     ```
-    load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
-
-    git_repository(
-        name = "bis",
-        remote = "git@github.com:xinzhengzhang/bis.git",
-        branch = "main",
+    # MODULE.bazel
+    bazel_dep(name = "bis", version = "0.2.6", dev_dependency = True)
+    archive_override(
+        module_name = "bis",
+        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.2.6.tar.gz",
+        strip_prefix = "bis-0.2.6"
     )
 
-    load("@bis//:repositories.bzl", "bis_rules_dependencies")
-
-    bis_rules_dependencies()
+    # If you are not in bzlmod please check the bis rules README.md
     ```
 * Generate `.vscode/launch.json`
-    * command + shift + p `>Generate bis launch json`
-
+    * command + shift + p `>generate bis launch json`
+* Refresh tree viewer manually
+    * command + shift + p `>refresh tree viewer`
+* Generate dummy project for hotreloading used in InjectionIII.app
+    * command + shift +p `>refresh dummy project for InjectionIII`
 ---
 
 ## Usage Visuals
@@ -80,15 +82,13 @@ This extension contributes the following settings:
 
     Auto generate .vscode/launch.json when configuration changing deteched 
 
+* `bis.check_duplicate_compile_commands`
+
+    Whether to ignore repeated refresh commands. Note: Different compilation parameters will still reuse the same copy. It doesn't matter in most cases, you can choose to delete the local ./compile_commands.json or disable it
+
 * `bis.simulator_cpu_string`
 
     Default cpu string for simulator ( | ios_x86_64)
-
-* `bis.bazel_background_output_base`
-
-    Temporary output_base when building
-
-    Notice: it may affect the bazel-out symbol link (Set to '' to disable it)
 
 * `bis.pre_launch_task_name`
 
