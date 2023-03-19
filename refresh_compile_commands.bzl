@@ -57,7 +57,7 @@ _refresh_compile_commands_ios_cfg = rule(
         ),
         "extractor": attr.label(mandatory = True),
         "build_artifacts": attr.bool(default = False),
-        "filter_file_path": attr.string(default = ".*"),
+        "filter_file_path": attr.string(default = ""),
         "_runner_template": attr.label(
             allow_single_file = True,
             default = Label("//:runner.template.py"),
@@ -73,7 +73,7 @@ _refresh_compile_commands_ios_cfg = rule(
     executable = True,
 )
 
-def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optionals = "", file_path = ".*", build_artifacts = False, minimum_os_version = "11.0", **kwargs):
+def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optionals = "", file_path = "", build_artifacts = False, minimum_os_version = "11.0", **kwargs):
     extractor_name = name + "_extractor"
 
     hedron_refresh_compile_commands(
@@ -103,7 +103,7 @@ _refresh_compile_commands = rule(
         ),
         "extractor": attr.label(mandatory = True),
         "build_artifacts": attr.bool(default = False),
-        "filter_file_path": attr.string(default = ".*"),
+        "filter_file_path": attr.string(default = ""),
         "_runner_template": attr.label(
             allow_single_file = True,
             default = Label("//:runner.template.py"),
@@ -112,7 +112,7 @@ _refresh_compile_commands = rule(
     executable = True,
 )
 
-def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "", file_path = ".*", build_artifacts = False, **kwargs):
+def refresh_compile_commands(name, targets, pre_compile_targets, optionals = "", file_path = "", build_artifacts = False, **kwargs):
     extractor_name = name + "_extractor"
 
     hedron_refresh_compile_commands(

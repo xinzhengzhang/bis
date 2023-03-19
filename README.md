@@ -4,11 +4,11 @@ Bazel rules and plugin for developing iOS project on vscode
 # Bzlmod
 ```sh
 # MODULE.bazel
-bazel_dep(name = "bis", version = "0.2.4", dev_dependency = True)
+bazel_dep(name = "bis", version = "0.2.6", dev_dependency = True)
 archive_override(
     module_name = "bis",
-    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.2.4.tar.gz",
-    strip_prefix = "bis-0.2.4"
+    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.2.6.tar.gz",
+    strip_prefix = "bis-0.2.6"
 )
 ```
 # Non-bzlmod
@@ -19,7 +19,7 @@ load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
 git_repository(
     name = "bis",
     remote = "git@github.com:xinzhengzhang/bis.git",
-    branch = "main",
+    tag = "0.2.6",
 )
 
 load("@bis//:repositories.bzl", "bis_rules_dependencies")
@@ -41,6 +41,22 @@ These independent rules are too complicated, it is recommended to use them in co
 
 See [README](plugin/zxz-moe-bis/README.md) of plugin 
 
+---
+If you insist on independent use, the following are simple ways to use it.
+```sh
+cd examples
+# Extract for single file
+bazel run @bis//:setup -- --target //srcs/binary/ios_application:App --compilation_mode dbg --cpu 'ios_x86_64' --file_path srcs/module_a/a.m
+# Extract for whole target
+bazel run @bis//:setup -- --target //srcs/binary/ios_application:App --compilation_mode dbg --cpu 'ios_x86_64'
+# Generate compile_commands.json
+bazel run //.bis:refresh_compile_commands --compilation_mode=dbg --cpu=ios_x86_64 --check_visibility=False
+# Build sub target
+bazel build //srcs/binary/ios_application:App --compilation_mode=dbg --cpu="ios_x86_64" --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/module_a:module_a"
+# Build app
+bazel  build //srcs/binary/ios_application:App --compilation_mode=dbg --cpu="ios_x86_64" --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/binary/ios_application:App"
+
+```
 
 # Components
 ## Targets
@@ -54,7 +70,7 @@ This step is done automatically by the plugin
     ```
     bazel run @bis//:setup -- -h
 
-    optional arguments:
+    Arguments:
         -h, --help            show this help message and exit
         --compilation_mode COMPILATION_MODE
                                 dbg or opt

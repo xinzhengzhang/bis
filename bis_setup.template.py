@@ -67,9 +67,9 @@ def create_bis_build(args, target_info):
 
     if not args.ignore_parsing_targets:
         target_stetment = f'deps({args.target})'
-        fname = os.path.basename(args.file_path)
-
-        target_stetment = f"let v = {target_stetment} in attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)"
+        if len(args.file_path) > 0:
+            fname = os.path.basename(args.file_path)
+            target_stetment = f"let v = {target_stetment} in attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)"
 
         aquery_args = [
             'bazel',
@@ -154,7 +154,7 @@ parser.add_argument('--compilation_mode', default='dbg',
                     type=str, help='dbg or opt')
 parser.add_argument('--cpu', default='', type=str, help='ios_arm64')
 parser.add_argument('--target', required=True, type=str, help='target labels')
-parser.add_argument('--file_path', default='.*',
+parser.add_argument('--file_path', default='',
                     type=str, help='source code path')
 parser.add_argument('--ignore_parsing_targets', default=False, type=str2bool,
                     help='skip searching compile targets')
