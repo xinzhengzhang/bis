@@ -97,7 +97,7 @@
             "type": "string",
             "markdownDescription": "Bazel query rules (Target selection), bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
             "order": 8,
-            "default": "(ios_application)"
+            "default": "(ios_application|swift_binary|cc_binary)"
           },
           "bis.compile_commands_rolling_size": {
             "type": "integer",

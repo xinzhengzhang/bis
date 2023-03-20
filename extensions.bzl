@@ -4,7 +4,6 @@ load(":repositories.bzl", "bis_rules_dependencies_hedron_compile_commands")
 def _non_module_deps_impl(module_ctx):
     remote = ""
     for mod in module_ctx.modules:
-        print(mod.tags)
         for remote in mod.tags.remote:
             remote = remote.remote
     if len(remote) > 0:

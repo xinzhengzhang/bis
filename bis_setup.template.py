@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import shutil
 import subprocess
 import json
 import types
@@ -27,23 +28,23 @@ def str2bool(v):
 
 
 def get_target_info(args):
-    Path(".bis/extractor").mkdir(parents=True, exist_ok=True)
-    with open('.bis/extractor/BUILD', 'w') as output_file:
-        template = f"""
-load("@bis//:extract_target_info.bzl", "extract_target_info")
-
-extract_target_info(
-  name = "extract_target",
-  target = "{args.target}",
-  tags = ["manual"],
-  testonly = True,
-
-)
-  """
-        output_file.write(template)
+    # Delete if .bis/extractor exists
+    if os.path.exists(".bis/extractor"):
+        shutil.rmtree(".bis/extractor")
+    with open('.bis/extract.cquery', 'w') as output_file:
+        output_file.write("""
+def format(target):
+    p = providers(target)
+    keys = [key for key in p.keys() if key.endswith('//apple:providers.bzl%AppleBundleInfo')]
+    if len(keys) == 1:
+        info = p.get(keys[0])
+        return json.encode(struct(minimum_os_version = info.minimum_os_version, is_apple_bundle = True))
+    else:
+        return json.encode(struct(is_apple_bundle = False))
+""")
     info_process = subprocess.run(
-        ["bazel", "run", "//.bis/extractor:extract_target",
-            "--check_visibility=false"],
+        ["bazel", "cquery", f'"{args.target}"',
+            "--output=starlark", "--starlark:file=.bis/extract.cquery"],
         capture_output=True,
         encoding=locale.getpreferredencoding(),
         check=False
@@ -53,6 +54,7 @@ extract_target_info(
     for line in info_process.stderr.splitlines():
         print(line, file=sys.stderr)
     try:
+        print(info_process.stdout)
         target_info = json.loads(info_process.stdout)
     except json.JSONDecodeError:
         print(
@@ -110,13 +112,13 @@ def create_bis_build(args, target_info):
 
 
     optionals = f'"--compilation_mode={args.compilation_mode} --cpu={args.cpu}"'
-    refresh_rule = "refresh_compile_commands_ios_cfg" if target_info[
-        "is_ios"] else "refresh_compile_commands"
-    minimum_os_version_string = f'minimum_os_version = "{target_info["minimum_os_version"]}",' if target_info["is_ios"] else ""
+    refresh_rule = "refresh_compile_commands_apple_bundle_cfg" if target_info[
+        "is_apple_bundle"] else "refresh_compile_commands"
+    minimum_os_version_string = f'minimum_os_version = "{target_info["minimum_os_version"]}",' if target_info["is_apple_bundle"] else ""
 
     template = f"""
 load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands")
-load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands_ios_cfg")
+load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands_apple_bundle_cfg")
 load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
 
 {refresh_rule}(

@@ -45,7 +45,7 @@ def _refresh_compile_commands_imp(ctx):
     ]
 
 
-_refresh_compile_commands_ios_cfg = rule(
+_refresh_compile_commands_apple_bundle_cfg = rule(
     implementation = _refresh_compile_commands_imp,
     cfg = transition_support.apple_rule_transition,
     attrs = {
@@ -73,7 +73,7 @@ _refresh_compile_commands_ios_cfg = rule(
     executable = True,
 )
 
-def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optionals = "", file_path = "", build_artifacts = False, minimum_os_version = "11.0", **kwargs):
+def refresh_compile_commands_apple_bundle_cfg(name, targets, pre_compile_targets, optionals = "", file_path = "", build_artifacts = False, minimum_os_version = "11.0", **kwargs):
     extractor_name = name + "_extractor"
 
     hedron_refresh_compile_commands(
@@ -82,7 +82,7 @@ def refresh_compile_commands_ios_cfg(name, targets, pre_compile_targets, optiona
         **kwargs
     )
 
-    _refresh_compile_commands_ios_cfg(
+    _refresh_compile_commands_apple_bundle_cfg(
         name = name,
         targets = pre_compile_targets,
         extractor = extractor_name,

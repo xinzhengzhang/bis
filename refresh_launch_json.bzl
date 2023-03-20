@@ -7,32 +7,52 @@ def _refresh_launch_json(ctx):
 
     target = ctx.attr.target
     pre_launch_task_name = ctx.attr.pre_launch_task_name
-    bundle_info = target[AppleBundleInfo]
-    program = "{}{}".format(bundle_info.bundle_name, bundle_info.bundle_extension)
 
-    # ios-debug cannot run .app so we need to convert it into executable in payload
-    if bundle_info.bundle_extension == ".app":
-        program = "Payload/{}.app".format(bundle_info.bundle_name)
+    if AppleBundleInfo in target:
+        bundle_info = target[AppleBundleInfo]
+        program = "{}{}".format(bundle_info.bundle_name, bundle_info.bundle_extension)
 
-    launch_items.append(struct(
-        name = "Launch",
-        type = "lldb",
-        request = "launch",
-        program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
-        iosBundleId = bundle_info.bundle_id,
-        iosTarget = "last-selected",
-        preLaunchTask = pre_launch_task_name,
-        sourceMap = {"./": "${workspaceFolder}"}
-    ))
-    launch_items.append(struct(
-        name = "Attach",
-        type = "lldb",
-        request = "attach",
-        program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
-        iosBundleId = bundle_info.bundle_id,
-        iosTarget = "last-selected",
-        sourceMap = {"./": "${workspaceFolder}"}
-    ))
+        # ios-debug cannot run .app so we need to convert it into executable in payload
+        if bundle_info.bundle_extension == ".app":
+            program = "Payload/{}.app".format(bundle_info.bundle_name)
+
+        launch_items.append(struct(
+            name = "Launch",
+            type = "lldb",
+            request = "launch",
+            program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
+            iosBundleId = bundle_info.bundle_id,
+            iosTarget = "last-selected",
+            preLaunchTask = pre_launch_task_name,
+            sourceMap = {"./": "${workspaceFolder}"}
+        ))
+        launch_items.append(struct(
+            name = "Attach",
+            type = "lldb",
+            request = "attach",
+            program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
+            iosBundleId = bundle_info.bundle_id,
+            iosTarget = "last-selected",
+            sourceMap = {"./": "${workspaceFolder}"}
+        ))
+    else:
+        # We should assert that if the files do not exist, we should not create a launch configuration. So just throw an exception
+        launch_items.append(struct(
+            name = "Launch",
+            type = "lldb",
+            request = "launch",
+            program = '${workspaceFolder}/'+ target.files.to_list()[0].path,
+            preLaunchTask = pre_launch_task_name,
+            sourceMap = {"./": "${workspaceFolder}"}
+        ))
+        launch_items.append(struct(
+            name = "Attach",
+            type = "lldb",
+            request = "attach",
+            program = '${workspaceFolder}/'+ target.files.to_list()[0].path,
+            sourceMap = {"./": "${workspaceFolder}"}
+        ))
+
     launch_configuration = struct(
         version = "2.0.0",
         configurations = launch_items
@@ -61,7 +81,6 @@ refresh_launch_json = rule(
     attrs = {
         "target": attr.label(
             mandatory = True,
-            providers = [AppleBundleInfo],
         ),
         "pre_launch_task_name": attr.string(
             default = "${config:bis.pre_launch_task_name}"

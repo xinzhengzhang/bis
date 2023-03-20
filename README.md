@@ -96,7 +96,7 @@ Create `compile_commands.json` into WORKSAPCE
 * optionals: to hedron_compile_commands
 * pre_compile_swift_module: should pre build swift module when refreshing `compile_commands.json`
 
-### refresh_compile_commands_ios_cfg
+### refresh_compile_commands_apple_bundle_cfg
 ---
 Exactly like `refresh_compile_commands`, except configured with ios cfg
 * minimum_os_version: the same attr with `ios_application`
@@ -104,11 +104,6 @@ Exactly like `refresh_compile_commands`, except configured with ios cfg
 ### refresh_launch_json
 ---
 Create `.vscode/launch.json` for vscode plugins
-* target: ios_application
-
-## extract_target_info
----
-Print output json of target attributes
 * target: ios_application
 
 ## Thanks to
