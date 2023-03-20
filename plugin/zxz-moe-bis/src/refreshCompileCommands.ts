@@ -156,11 +156,13 @@ class CustomBuildTaskTerminal {
                 this.process = this.runBazelProcess(
                     workspace.uri.fsPath,
                     [
+                        `${configuration.startupOptions}`,
                         "run",
                         "//.bis:refresh_compile_commands",
                         "--check_visibility=false",
                         `--compilation_mode=${compilationMode}`,
                         `--cpu=${cpu}`,
+                        `${configuration.buildOptions}`
                     ],
                     (success) => {
                         this.parsingFilePath = "";
