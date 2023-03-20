@@ -86,7 +86,7 @@ export async function inputBuildTarget() {
     let quickPickOptions: vscode.QuickPickOptions = {
         title: "Select build target",
         matchOnDescription: true,
-        placeHolder: "(ios_application|swift_binrary|cc_binary)",
+        placeHolder: "ios_application",
     };
 
     let choose = await vscode.window.showQuickPick(
