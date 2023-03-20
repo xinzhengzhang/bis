@@ -56,11 +56,11 @@ const configuration = {
                 .get<string>("query_kind_filter") ?? "(swift|objc|cc)_library"
         );
     },
-    get targetQueryKindFilter(): string {
+    get targetQueryKindFilter(): string|undefined {
         return (
             vscode.workspace
                 .getConfiguration("bis")
-                .get<string>("target_query_kind_filter") ?? "ios_application"
+                .get<string>("target_query_kind_filter")
         );
     },
     get autoRefreshDummyProjectForInjectionIII(): boolean {

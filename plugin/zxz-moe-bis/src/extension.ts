@@ -3,6 +3,7 @@
 import * as vscode from "vscode";
 import * as logger from "./logger";
 import * as picker from "./picker";
+import * as platformPicker from "./platformPicker";
 import * as inputer from "./inputer";
 import * as cpuProvider from "./cpuProvider";
 import * as launchGenerator from "./launchGenerator";
@@ -14,6 +15,7 @@ import {
     targetVariable,
     compilationModeVariable,
     cpuVariable,
+    platformVariable,
 } from "./variables";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
@@ -33,9 +35,10 @@ export function activate(context: vscode.ExtensionContext) {
     // Component
     targetVariable.active(context);
     compilationModeVariable.active(context);
+    platformVariable.active(context);
     picker.activate(context);
     inputer.activate(context);
-    
+    platformPicker.activate(context);
     // Commands get variable
     context.subscriptions.push(
         vscode.commands.registerCommand("zxz-moe-bis.cpu", cpuProvider.cpu)
@@ -54,7 +57,12 @@ export function activate(context: vscode.ExtensionContext) {
             inputer.buildTarget
         )
     );
-
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+            "zxz-moe-bis.selectPlatform",
+            platformPicker.select
+        )
+    );
     // Commands action
     WorkspaceService.setup(context);
     LibPathService.setup(context);
@@ -118,20 +126,21 @@ export function activate(context: vscode.ExtensionContext) {
     );
     context.subscriptions.push(
         vscode.commands.registerCommand(
-        "zxz-moe-bis.refreshTreeViewer", () => treeProvider.refresh())
+            "zxz-moe-bis.refreshTreeViewer", () => treeProvider.refresh())
     );
 
     // Auto generateLaunchJson
     combineLatest([
         targetVariable.subject.pipe(filter((x) => x !== undefined)),
         compilationModeVariable.subject,
+        platformVariable.subject,
         cpuVariable.subject.pipe(filter((x) => x !== undefined)),
     ])
         .pipe(distinctUntilChanged(isEqual))
         .pipe(skip(1))
-        .subscribe(([target, compilationMode, cpu]) => {
+        .subscribe(([target, compilationMode, platform, cpu]) => {
             logger.log(
-                `Diff detected target = ${target} compilationMode = ${compilationMode} cpu = ${cpu}`
+                `Diff detected target = ${target} compilationMode = ${compilationMode}, platform = ${platform}, cpu = ${cpu}`
             );
             if (configuration.autoGenerateLaunchJson) {
                 logger.log("Auto generate LaunchJson");
@@ -143,14 +152,14 @@ export function activate(context: vscode.ExtensionContext) {
                 logger.log("Auto refresh InjectionIII project");
                 vscode.commands.executeCommand(
                     "zxz-moe-bis.refreshDummyProjectForInjectionIII"
-                ); 
+                );
             }
             vscode.commands.executeCommand(
                 "zxz-moe-bis.refreshTreeViewer"
             );
         });
-    
-    isBisInstalled().then(()=>{
+
+    isBisInstalled().then(() => {
         touchBisBuild();
         // Try to get CPU info if bis installed
         cpuProvider.tryGetCpu();

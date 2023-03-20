@@ -1,7 +1,7 @@
-import { log } from "node:console";
+import * as process from "node:process";
 import * as vscode from "vscode";
 import configuration from "./configuration";
-import { cpuVariable } from "./variables";
+import { platformVariable, cpuVariable, PlatformTypes } from "./variables";
 
 export function tryGetCpu() {
     getCpuRepeatly();
@@ -14,15 +14,26 @@ async function getCpuRepeatly() {
 }
 
 export async function cpu() {
-    let sdk = await vscode.commands.executeCommand("ios-debug.targetSdk");
     let result = "";
-    if (sdk === "iphonesimulator") {
-        // Return empty string to bazel
-        // It will use the current cpu properties of the current platform
-        result = configuration.simulatorCpuString ?? "";
+    const platform = platformVariable.get() || PlatformTypes.ios;
+    if (platform === PlatformTypes.macos) {
+        const arch = process.arch;
+        if ('arm64' === arch) {
+            result = "darwin_arm64";
+        } else if ('x64' === arch) {
+            result = "darwin_x86_64";
+        }
     } else {
-        // Should not need support armv7?
-        result = "ios_arm64";
+        let sdk = await vscode.commands.executeCommand("ios-debug.targetSdk");
+
+        if (sdk === "iphonesimulator") {
+            // Return empty string to bazel
+            // It will use the current cpu properties of the current platform
+            result = configuration.simulatorCpuString ?? "";
+        } else {
+            // Should not need support armv7?
+            result = "ios_arm64";
+        }
     }
     cpuVariable.update(result);
     return result;
