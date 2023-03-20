@@ -46,9 +46,9 @@ If you insist on independent use, the following are simple ways to use it.
 ```sh
 cd examples
 # Extract for single file
-bazel run @bis//:setup -- --target //srcs/binary/ios_application:App --compilation_mode dbg --cpu 'ios_x86_64' --file_path srcs/module_a/a.m
+bazel run @bis//:setup -- --target //srcs/binary/ios_application:App --optional "--compilation_mode dbg --cpu 'ios_x86_64'" --file_path srcs/module_a/a.m
 # Extract for whole target
-bazel run @bis//:setup -- --target //srcs/binary/ios_application:App --compilation_mode dbg --cpu 'ios_x86_64'
+bazel run @bis//:setup -- --target //srcs/binary/ios_application:App --optional "--compilation_mode dbg --cpu 'ios_x86_64'"
 # Generate compile_commands.json
 bazel run //.bis:refresh_compile_commands --compilation_mode=dbg --cpu=ios_x86_64 --check_visibility=False
 # Build sub target
@@ -72,9 +72,8 @@ This step is done automatically by the plugin
 
     Arguments:
         -h, --help            show this help message and exit
-        --compilation_mode COMPILATION_MODE
-                                dbg or opt
-        --cpu CPU             ios_arm64
+        --optionals OPTIONALS
+                              --compilation_mode=dbg --cpu=ios_x86_6
         --target TARGET       target labels
         --file_path FILE_PATH
                                 source code path

@@ -131,10 +131,8 @@ class CustomBuildTaskTerminal {
                 "--",
                 "--target",
                 `${buildTarget}`,
-                "--compilation_mode",
-                `${compilationMode}`,
-                "--cpu",
-                `'${cpu}'`,
+                "--optionals",
+                `\"--compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}\"`,
                 "--file_path",
                 `${filePath}`
             ],

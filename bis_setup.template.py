@@ -111,7 +111,6 @@ def create_bis_build(args, target_info):
         print(f"End query", flush=True)
 
 
-    optionals = f'"--compilation_mode={args.compilation_mode} --cpu={args.cpu}"'
     refresh_rule = "refresh_compile_commands_apple_bundle_cfg" if target_info[
         "is_apple_bundle"] else "refresh_compile_commands"
     minimum_os_version_string = f'minimum_os_version = "{target_info["minimum_os_version"]}",' if target_info["is_apple_bundle"] else ""
@@ -129,7 +128,7 @@ load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
   pre_compile_targets = [
     {pre_compile_targets}
   ],
-  optionals = {optionals},
+  optionals = "{args.optionals}",
   file_path = "{args.file_path}",
   {minimum_os_version_string}
   tags = ["manual"],
@@ -152,9 +151,8 @@ refresh_launch_json(
 # main
 parser = argparse.ArgumentParser(description='Setup bis project')
 
-parser.add_argument('--compilation_mode', default='dbg',
-                    type=str, help='dbg or opt')
-parser.add_argument('--cpu', default='', type=str, help='ios_arm64')
+parser.add_argument('--optionals', default='',
+                    type=str, help='--compilation_mode=dbg --cpu=ios_x86_64')
 parser.add_argument('--target', required=True, type=str, help='target labels')
 parser.add_argument('--file_path', default='',
                     type=str, help='source code path')
