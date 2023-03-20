@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 import { Command, RunLoading, Service } from './services';
-
+import configuration from './configuration';
 const exec = promisify(cp.exec);
 
 async function showChooseLibsInputer(opt: { title: string, placeHolder: string, items: string[] }) {
@@ -38,11 +38,11 @@ export default class LibDepsService extends Service {
     @RunLoading()
     async computeLibDepsc(cwd: string, lib1: string, lib2: string) {
         try {
-            let { stdout: bazelOutput } = await exec('bazel info output_path', { cwd });
+            let { stdout: bazelOutput } = await exec(`${configuration.bazelExecutablePath} info output_path`, { cwd });
             if (!bazelOutput) { return; }
             bazelOutput = bazelOutput.trim();
             let output = `${bazelOutput}/deps-${new Date().getTime()}.svg`;
-            let cmd = `bazel query 'allpaths(${lib1}, ${lib2})' --noimplicit_deps --keep_going --output graph | dot -Tsvg > ${output}`;
+            let cmd = `${configuration.bazelExecutablePath} query 'allpaths(${lib1}, ${lib2})' --noimplicit_deps --keep_going --output graph | dot -Tsvg > ${output}`;
             await exec(cmd, { cwd });
             let webviewPanel = vscode.window.createWebviewPanel(
                 output,

@@ -4,6 +4,7 @@ import * as logger from "./logger";
 import { targetVariable } from "./variables";
 import { exec } from "child_process";
 import {
+    executeBazelCommands,
     WriteStream,
     WriteStreamType,
 } from "./utils";
@@ -34,11 +35,9 @@ function setupStatusBarInputer() {
 function execResult(folderString: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
         let result: string[] = [];
-        const process = exec(
-            `bazel query 'kind("${configuration.targetQueryKindFilter}", "//...")' --output=label`,
-            {
-                cwd: folderString,
-            },
+        const process = executeBazelCommands(
+            ["query", `'kind("${configuration.targetQueryKindFilter}", "//...")'`, "--output=label"],
+            folderString,
             (exception, stdout, stderr) => {
                 if (stdout) {
                     const splited = stdout.split(/\r?\n/);
