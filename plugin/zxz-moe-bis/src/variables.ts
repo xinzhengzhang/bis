@@ -15,7 +15,7 @@ class Variable<T> {
         this.subject.next(context.workspaceState.get(this.key));
     }
 
-    update(value: T) {
+    update(value: T | undefined) {
         this.context?.workspaceState.update(this.key, value);
         this.subject.next(value);
     }
@@ -28,12 +28,19 @@ class Variable<T> {
 const INPUTED_LABEL_STRING = "inputed_label_string";
 const SELECTED_COMPILATION_MODE_KEY = "selected_compilation_mode";
 const CPU_VARIABLE_KEY = "cpu_variable_key";
+const PLATFORM_VARIABLE_KEY = "platform_variable_key";
 
 export enum CompilationMode {
     dbg = "dbg",
     opt = "opt",
 }
 
+export enum PlatformTypes {
+    macos = "macOS",
+    ios = "iOS",
+}
+
 export const targetVariable = new Variable<string>(INPUTED_LABEL_STRING);
 export const compilationModeVariable= new Variable<CompilationMode>(SELECTED_COMPILATION_MODE_KEY);
 export const cpuVariable = new Variable<string>(CPU_VARIABLE_KEY);
+export const platformVariable = new Variable<PlatformTypes>(PLATFORM_VARIABLE_KEY);

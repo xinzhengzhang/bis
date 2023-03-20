@@ -1,14 +1,14 @@
 import exp = require("constants");
 import * as vscode from "vscode";
 import * as logger from "./logger";
-import { targetVariable } from "./variables";
-import { exec } from "child_process";
+import { PlatformTypes, platformVariable, targetVariable } from "./variables";
 import {
     executeBazelCommands,
     WriteStream,
     WriteStreamType,
 } from "./utils";
 import configuration from "./configuration";
+import { skip } from "rxjs";
 
 const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-/]*:[\\w-]+");
 
@@ -25,18 +25,30 @@ function setupStatusBarInputer() {
 
     if (target && target.match(LABEL_REGEX)) {
         _updateLabel(target);
-        statusBarTargetInputer.text = target;
     } else {
-        statusBarTargetInputer.text = "No target specified";
+        _updateLabel(undefined);
     }
     statusBarTargetInputer.show();
 }
 
-function execResult(folderString: string): Promise<string[]> {
+function execResult(platform: PlatformTypes, folderString: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
         let result: string[] = [];
+        let kindFilter;
+        if (platform === PlatformTypes.ios) {
+            kindFilter = "ios_application";
+        } else if (platform === PlatformTypes.macos){
+            kindFilter = "macos_application|macos_command_line_application|cc_test";
+        } else {
+            reject("Unsupported yet");
+            return;
+        }
+        const configFilter = configuration.targetQueryKindFilter;
+        if (configFilter && kindFilter.indexOf(configFilter) === -1) {
+            kindFilter += "|" + configFilter;
+        }
         const process = executeBazelCommands(
-            ["query", `'kind("${configuration.targetQueryKindFilter}", "//...")'`, "--output=label"],
+            ["query", `'kind("${kindFilter}", "//...")'`, "--output=label"],
             folderString,
             (exception, stdout, stderr) => {
                 if (stdout) {
@@ -61,7 +73,7 @@ function execResult(folderString: string): Promise<string[]> {
     });
 }
 
-async function getAlliOSApplicationLabels() {
+async function getPlatformCompatibleLabels(platform: PlatformTypes) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders?.length) {
         return [];
@@ -72,7 +84,7 @@ async function getAlliOSApplicationLabels() {
         for (const workspaceFolder of workspaceFolders) {
             const folderString = workspaceFolder.uri.fsPath;
             try {
-                const r = await execResult(folderString);
+                const r = await execResult(platform, folderString);
                 result.push(...r);
             } catch (error) {
                 logger.error(error);
@@ -83,14 +95,15 @@ async function getAlliOSApplicationLabels() {
 }
 
 export async function inputBuildTarget() {
+    const platform =  platformVariable.get() || PlatformTypes.ios;
     let quickPickOptions: vscode.QuickPickOptions = {
         title: "Select build target",
         matchOnDescription: true,
-        placeHolder: "ios_application",
+        placeHolder: "Choose your target for platform " + platform,
     };
 
     let choose = await vscode.window.showQuickPick(
-        getAlliOSApplicationLabels(),
+        getPlatformCompatibleLabels(platform),
         quickPickOptions
     );
 
@@ -136,6 +149,12 @@ export function activate(c: vscode.ExtensionContext) {
         0
     );
     setupStatusBarInputer();
+    const sub = platformVariable.subject.pipe(skip(1)).subscribe((p) => {
+        _updateLabel(undefined);
+    });
+    context.subscriptions.push({
+        dispose: sub.unsubscribe
+    });
 }
 
 async function _getOrInputLabel() {
@@ -146,7 +165,11 @@ async function _getOrInputLabel() {
     return labelString;
 }
 
-async function _updateLabel(labelString: string) {
+async function _updateLabel(labelString: string|undefined) {
     targetVariable.update(labelString);
-    statusBarTargetInputer.text = labelString;
+    if (labelString) {
+        statusBarTargetInputer.text = `$(target) ${labelString}`;
+    } else {
+        statusBarTargetInputer.text = "No target specified";
+    }
 }

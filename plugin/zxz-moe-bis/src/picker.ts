@@ -16,9 +16,8 @@ function setupStatusBarPicker() {
 
     if (compilationMode && compilationMode in CompilationMode) {
         _updateCompilationMode(compilationMode);
-        statusBarCompilationModePicker.text = compilationMode;
     } else {
-        statusBarCompilationModePicker.text = CompilationMode.dbg;
+        _updateCompilationMode(CompilationMode.dbg);
     }
     statusBarCompilationModePicker.show();
 }
@@ -67,5 +66,5 @@ async function _getOrPickCompilationMode() {
 // Storage
 async function _updateCompilationMode(compilationMode: string) {
     compilationModeVariable.update(compilationMode as CompilationMode);
-    statusBarCompilationModePicker.text = compilationMode;
+    statusBarCompilationModePicker.text = `$(gear) ${compilationMode}`;
 }
