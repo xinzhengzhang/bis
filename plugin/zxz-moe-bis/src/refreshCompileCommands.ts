@@ -146,7 +146,7 @@ class CustomBuildTaskTerminal {
                 logger.log(`Starting refresh...\r\n${filePath}\r\n`);
                 const shouldCleanCompileCommands =
                     (getCompileCommandsSize(workspace) ??
-                        Number.MAX_SAFE_INTEGER) <
+                        Number.MAX_SAFE_INTEGER) >
                     configuration.compileCommandsRollingSize;
                 if (shouldCleanCompileCommands) {
                     deleteCompileCommandsSize(workspace);
