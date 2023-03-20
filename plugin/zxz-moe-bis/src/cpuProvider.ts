@@ -1,3 +1,4 @@
+import { log } from "node:console";
 import * as vscode from "vscode";
 import configuration from "./configuration";
 import { cpuVariable } from "./variables";

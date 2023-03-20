@@ -10,9 +10,9 @@ export async function generate() {
     const buildTarget = await inputer.buildTarget();
     const compilationMode = (await picker.compilationMode()) ?? "dbg";
     const cpu = await cpuProvider.cpu();
-
-    let executionCommands = `bazel run @bis//:setup -- --target ${buildTarget} --compilation_mode ${compilationMode} --cpu "${cpu}" --ignore_parsing_targets True`;
-    executionCommands += `;bazel run //.bis:refresh_launch_json --check_visibility=false --compilation_mode=${compilationMode} --cpu="${cpu}"`;
+    
+    let executionCommands = `${configuration.bazelExecutablePath} run @bis//:setup -- --target ${buildTarget} --compilation_mode ${compilationMode} --cpu "${cpu}" --ignore_parsing_targets True`;
+    executionCommands += `;${configuration.bazelExecutablePath} run //.bis:refresh_launch_json --check_visibility=false --compilation_mode=${compilationMode} --cpu="${cpu}"`;
     const task = new vscode.Task(
         { type: buildType },
         vscode.TaskScope.Workspace,

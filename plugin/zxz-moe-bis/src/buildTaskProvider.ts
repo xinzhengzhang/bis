@@ -57,9 +57,14 @@ export class BuildTaskProvider implements vscode.TaskProvider {
 
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
-            const command = `bazel ${configuration.startupOptions} build ${buildTarget} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && bazel ${configuration.startupOptions} cquery ${buildTarget} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"  | xargs -I{} cat bazel-bin/{}`;
+            const cpuOpts = `--cpu=${cpu}`;
+            var buildOpts = configuration.buildOptions;
+            if (buildOpts.search("--cpu=") <= 0) {
+                buildOpts += " " + cpuOpts;
+            }
+            const command = `${configuration.bazelExecutablePath} ${configuration.startupOptions} build ${buildTarget} --compilation_mode=${compilationMode} ${buildOpts} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && bazel ${configuration.startupOptions} cquery ${buildTarget} --compilation_mode=${compilationMode} ${buildOpts} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"  | xargs -I{} cat bazel-bin/{}`;
             const process = exec(
-                 command,
+                command,
                 {
                     cwd: folderString,
                 },
@@ -97,12 +102,12 @@ export class BuildTaskProvider implements vscode.TaskProvider {
 
     private createTask(
         target: string,
-        labelIdentifier: string|undefined,
+        labelIdentifier: string | undefined,
         compilationMode: string,
         cpu: string,
         source: string
     ) {
-        let executionCommands = `bazel ${configuration.startupOptions} build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
+        let executionCommands = `${configuration.bazelExecutablePath} ${configuration.startupOptions} build ${target} --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}`;
         if (labelIdentifier) {
             executionCommands += ` --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="${labelIdentifier}"`;
         }

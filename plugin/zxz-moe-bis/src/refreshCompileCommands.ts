@@ -5,7 +5,7 @@ import * as cpuProvider from "./cpuProvider";
 import * as path from "path";
 import * as logger from "./logger";
 import configuration from "./configuration";
-import { isBisWorkspace, getCompileCommandsSize, WriteStream, WriteStreamType, deleteCompileCommandsSize } from "./utils";
+import { isBisWorkspace, getCompileCommandsSize, WriteStream, WriteStreamType, deleteCompileCommandsSize, executeBazelCommands } from "./utils";
 import { showIfError } from "./error";
 import { ChildProcess, execFile } from "child_process";
 import * as readline from "readline";
@@ -184,7 +184,8 @@ class CustomBuildTaskTerminal {
         cmd: string[],
         callback: (success: boolean) => void
     ): ChildProcess {
-        let process = execFile("bazel", cmd, { cwd: cwd }, (exception) => {
+        
+        let process = executeBazelCommands(cmd, cwd, (exception) => {
             callback(exception ? false : true);
             showIfError(Number(exception?.code));
         });

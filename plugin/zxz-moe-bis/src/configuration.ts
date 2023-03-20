@@ -70,6 +70,17 @@ const configuration = {
                 .get<boolean>("auto_refresh_dummy_project_for_InjectionIII") ?? true
         );
     },
+    /**
+     * Gets the path to the Bazel executable specified by the workspace
+     * configuration, if present.
+     */
+    get bazelExecutablePath(): string {
+        const bazelExecutable = vscode.workspace.getConfiguration("bis").get<string>("bazel_executable") ?? '';
+        if (bazelExecutable.length === 0) {
+            return "bazel";
+        }
+        return bazelExecutable;
+    }
 };
 
 export default configuration;
