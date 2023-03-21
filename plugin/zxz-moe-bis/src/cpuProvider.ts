@@ -3,17 +3,17 @@ import * as vscode from "vscode";
 import configuration from "./configuration";
 import { platformVariable, cpuVariable, PlatformTypes } from "./variables";
 
-export function tryGetCpu() {
-    getCpuRepeatly();
-}
+// export function tryGetCpu() {
+//     getCpuRepeatly();
+// }
 
-async function getCpuRepeatly() {
-    setTimeout(() => {
-        cpu().then(getCpuRepeatly);
-    }, 1000);
-}
+// async function getCpuRepeatly() {
+//     setTimeout(() => {
+//         cpu().then(getCpuRepeatly);
+//     }, 1000);
+// }
 
-export async function cpu() {
+export function updateCpu(iosTargetSdk: string|undefined) {
     let result = "";
     const platform = platformVariable.get() || PlatformTypes.ios;
     if (platform === PlatformTypes.macos) {
@@ -24,7 +24,7 @@ export async function cpu() {
             result = "darwin_x86_64";
         }
     } else {
-        let sdk = await vscode.commands.executeCommand("ios-debug.targetSdk");
+        let sdk = iosTargetSdk;
 
         if (sdk === "iphonesimulator") {
             // Return empty string to bazel
@@ -37,4 +37,8 @@ export async function cpu() {
     }
     cpuVariable.update(result);
     return result;
+}
+
+export async function cpu() {
+    return cpuVariable.get();
 }

@@ -25,6 +25,12 @@ import LibPathService from "./libpath";
 import WorkspaceService from './workspace';
 import { TreeProvider } from "./treeProvider";
 
+import * as targetPicker from "vscode-ios-debug/src/targetPicker";
+import * as targetCommand from "vscode-ios-debug/src/targetCommand";
+import * as debugConfigProvider from "vscode-ios-debug/src/debugConfigProvider";
+import * as debugLifecycleManager from "vscode-ios-debug/src/debugLifecycleManager";
+import * as iosDebugLogger from "vscode-ios-debug/src/logger";
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -33,12 +39,23 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "zxz-moe-bis" is now active!');
 
     // Component
+    // UI
+    iosDebugLogger.activate();
     targetVariable.active(context);
     compilationModeVariable.active(context);
     platformVariable.active(context);
     picker.activate(context);
     inputer.activate(context);
     platformPicker.activate(context);
+    // TODO: @Yrom change status bar commands in targetPicker
+    targetPicker.activate(context);
+
+    targetCommand.activate(context);
+
+    // Debugger
+    debugConfigProvider.activate(context);
+    debugLifecycleManager.activate(context);
+
     // Commands get variable
     context.subscriptions.push(
         vscode.commands.registerCommand("zxz-moe-bis.cpu", cpuProvider.cpu)
@@ -63,6 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
             platformPicker.select
         )
     );
+
     // Commands action
     WorkspaceService.setup(context);
     LibPathService.setup(context);
@@ -106,6 +124,24 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand(
+            "zxz-moe-bis.targetSdk",
+            async () => {
+                return targetPicker.targetSdk().then((targetSdk) => {
+                    cpuProvider.updateCpu(targetSdk);
+                });
+            }
+        )
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
+            'zxz-moe-bis.pickTarget',
+            targetPicker.pickTarget)
+    );
+
+    // Task Provider
+    context.subscriptions.push(
         vscode.tasks.registerTaskProvider(
             BuildTaskProvider.scriptType,
             new BuildTaskProvider()
@@ -127,6 +163,11 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand(
             "zxz-moe-bis.refreshTreeViewer", () => treeProvider.refresh())
+    );
+
+    // Debugger
+    context.subscriptions.push(
+        vscode.debug.registerDebugConfigurationProvider('lldb', new debugConfigProvider.DebugConfigurationProvider())
     );
 
     // Auto generateLaunchJson
@@ -162,7 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
     isBisInstalled().then(() => {
         touchBisBuild();
         // Try to get CPU info if bis installed
-        cpuProvider.tryGetCpu();
+        // cpuProvider.tryGetCpu();
     }).catch(error => {
         vscode.window.showInformationMessage("Bis rule not detected");
         logger.log("If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line");
