@@ -258,6 +258,7 @@
   "dependencies": {
     "lodash": "^4.17.21",
     "rxjs": "^7.8.0",
-    "vscode-ios-debug": "github:nisargjhaveri/vscode-ios-debug"
+    "vscode-ios-debug": "github:nisargjhaveri/vscode-ios-debug",
+    "ios-deploy": "github:ios-control/ios-deploy#main"
   }
 }
