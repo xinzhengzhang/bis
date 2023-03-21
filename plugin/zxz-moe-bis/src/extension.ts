@@ -137,7 +137,12 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand(
             'zxz-moe-bis.pickTarget',
-            targetPicker.pickTarget)
+            async () => {
+                return targetPicker.pickTarget().then((target) => {
+                    cpuProvider.updateCpu(target?.sdk);
+                });
+            }
+        )
     );
 
     // Task Provider
