@@ -14,7 +14,6 @@ let context: vscode.ExtensionContext;
 let statusBarTargetInputer: vscode.StatusBarItem;
 
 // Status bar
-
 function setupStatusBarInputer() {
     statusBarTargetInputer.command = "zxz-moe-bis.inputBuildTarget";
     statusBarTargetInputer.tooltip = "Input build target for debugging";
@@ -46,7 +45,7 @@ function execResult(sdk: string, folderString: string): Promise<string[]> {
             kindFilter += "|" + configFilter;
         }
         const process = executeBazelCommands(
-            ["query", `'kind("${kindFilter}", "//...")'`, "--output=label"],
+            ["query", `'kind("${kindFilter}", "//...")'`, "--output=label_kind"],
             folderString,
             (exception, stdout, stderr) => {
                 if (stdout) {
@@ -93,7 +92,7 @@ async function getDeviceSDKCompatibleLabels(sdk: string) {
 }
 
 export async function inputBuildTarget() {
-    const sdk = deviceVariable.get()?.sdk || "iphoneos";
+    const sdk = deviceVariable.get()?.sdk || "iphonesimulator";
     let quickPickOptions: vscode.QuickPickOptions = {
         title: "Select build target",
         matchOnDescription: true,
@@ -101,15 +100,34 @@ export async function inputBuildTarget() {
     };
 
     let choose = await vscode.window.showQuickPick(
-        getDeviceSDKCompatibleLabels(sdk),
+        getDeviceSDKCompatibleLabels(sdk)
+            .then<vscode.QuickPickItem[]>((labels): vscode.QuickPickItem[] => {
+                return labels.map((label) => {
+                    const matches = label.match("(.*) rule (.*)");
+                    let rule = "";
+                    let target = "";
+                    let kind = vscode.QuickPickItemKind.Separator;
+                    if (matches) {
+                        kind = vscode.QuickPickItemKind.Default;
+                        rule = matches[1];
+                        target = matches[2];
+                    }
+                    return {
+                        label: target,
+                        kind: kind,
+                        description: matches ? `(${rule})` : undefined,
+                    };
+
+                });
+            }),
         quickPickOptions
     );
 
     if (choose) {
-        await _updateLabel(choose);
+        await _updateLabel(choose.label);
 
         logger.log("Choose label: ", choose);
-        return choose;
+        return choose.label;
     } else {
         let options: vscode.InputBoxOptions = {
             title: "Input label of target",
