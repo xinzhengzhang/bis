@@ -11,3 +11,11 @@ cc_test(
         ":module_c",
     ],
 )
+
+cc_binary(
+    name = "module_c_binary",
+    srcs = ["module_c_test.cc"],
+    deps = [
+        ":module_c",
+    ],
+)

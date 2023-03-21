@@ -1,2 +1,4 @@
 build --enable_bzlmod
 query --enable_bzlmod
+
+build --spawn_strategy=local

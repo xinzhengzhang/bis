@@ -5,7 +5,13 @@ import srcs_module_a_module_a
 struct iOSApp: App {
     var body: some Scene {
         WindowGroup {
-            Text(foo())
+            VStack {
+                Text(foo())
+                Button("click me") {
+                    print("clicked")
+                }
+            }
+
         }
     }
 }
