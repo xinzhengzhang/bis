@@ -117,7 +117,7 @@
             "type": "boolean",
             "markdownDescription": "Refresh bis-dummy.xcodeproj and ~/Library/Developer/Xcode/DerivedData/bis-dummy-log/Logs/Build/ automaticaly when configuration changed",
             "order": 11,
-            "default": true
+            "default": false
           },
           "bis.bazel_executable": {
             "type": "string",
