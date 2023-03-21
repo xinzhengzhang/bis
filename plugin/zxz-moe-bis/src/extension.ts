@@ -26,7 +26,7 @@ import WorkspaceService from './workspace';
 import { TreeProvider } from "./treeProvider";
 
 import * as targetCommand from "vscode-ios-debug/src/targetCommand";
-import * as debugConfigProvider from "vscode-ios-debug/src/debugConfigProvider";
+import * as debugConfigProvider from "./debugConfigProvider";
 import * as debugLifecycleManager from "vscode-ios-debug/src/debugLifecycleManager";
 import * as iosDebugLogger from "vscode-ios-debug/src/logger";
 
