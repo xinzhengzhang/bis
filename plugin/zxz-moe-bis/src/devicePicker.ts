@@ -32,6 +32,24 @@ export function lastSelected(): Promise<Target | undefined> {
     return Promise.resolve(selected);
 }
 
+export async function getTargetFromUDID(udid: string) {
+    const selected = deviceVariable.get();
+    if (selected && selected.udid === udid) {
+        return selected;
+    }
+    let device = (await listAllDevices()).find((t: Target) => t.udid === udid);
+   
+    if (device && device.udid) {
+        _update(device);
+    }
+    logger.log(`Got target for udid: ${udid}`, device);
+
+    return device;
+}
+export async function listAllDevices(): Promise<Array<Target>>{
+    return [await _localDevice(), ...await iosTargets.listTargets()];
+}
+
 export async function selectDevice(): Promise<Target | undefined> {
 
     let quickPickItems = await vscode.window.withProgress({
@@ -75,11 +93,15 @@ export async function selectDevice(): Promise<Target | undefined> {
 
     logger.log("Picked target", target);
 
-    deviceVariable.update(target);
-    _updateIndiator(target);
+    _update(target);
     return target;
 
 }
+function _update(target: Target | undefined) {
+    deviceVariable.update(target);
+    _updateIndiator(target);
+}
+
 function _updateIndiator(target: Target | undefined) {
     if (target && target.sdk === "macosx") {
         devicePickerStatusBarIndiator.text = `$(device-desktop) ${(target as Device).modelName}`;
