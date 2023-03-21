@@ -176,7 +176,6 @@
     "test": "node ./out/test/runTest.js"
   },
   "extensionDependencies": [
-    "nisargjhaveri.ios-debug",
     "sswg.swift-lang"
   ],
   "devDependencies": {
@@ -196,6 +195,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "vscode-ios-debug": "github:nisargjhaveri/vscode-ios-debug"
   }
 }
