@@ -1,18 +1,7 @@
 import * as process from "node:process";
-import * as vscode from "vscode";
 import { Target } from "vscode-ios-debug/src/commonTypes";
 import configuration from "./configuration";
-import { deviceVariable, cpuVariable } from "./variables";
-
-// export function tryGetCpu() {
-//     getCpuRepeatly();
-// }
-
-// async function getCpuRepeatly() {
-//     setTimeout(() => {
-//         cpu().then(getCpuRepeatly);
-//     }, 1000);
-// }
+import { cpuVariable } from "./variables";
 
 export function updateCpu(device: Target | undefined) {
     let result = "";
@@ -37,6 +26,6 @@ export function updateCpu(device: Target | undefined) {
     return result;
 }
 
-export async function cpu() {
+export function cpu() {
     return cpuVariable.get();
 }

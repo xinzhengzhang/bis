@@ -45,8 +45,8 @@ export function activate(context: vscode.ExtensionContext) {
     deviceVariable.active(context);
     cpuVariable.active(context);
     picker.activate(context);
-    inputer.activate(context);
     devicePicker.activate(context);
+    inputer.activate(context);
     targetCommand.activate(context);
 
     // Debugger
@@ -130,7 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
             "zxz-moe-bis.targetSdk",
             () => {
                 const target = deviceVariable.get();
-                return cpuProvider.updateCpu(target);
+                return target?.sdk ?? "iphonesimulator";
             }
         )
     );

@@ -19,8 +19,8 @@ export async function refreshInjectionIIIProject() {
 
     const buildTarget = await inputer.buildTarget();
     const compilationMode = (await picker.compilationMode()) ?? "dbg";
-    const cpu = await cpuProvider.cpu();
     const targetSdk: string | undefined = (await devicePicker.lastSelected())?.sdk;
+    const cpu = cpuProvider.cpu();
 
     vscode.workspace.workspaceFolders?.forEach(async (value) => {
         if (isBisWorkspace(value)) {

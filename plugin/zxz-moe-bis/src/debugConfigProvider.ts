@@ -12,7 +12,6 @@ import { getTargetFromUDID, lastSelected, selectDevice } from './devicePicker';
 
 let context: vscode.ExtensionContext;
 
-//TODO: support local device
 const lldbPlatform: { [T in TargetType]: string } = {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "Simulator": "ios-simulator",
@@ -52,23 +51,29 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     async resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, dbgConfig: vscode.DebugConfiguration, token: vscode.CancellationToken) {
+        if (!dbgConfig.iosTarget) {
+            // assume: running 'program' in local device
+            dbgConfig.internalConsoleOptions = "openOnSessionStart";
+            dbgConfig.console = "internalConsole";
+            dbgConfig.waitFor = true;
+        } else {
+            // runing on remote device: iphone device or simulator
+            let target: Target | undefined = await this.getTarget(dbgConfig.iosTarget);
+            if (!target) { return null; }
+
+            dbgConfig.iosTarget = target;
+
+            dbgConfig.iosRequest = dbgConfig.request;
+            dbgConfig.request = target.type === "Simulator" ? "attach" : dbgConfig.request;
+            dbgConfig.request = target.type === "Device" ? "launch" : dbgConfig.request;
+
+            dbgConfig.initCommands = (dbgConfig.initCommands instanceof Array) ? dbgConfig.initCommands : [];
+
+            dbgConfig.initCommands.unshift(`command script import '${context.asAbsolutePath("lldb/logs.py")}'`);
+            dbgConfig.initCommands.unshift(`command script import '${context.asAbsolutePath("lldb/simulator_focus.py")}'`);
+            dbgConfig.initCommands.unshift(`platform select ${lldbPlatform[target.type]}`);
+        }
         logger.log("resolveDebugConfiguration", dbgConfig);
-
-        if (!dbgConfig.iosTarget) { return dbgConfig; }
-
-        let target: Target | undefined = await this.getTarget(dbgConfig.iosTarget);
-        if (!target) { return null; }
-
-        dbgConfig.iosTarget = target;
-
-        dbgConfig.iosRequest = dbgConfig.request;
-        dbgConfig.request = target.type === "Simulator" ? "attach" : dbgConfig.request;
-        dbgConfig.request = target.type === "Device" ? "launch" : dbgConfig.request;
-
-        dbgConfig.initCommands = (dbgConfig.initCommands instanceof Array) ? dbgConfig.initCommands : [];
-        dbgConfig.initCommands.unshift(`command script import '${context.asAbsolutePath("lldb/logs.py")}'`);
-        dbgConfig.initCommands.unshift(`command script import '${context.asAbsolutePath("lldb/simulator_focus.py")}'`);
-        dbgConfig.initCommands.unshift(`platform select ${lldbPlatform[target.type]}`);
 
         return dbgConfig;
     }
@@ -76,10 +81,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     async resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, dbgConfig: vscode.DebugConfiguration, token: vscode.CancellationToken) {
         logger.log("resolveDebugConfigurationWithSubstitutedVariables", dbgConfig);
 
-        if (!dbgConfig.iosTarget) { return dbgConfig; }
 
         if (dbgConfig.sessionName) {
             dbgConfig.name = dbgConfig.sessionName;
+        }
+        if (!dbgConfig.iosTarget) {
+            // no additional config for local debugging process
+            return dbgConfig;
         }
 
         // Enable OS_ACTIVITY_DT_MODE by default unless disabled for both Simulator and Device

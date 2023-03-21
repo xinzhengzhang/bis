@@ -73,7 +73,8 @@
             "type": "string",
             "markdownDescription": "Pre launch task name before build",
             "order": 4,
-            "default": "bis.build: build"
+            "default": "bis.build: build",
+            "scope": "window"
           },
           "bis.startup_options": {
             "type": "string",
