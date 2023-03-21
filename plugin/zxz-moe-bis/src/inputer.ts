@@ -1,14 +1,12 @@
-import exp = require("constants");
 import * as vscode from "vscode";
 import * as logger from "./logger";
-import { PlatformTypes, platformVariable, targetVariable } from "./variables";
+import { deviceVariable, targetVariable } from "./variables";
 import {
     executeBazelCommands,
     WriteStream,
     WriteStreamType,
 } from "./utils";
 import configuration from "./configuration";
-import { skip } from "rxjs";
 
 const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-/]*:[\\w-]+");
 
@@ -31,13 +29,13 @@ function setupStatusBarInputer() {
     statusBarTargetInputer.show();
 }
 
-function execResult(platform: PlatformTypes, folderString: string): Promise<string[]> {
+function execResult(sdk: string, folderString: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
         let result: string[] = [];
         let kindFilter;
-        if (platform === PlatformTypes.ios) {
+        if (sdk === "iphoneos" || sdk === "iphonesimulator") {
             kindFilter = "ios_application";
-        } else if (platform === PlatformTypes.macos){
+        } else if (sdk === "macosx") {
             kindFilter = "macos_application|macos_command_line_application|cc_test";
         } else {
             reject("Unsupported yet");
@@ -73,7 +71,7 @@ function execResult(platform: PlatformTypes, folderString: string): Promise<stri
     });
 }
 
-async function getPlatformCompatibleLabels(platform: PlatformTypes) {
+async function getDeviceSDKCompatibleLabels(sdk: string) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders?.length) {
         return [];
@@ -84,7 +82,7 @@ async function getPlatformCompatibleLabels(platform: PlatformTypes) {
         for (const workspaceFolder of workspaceFolders) {
             const folderString = workspaceFolder.uri.fsPath;
             try {
-                const r = await execResult(platform, folderString);
+                const r = await execResult(sdk, folderString);
                 result.push(...r);
             } catch (error) {
                 logger.error(error);
@@ -95,15 +93,15 @@ async function getPlatformCompatibleLabels(platform: PlatformTypes) {
 }
 
 export async function inputBuildTarget() {
-    const platform =  platformVariable.get() || PlatformTypes.ios;
+    const sdk = deviceVariable.get()?.sdk || "iphoneos";
     let quickPickOptions: vscode.QuickPickOptions = {
         title: "Select build target",
         matchOnDescription: true,
-        placeHolder: "Choose your target for platform " + platform,
+        placeHolder: "Choose your target for sdk: " + sdk,
     };
 
     let choose = await vscode.window.showQuickPick(
-        getPlatformCompatibleLabels(platform),
+        getDeviceSDKCompatibleLabels(sdk),
         quickPickOptions
     );
 
@@ -149,12 +147,6 @@ export function activate(c: vscode.ExtensionContext) {
         0
     );
     setupStatusBarInputer();
-    const sub = platformVariable.subject.pipe(skip(1)).subscribe((p) => {
-        _updateLabel(undefined);
-    });
-    context.subscriptions.push({
-        dispose: sub.unsubscribe
-    });
 }
 
 async function _getOrInputLabel() {
@@ -165,7 +157,7 @@ async function _getOrInputLabel() {
     return labelString;
 }
 
-async function _updateLabel(labelString: string|undefined) {
+async function _updateLabel(labelString: string | undefined) {
     targetVariable.update(labelString);
     if (labelString) {
         statusBarTargetInputer.text = `$(target) ${labelString}`;

@@ -3,7 +3,7 @@
 import * as vscode from "vscode";
 import * as logger from "./logger";
 import * as picker from "./picker";
-import * as platformPicker from "./platformPicker";
+import * as devicePicker from "./devicePicker";
 import * as inputer from "./inputer";
 import * as cpuProvider from "./cpuProvider";
 import * as launchGenerator from "./launchGenerator";
@@ -15,7 +15,7 @@ import {
     targetVariable,
     compilationModeVariable,
     cpuVariable,
-    platformVariable,
+    deviceVariable,
 } from "./variables";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
@@ -25,7 +25,6 @@ import LibPathService from "./libpath";
 import WorkspaceService from './workspace';
 import { TreeProvider } from "./treeProvider";
 
-import * as targetPicker from "vscode-ios-debug/src/targetPicker";
 import * as targetCommand from "vscode-ios-debug/src/targetCommand";
 import * as debugConfigProvider from "vscode-ios-debug/src/debugConfigProvider";
 import * as debugLifecycleManager from "vscode-ios-debug/src/debugLifecycleManager";
@@ -43,18 +42,21 @@ export function activate(context: vscode.ExtensionContext) {
     iosDebugLogger.activate();
     targetVariable.active(context);
     compilationModeVariable.active(context);
-    platformVariable.active(context);
+    deviceVariable.active(context);
+    cpuVariable.active(context);
     picker.activate(context);
     inputer.activate(context);
-    platformPicker.activate(context);
-    // TODO: @Yrom change status bar commands in targetPicker
-    targetPicker.activate(context);
-
+    devicePicker.activate(context);
     targetCommand.activate(context);
 
     // Debugger
     debugConfigProvider.activate(context);
     debugLifecycleManager.activate(context);
+
+    deviceVariable.subscribe((d) => {
+        // refresh cpu
+        cpuProvider.updateCpu(d);
+    });
 
     // Commands get variable
     context.subscriptions.push(
@@ -76,8 +78,8 @@ export function activate(context: vscode.ExtensionContext) {
     );
     context.subscriptions.push(
         vscode.commands.registerCommand(
-            "zxz-moe-bis.selectPlatform",
-            platformPicker.select
+            "zxz-moe-bis.selectDevice",
+            devicePicker.selectDevice
         )
     );
 
@@ -126,21 +128,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand(
             "zxz-moe-bis.targetSdk",
-            async () => {
-                return targetPicker.targetSdk().then((targetSdk) => {
-                    cpuProvider.updateCpu(targetSdk);
-                });
-            }
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand(
-            'zxz-moe-bis.pickTarget',
-            async () => {
-                return targetPicker.pickTarget().then((target) => {
-                    cpuProvider.updateCpu(target?.sdk);
-                });
+            () => {
+                const target = deviceVariable.get();
+                return cpuProvider.updateCpu(target);
             }
         )
     );
@@ -177,16 +167,18 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Auto generateLaunchJson
     combineLatest([
-        targetVariable.subject.pipe(filter((x) => x !== undefined)),
-        compilationModeVariable.subject,
-        platformVariable.subject,
-        cpuVariable.subject.pipe(filter((x) => x !== undefined)),
+        targetVariable.asObservable().pipe(filter((x) => x !== undefined)),
+        compilationModeVariable.asObservable(),
+        cpuVariable.asObservable().pipe(filter((x) => x !== undefined)),
     ])
         .pipe(distinctUntilChanged(isEqual))
         .pipe(skip(1))
-        .subscribe(([target, compilationMode, platform, cpu]) => {
+        .subscribe(([target, compilationMode, cpu]) => {
             logger.log(
-                `Diff detected target = ${target} compilationMode = ${compilationMode}, platform = ${platform}, cpu = ${cpu}`
+                `Diff detected target = ${target},\n
+                 compilationMode = ${compilationMode},\n
+                 device = ${deviceVariable.get()}\n
+                 cpu = ${cpu}`
             );
             if (configuration.autoGenerateLaunchJson) {
                 logger.log("Auto generate LaunchJson");
@@ -207,8 +199,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     isBisInstalled().then(() => {
         touchBisBuild();
-        // Try to get CPU info if bis installed
-        // cpuProvider.tryGetCpu();
     }).catch(error => {
         vscode.window.showInformationMessage("Bis rule not detected");
         logger.log("If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line");
