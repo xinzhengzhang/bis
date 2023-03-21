@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as picker from "./picker";
 import * as inputer from "./inputer";
 import * as cpuProvider from "./cpuProvider";
+import * as devicePicker from "./devicePicker";
 import * as logger from "./logger";
 import * as zlib from "node:zlib";
 import * as fs from "fs";
@@ -19,7 +20,7 @@ export async function refreshInjectionIIIProject() {
     const buildTarget = await inputer.buildTarget();
     const compilationMode = (await picker.compilationMode()) ?? "dbg";
     const cpu = await cpuProvider.cpu();
-    const targetSdk: string = await vscode.commands.executeCommand("ios-debug.targetSdk");
+    const targetSdk: string | undefined = (await devicePicker.lastSelected())?.sdk;
 
     vscode.workspace.workspaceFolders?.forEach(async (value) => {
         if (isBisWorkspace(value)) {

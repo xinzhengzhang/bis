@@ -97,9 +97,32 @@ export class WriteStream extends Transform {
 
 export function executeBazelCommands(args?: ReadonlyArray<string> | null, workspace?: string | undefined, callback?: (error: ExecFileException | null, stdout: string, stderr: string) => void): ChildProcess {
     const bazelExe = configuration.bazelExecutablePath;
-    return execFile(bazelExe, args, { shell: true, cwd : workspace}, (error, stdout, stderr) => {
+    return execFile(bazelExe, args, { shell: true, cwd: workspace }, (error, stdout, stderr) => {
         if (callback) {
             callback(error, stdout, stderr);
         }
     });
+}
+
+export async function macOSVersions() {
+    let { stdout: props } = await promisify(exec)("sw_vers");
+    logger.log("sw_vers: ", props);
+    let productName = "";
+    let productVersion = "";
+    let buildVersion = "";
+    for (const prop of (props.trim().split('\n'))) {
+        let [k, v] = prop.split(":");
+        if (k === "ProductName") {
+            productName = v.trim();
+        } else if (k === "ProductVersion") {
+            productVersion = v.trim();
+        } else if (k === "BuildVersion") {
+            buildVersion = v.trim();
+        }
+    }
+    return {
+        "name": productName,
+        "version": productVersion,
+        "buildVersion": buildVersion,
+    };
 }
