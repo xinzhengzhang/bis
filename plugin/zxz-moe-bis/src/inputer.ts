@@ -35,7 +35,7 @@ function execResult(sdk: string, folderString: string): Promise<string[]> {
         if (sdk === "iphoneos" || sdk === "iphonesimulator") {
             kindFilter = "ios_application";
         } else if (sdk === "macosx") {
-            kindFilter = "macos_application|macos_command_line_application|cc_test";
+            kindFilter = "macos_application|macos_command_line_application|cc_binary|swift_binary|apple_universal_binary|cc_test";
         } else {
             reject("Unsupported yet");
             return;

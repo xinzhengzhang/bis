@@ -19,7 +19,7 @@ import {
 } from "./variables";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
-import { isBisInstalled, touchBisBuild } from "./utils";
+import { deleteCompileCommandsFile, isBisInstalled, touchBisBuild } from "./utils";
 import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
 import WorkspaceService from './workspace';
@@ -195,6 +195,10 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand(
                 "zxz-moe-bis.refreshTreeViewer"
             );
+
+            vscode.workspace.workspaceFolders?.forEach((folder) => {
+                deleteCompileCommandsFile(folder);
+            });
         });
 
     isBisInstalled().then(() => {

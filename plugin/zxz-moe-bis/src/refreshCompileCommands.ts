@@ -5,7 +5,7 @@ import * as cpuProvider from "./cpuProvider";
 import * as path from "path";
 import * as logger from "./logger";
 import configuration from "./configuration";
-import { isBisWorkspace, getCompileCommandsSize, WriteStream, WriteStreamType, deleteCompileCommandsSize, executeBazelCommands } from "./utils";
+import { isBisWorkspace, getCompileCommandsSize, WriteStream, WriteStreamType, deleteCompileCommandsFile, executeBazelCommands } from "./utils";
 import { showIfError } from "./error";
 import { ChildProcess, execFile } from "child_process";
 import * as readline from "readline";
@@ -149,7 +149,7 @@ class CustomBuildTaskTerminal {
                         Number.MAX_SAFE_INTEGER) >
                     configuration.compileCommandsRollingSize;
                 if (shouldCleanCompileCommands) {
-                    deleteCompileCommandsSize(workspace);
+                    deleteCompileCommandsFile(workspace);
                 }
                 this.process = this.runBazelProcess(
                     workspace.uri.fsPath,

@@ -32,7 +32,7 @@ export function getCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
     return fs.statSync(path).size;
 }
 
-export function deleteCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
+export function deleteCompileCommandsFile(workspace: vscode.WorkspaceFolder) {
     let path = workspace.uri.fsPath + "/compile_commands.json";
     if (fs.existsSync(path)) {
         fs.unlinkSync(path);
