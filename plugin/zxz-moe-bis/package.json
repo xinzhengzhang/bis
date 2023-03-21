@@ -161,11 +161,72 @@
           "name": "Bis Build Targets"
         }
       ]
-    }
+    },
+    "debuggers": [
+      {
+        "type": "lldb",
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+							"iosTarget": {
+								"description": "Target ios. Specify target UDID or `true` to select target.",
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"enum": [
+											false,
+											"select",
+											"last-selected"
+										]
+									}
+								]
+							},
+							"iosBundleId": {
+								"description": "Bundle ID of the app to debug",
+								"type": "string"
+							},
+							"sessionName": {
+								"description": "Update the debug session name to easily identify multiple running sessions",
+								"type": "string"
+							}
+						}
+          },
+          "attach": {
+						"properties": {
+							"iosTarget": {
+								"description": "Target ios. Specify target UDID or `true` to select target.",
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"enum": [
+											false,
+											"select",
+											"last-selected"
+										]
+									}
+								]
+							},
+							"iosBundleId": {
+								"description": "Bundle ID of the app to debug",
+								"type": "string"
+							},
+							"sessionName": {
+								"description": "Update the debug session name to easily identify multiple running sessions",
+								"type": "string"
+							}
+						}
+					}
+        }
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --external:ios-deploy/package.json --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "test-compile": "tsc -p ./",
@@ -176,7 +237,8 @@
     "test": "node ./out/test/runTest.js"
   },
   "extensionDependencies": [
-    "sswg.swift-lang"
+    "sswg.swift-lang",
+    "vadimcn.vscode-lldb"
   ],
   "devDependencies": {
     "@types/glob": "^8.0.0",
