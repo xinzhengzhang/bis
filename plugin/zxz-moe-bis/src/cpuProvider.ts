@@ -1,7 +1,8 @@
+import * as vscode from "vscode";
 import * as process from "node:process";
 import { Target } from "vscode-ios-debug/src/commonTypes";
 import configuration from "./configuration";
-import { cpuVariable } from "./variables";
+import { cpuVariable, deviceVariable } from "./variables";
 
 export function updateCpu(device: Target | undefined) {
     let result = "";
@@ -24,6 +25,10 @@ export function updateCpu(device: Target | undefined) {
     }
     cpuVariable.update(result);
     return result;
+}
+
+export function activate(c: vscode.ExtensionContext) {
+    updateCpu(deviceVariable.get());
 }
 
 export function cpu() {

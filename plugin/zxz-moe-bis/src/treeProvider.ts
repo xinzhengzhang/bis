@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { BuildTaskProvider } from "./buildTaskProvider";
+import { targetVariable, deviceVariable } from "./variables";
 
 export interface ITreeItem {
   getLabel(): string;
@@ -116,31 +117,11 @@ export class TreeProvider
   constructor(private context: vscode.ExtensionContext) {
     this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
 
-    const buildWatcher = vscode.workspace.createFileSystemWatcher(
-      "**/{BUILD,BUILD.bazel}",
-      false,
-      false,
-      false,
-    );
-    buildWatcher.onDidChange(
-      this.onBuildFilesChanged,
-      this,
-      context.subscriptions,
-    );
-    buildWatcher.onDidCreate(
-      this.onBuildFilesChanged,
-      this,
-      context.subscriptions,
-    );
-    buildWatcher.onDidDelete(
-      this.onBuildFilesChanged,
-      this,
-      context.subscriptions,
-    );
-
     vscode.workspace.onDidChangeWorkspaceFolders(this.refresh, this);
 
-    this.updateWorkspaceFolderTreeItems();
+    if (targetVariable.get() && deviceVariable.get()) {
+      this.updateWorkspaceFolderTreeItems();
+    }
   }
 
   public getChildren(element?: ITreeItem): Thenable<ITreeItem[]> {

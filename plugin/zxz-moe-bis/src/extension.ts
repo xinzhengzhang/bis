@@ -17,6 +17,7 @@ import {
     cpuVariable,
     deviceVariable,
 } from "./variables";
+import * as eventEmitter from "./eventEmitter";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
 import { deleteCompileCommandsFile, isBisInstalled, touchBisBuild } from "./utils";
@@ -48,15 +49,12 @@ export function activate(context: vscode.ExtensionContext) {
     devicePicker.activate(context);
     inputer.activate(context);
     targetCommand.activate(context);
+    cpuProvider.activate(context);
+    eventEmitter.activate(context);
 
     // Debugger
     debugConfigProvider.activate(context);
     debugLifecycleManager.activate(context);
-
-    deviceVariable.subscribe((d) => {
-        // refresh cpu
-        cpuProvider.updateCpu(d);
-    });
 
     // Commands get variable
     context.subscriptions.push(
@@ -165,7 +163,22 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.debug.registerDebugConfigurationProvider('lldb', new debugConfigProvider.DebugConfigurationProvider())
     );
 
-    // Auto generateLaunchJson
+    // Rx
+    deviceVariable.asObservable()
+    .pipe(distinctUntilChanged(isEqual))
+    .pipe(skip(1))
+    .subscribe((d) => {
+        cpuProvider.updateCpu(d);
+        vscode.commands.executeCommand("zxz-moe-bis.inputBuildTarget");
+    });
+
+    eventEmitter.buildFileChangedEmitter
+        .subscribe((file) => {
+            treeProvider.refresh();
+            vscode.workspace.workspaceFolders?.forEach((folder) => {
+                deleteCompileCommandsFile(folder);
+            });
+        });
     combineLatest([
         targetVariable.asObservable().pipe(filter((x) => x !== undefined)),
         compilationModeVariable.asObservable(),
