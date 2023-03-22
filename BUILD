@@ -1,5 +1,5 @@
 load("//:template_generator.bzl", "template_generator")
-exports_files(["runner.template.py", "json.template.py", "bis_setup.template.py"])
+exports_files(["json.template.py", "bis_setup.template.py"])
 
 
 py_binary(

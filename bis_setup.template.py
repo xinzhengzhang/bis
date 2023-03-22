@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
-import shutil
-import subprocess
 import json
-import types
 import locale
 import os
+import subprocess
 import sys
-import re
+import types
 
 from pathlib import Path
 
@@ -27,78 +25,9 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
-def get_target_info(args):
-    # Delete if .bis/extractor exists
-    if os.path.exists(".bis/extractor"):
-        shutil.rmtree(".bis/extractor")
-    with open('.bis/extract.cquery', 'w') as output_file:
-        output_file.write("""
-def format(target):
-    p = providers(target)
-    keys = [key for key in p.keys() if key.endswith('//apple:providers.bzl%AppleBundleInfo')]
-    if len(keys) == 1:
-        info = p.get(keys[0])
-        return json.encode(struct(minimum_os_version = info.minimum_os_version, is_apple_bundle = True, platform_type = info.platform_type))
-    keys = [key for key in p.keys() if key.endswith('//apple:providers.bzl%AppleBinaryInfo')]
-    if len(keys) == 1:
-        info = p.get(keys[0])
-        if info.infoplist:
-            str = info.infoplist.path
-            min_index = str.find("min")
-            if min_index != -1:
-                # Extract the substring starting from the index of "min" + 3 (to skip "min")
-                start_index = min_index + 3
-                end_index = start_index
-
-                # Find the index of the next non-digit character
-                for end_index in range(end_index, len(str)):
-                    if not (str[end_index].isdigit() or str[end_index] == '.'):
-                        break
-
-                version = str[start_index:end_index]
-            else:
-                version = None
-            start_index = str.find("bazel-out/")
-            if start_index != -1:
-                # Find the index of the next "-" after "bazel-out/"
-                end_index = str.find("-", start_index + len("bazel-out/"))
-
-                if end_index != -1:
-                    # Extract the substring between "bazel-out/" and the next "-" character
-                    target_str = str[start_index+10:end_index]
-                else:
-                    target_str = None
-            else:
-                target_str = None
-
-            if version and target_str:
-                return json.encode(struct(minimum_os_version = version, is_apple_bundle = True, platform_type = target_str))
-    return json.encode(struct(is_apple_bundle = False))
-""")
-    info_process = subprocess.run(
-        ["bazel", "cquery", f'"{args.target}"',
-            "--output=starlark", "--starlark:file=.bis/extract.cquery"],
-        capture_output=True,
-        encoding=locale.getpreferredencoding(),
-        check=False
-    )
-
-    # Get target info
-    for line in info_process.stderr.splitlines():
-        print(line, file=sys.stderr)
-    try:
-        print(info_process.stdout)
-        target_info = json.loads(info_process.stdout)
-    except json.JSONDecodeError:
-        print(
-            "Bazel action failed. Command: //.bis/extractor:extract_target", file=sys.stderr)
-    print("Complete parsing target information", flush=True)
-    return target_info
-
-
-def create_bis_build(args, target_info):
-    targets = f'"{args.target}"'
-    pre_compile_targets = targets
+def create_bis_build(args):
+    target = f'"{args.target}"'
+    outputs_group_str = ""
 
     if not args.ignore_parsing_targets:
         target_stetment = f'deps({args.target})'
@@ -135,42 +64,41 @@ def create_bis_build(args, target_info):
                 aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
             if not hasattr(parsed_aquery_output, 'targets'):
                 os._exit(ERR_NO_TARGET_FOUND)
-            # Compiling up to 3 targets should suffice
-            pre_compile_targets = ', '.join(
-                [f'"{target.label}"' for target in parsed_aquery_output.targets])
-            pattern = r'(@[^~]+)~[\d.]+(//:.+)'
-            pre_compile_targets = re.sub(pattern, r'\1\2', pre_compile_targets)
+
+            def label_transfer(label):
+                result = [label]
+                if label.startswith('@@'):
+                    pass
+                elif label.startswith('//'):
+                    # Compatibility for old Bazel
+                    result.append(label.replace('//','@//', 1))
+                    result.append(label.replace('//', '@@//', 1))
+                elif label.startswith('@//'):
+                    # Compatibility for old Bazel
+                    result.append(label.replace('@//', '@@//', 1))
+                elif label.startswith('@'):
+                    result.append(label.replace('@', '@@', 1))
+                return result
+
+            flat_targets = [target for target in parsed_aquery_output.targets for target in label_transfer(target.label)]
+            outputs_group_str = ','.join(
+                [f"bis all index dependents {target}" for target in flat_targets])
 
         except json.JSONDecodeError:
             print("Bazel aquery failed. Command:",
                   aquery_args, file=sys.stderr)
         print(f"End query", flush=True)
 
-
-    refresh_rule = "refresh_compile_commands_apple_bundle_cfg" if target_info[
-        "is_apple_bundle"] else "refresh_compile_commands"
-    minimum_os_version_string = f'minimum_os_version = "{target_info["minimum_os_version"]}",' if 'minimum_os_version' in target_info else ""
-    platform_type = f'platform_type = "{target_info["platform_type"]}",' if 'platform_type' in target_info else ""
-
     template = f"""
 load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands")
-load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands_apple_bundle_cfg")
 load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
-
-{refresh_rule}(
+refresh_compile_commands(
   name = "refresh_compile_commands",
   targets = [
-    {targets}
-  ],
-  pre_compile_targets = [
-    {pre_compile_targets}
+    {target}
   ],
   optionals = "{args.optionals}",
-  file_path = "{args.file_path}",
-  {minimum_os_version_string}
-  {platform_type}
   tags = ["manual"],
-  testonly = True,
 )
 
 refresh_launch_json(
@@ -184,6 +112,18 @@ refresh_launch_json(
     Path(".bis").mkdir(parents=True, exist_ok=True)
     with open('.bis/BUILD', 'w') as output_file:
         output_file.write(template)
+
+    if not args.ignore_parsing_targets:
+        cmd = f'bazel build {target} {args.optionals} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="{outputs_group_str}"'
+        
+        print(f"Start build command = {cmd}", flush=True)
+        process = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
+        print(f"End build", flush=True)
+    
+        cmd = f"bazel run //.bis:refresh_compile_commands -- --file={args.file_path}"
+        print(f"Start refresh_compile_commands command = {cmd}", flush=True)
+        pricess = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
+        print(f"End refresh_compile_commands", flush=True)
 
 
 # main
@@ -201,5 +141,4 @@ args = parser.parse_args()
 
 os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
 
-target_info = get_target_info(args)
-create_bis_build(args, target_info)
+create_bis_build(args)

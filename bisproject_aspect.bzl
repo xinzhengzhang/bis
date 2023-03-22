@@ -32,7 +32,7 @@ def _bis_aspect_impl(target, ctx):
 
     is_swift = SwiftInfo in target
     if is_swift:
-        direct_index_dependents = [direct_index_dependent for direct_index_dependent in target[DefaultInfo].files.to_list() if direct_index_dependent.extension in ["h", "swiftmodule"]]
+        direct_index_dependents = [depset([direct_index_dependent for direct_index_dependent in target[DefaultInfo].files.to_list() if direct_index_dependent.extension in ["h", "swiftmodule"]])]
 
     transitive_infos = _transitive_infos(ctx = ctx)
     infos = [info for attr, info in transitive_infos]
@@ -40,7 +40,11 @@ def _bis_aspect_impl(target, ctx):
     transitive_index_dependents = depset(direct_index_dependents, transitive = [info.transitive_index_dependents for info in infos])
     transitive_outputs = depset(direct_outputs, transitive = [info.transitive_outputs for info in infos])
 
+    direct_all_index_dependents = [("bis all index dependents {}".format(target.label), transitive_index_dependents)]
+    transitive_all_index_dependents = depset(direct_all_index_dependents, transitive = [info.transitive_all_index_dependents for info in infos])
+
     output_groups = {k: v for k, v in transitive_outputs.to_list()}
+    output_groups.update({k: depset([], transitive = v.to_list()).to_list() for k, v in transitive_all_index_dependents.to_list()})
 
     artifacts_labels_file = ctx.actions.declare_file("{}_bis_artifacts_labels.txt".format(target.label.name))
     ctx.actions.write(artifacts_labels_file, '\n'.join(list(output_groups.keys())))
@@ -51,7 +55,9 @@ def _bis_aspect_impl(target, ctx):
             direct_index_dependents = direct_index_dependents,
             transitive_index_dependents = transitive_index_dependents,
             direct_outputs = direct_outputs,
-            transitive_outputs = transitive_outputs
+            transitive_outputs = transitive_outputs,
+            direct_all_index_dependents = direct_all_index_dependents,
+            transitive_all_index_dependents = transitive_all_index_dependents,
         ),
         OutputGroupInfo(**output_groups),
     ]
