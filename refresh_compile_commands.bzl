@@ -19,7 +19,6 @@ def _refresh_compile_commands_imp(ctx):
     extractor_sources = extractor[PyInfo].transitive_sources.to_list()
     if len(extractor_sources) != 1:
         fail("extractor should only have one main py file")
-
     extractor_source_name = extractor_sources[0].short_path
 
     output = ctx.actions.declare_file("{}-runner.py".format(ctx.attr.name))
@@ -73,7 +72,7 @@ _refresh_compile_commands_apple_bundle_cfg = rule(
     executable = True,
 )
 
-def refresh_compile_commands_apple_bundle_cfg(name, targets, pre_compile_targets, optionals = "", file_path = "", build_artifacts = False, minimum_os_version = "11.0", **kwargs):
+def refresh_compile_commands_apple_bundle_cfg(name, targets, pre_compile_targets, optionals = "", file_path = "", build_artifacts = False, minimum_os_version = "11.0", platform_type = "ios", **kwargs):
     extractor_name = name + "_extractor"
 
     hedron_refresh_compile_commands(
@@ -88,6 +87,7 @@ def refresh_compile_commands_apple_bundle_cfg(name, targets, pre_compile_targets
         extractor = extractor_name,
         build_artifacts = build_artifacts,
         minimum_os_version = minimum_os_version,
+        platform_type = platform_type,
         filter_file_path = file_path,
         testonly = True,
     )

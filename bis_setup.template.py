@@ -38,9 +38,42 @@ def format(target):
     keys = [key for key in p.keys() if key.endswith('//apple:providers.bzl%AppleBundleInfo')]
     if len(keys) == 1:
         info = p.get(keys[0])
-        return json.encode(struct(minimum_os_version = info.minimum_os_version, is_apple_bundle = True))
-    else:
-        return json.encode(struct(is_apple_bundle = False))
+        return json.encode(struct(minimum_os_version = info.minimum_os_version, is_apple_bundle = True, platform_type = info.platform_type))
+    keys = [key for key in p.keys() if key.endswith('//apple:providers.bzl%AppleBinaryInfo')]
+    if len(keys) == 1:
+        info = p.get(keys[0])
+        if info.infoplist:
+            str = info.infoplist.path
+            min_index = str.find("min")
+            if min_index != -1:
+                # Extract the substring starting from the index of "min" + 3 (to skip "min")
+                start_index = min_index + 3
+                end_index = start_index
+
+                # Find the index of the next non-digit character
+                for end_index in range(end_index, len(str)):
+                    if not (str[end_index].isdigit() or str[end_index] == '.'):
+                        break
+
+                version = str[start_index:end_index]
+            else:
+                version = None
+            start_index = str.find("bazel-out/")
+            if start_index != -1:
+                # Find the index of the next "-" after "bazel-out/"
+                end_index = str.find("-", start_index + len("bazel-out/"))
+
+                if end_index != -1:
+                    # Extract the substring between "bazel-out/" and the next "-" character
+                    target_str = str[start_index+10:end_index]
+                else:
+                    target_str = None
+            else:
+                target_str = None
+
+            if version and target_str:
+                return json.encode(struct(minimum_os_version = version, is_apple_bundle = True, platform_type = target_str))
+    return json.encode(struct(is_apple_bundle = False))
 """)
     info_process = subprocess.run(
         ["bazel", "cquery", f'"{args.target}"',
@@ -113,7 +146,8 @@ def create_bis_build(args, target_info):
 
     refresh_rule = "refresh_compile_commands_apple_bundle_cfg" if target_info[
         "is_apple_bundle"] else "refresh_compile_commands"
-    minimum_os_version_string = f'minimum_os_version = "{target_info["minimum_os_version"]}",' if target_info["is_apple_bundle"] else ""
+    minimum_os_version_string = f'minimum_os_version = "{target_info["minimum_os_version"]}",' if 'minimum_os_version' in target_info else ""
+    platform_type = f'platform_type = "{target_info["platform_type"]}",' if 'platform_type' in target_info else ""
 
     template = f"""
 load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands")
@@ -131,6 +165,7 @@ load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
   optionals = "{args.optionals}",
   file_path = "{args.file_path}",
   {minimum_os_version_string}
+  {platform_type}
   tags = ["manual"],
   testonly = True,
 )

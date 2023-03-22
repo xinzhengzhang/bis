@@ -32,6 +32,12 @@ export function onDidChangeActiveTextEditorMaker() {
                     // Is there a more elegant way?
                     // cpp extension:... https://github.com/llvm/llvm-project/blob/b9f3b7f89a4cb4cf541b7116d9389c73690f78fa/clang/lib/Driver/Types.cpp#L293
                     const supportExt = [".h", ".swift", ".m", ".mm", ".c", ".cc", ".cpp", ".cxx", ".c++", ".C", ".CC", ".CPP", ".CXX", ".C++"];
+                    const resetCtxFileName = ["BUILD", "BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel", "MODULE.bazel"];
+
+                    if (!relative.startsWith("../") && resetCtxFileName.includes(path.basename(relative))) {
+                        context.terminal.reset();
+                    }
+
                     if (
                         !relative.startsWith("../") &&
                         supportExt.includes(path.extname(relative))
@@ -99,6 +105,12 @@ class CustomBuildTaskTerminal {
     private process?: ChildProcess;
     private currentFilePath = "";
     private parsingFilePath = "";
+
+    reset() {
+        this.currentFilePath = "";
+        this.parsingFilePath = "";
+        this.process?.kill();
+    }
 
     async doTask(
         buildTarget: string | undefined,
