@@ -1,14 +1,14 @@
 cc_library(
-    name = "module_c",
-    srcs = ["module_c.cc"],
-    hdrs = ["module_c.h"],
+    name = "main",
+    srcs = ["module_c_test.cc"],
+    implementation_deps = [
+        "//srcs/shared/module_c:module_c"
+    ],
 )
-
 cc_test(
     name = "module_c_test",
-    srcs = ["module_c_test.cc"],
     deps = [
-        ":module_c",
+        ":main",
     ],
 )
 
@@ -16,6 +16,6 @@ cc_binary(
     name = "module_c_binary",
     srcs = ["module_c_test.cc"],
     deps = [
-        ":module_c",
+        ":main",
     ],
 )

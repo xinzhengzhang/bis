@@ -1,4 +1,4 @@
 build --enable_bzlmod
 query --enable_bzlmod
 
-build --features=oso_prefix_is_pwd
+build --experimental_cc_implementation_deps

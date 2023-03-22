@@ -1,5 +1,5 @@
 import SwiftUI
-import srcs_module_a_module_a
+import srcs_shared_module_a_module_a
 
 @main
 struct iOSApp: App {

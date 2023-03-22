@@ -10,7 +10,7 @@ objc_library(
         "include/a.h",
     ],
     copts = [
-        "-iquote srcs/module_a/sub_module_b",
+        "-iquote srcs/shared/module_a/sub_module_b",
     ],
     includes = ["include"],
     visibility = ["//visibility:public"],
