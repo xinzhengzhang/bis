@@ -9,6 +9,6 @@ swift_binary(
         "main.swift",
     ],
     deps = [
-        "//srcs/module_c:module_c"
+        "//srcs/module_a:module_a"
     ]
 )

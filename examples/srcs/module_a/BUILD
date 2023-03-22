@@ -1,3 +1,4 @@
+package(default_visibility = ["//visibility:public"])
 objc_library(
     name = "module_a",
     srcs = [
