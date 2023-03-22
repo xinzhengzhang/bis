@@ -1,8 +1,13 @@
+package(default_visibility = ["//visibility:public"])
 load("@build_bazel_rules_swift//swift:swift.bzl", "swift_binary")
 
 swift_binary(
     name = "bin",
     srcs = [
-        "main.swift",
+        "entrance.swift",
     ],
+    deps = [
+        "//srcs/shared/module_b:module_b",
+        "@swift_argument_parser//:ArgumentParser"
+    ]
 )
