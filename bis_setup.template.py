@@ -137,7 +137,10 @@ def create_bis_build(args, target_info):
                 os._exit(ERR_NO_TARGET_FOUND)
             # Compiling up to 3 targets should suffice
             pre_compile_targets = ', '.join(
-                [f'"{target.label}"' for target in parsed_aquery_output.targets[:3]])
+                [f'"{target.label}"' for target in parsed_aquery_output.targets])
+            pattern = r'(@[^~]+)~[\d.]+(//:.+)'
+            pre_compile_targets = re.sub(pattern, r'\1\2', pre_compile_targets)
+
         except json.JSONDecodeError:
             print("Bazel aquery failed. Command:",
                   aquery_args, file=sys.stderr)
