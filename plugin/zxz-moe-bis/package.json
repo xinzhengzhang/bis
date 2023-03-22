@@ -86,7 +86,7 @@
             "type": "string",
             "markdownDescription": "Build options append on bazel build commands",
             "order": 6,
-            "default": ""
+            "default": "--features=oso_prefix_is_pwd"
           },
           "bis.query_kind_filter": {
             "type": "string",
