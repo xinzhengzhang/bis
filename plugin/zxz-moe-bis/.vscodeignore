@@ -10,3 +10,6 @@ vsc-extension-quickstart.md
 **/*.ts
 out/**
 node_modules/**
+# Bundle some files from ios-deploy
+!node_modules/ios-deploy/build/Release/ios-deploy
+!node_modules/ios-deploy/package.json
