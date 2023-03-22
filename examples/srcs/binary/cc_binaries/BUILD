@@ -14,7 +14,6 @@ cc_test(
 
 cc_binary(
     name = "module_c_binary",
-    srcs = ["module_c_test.cc"],
     deps = [
         ":main",
     ],

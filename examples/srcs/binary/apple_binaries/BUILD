@@ -3,7 +3,7 @@ load(
 )
 apple_universal_binary(
     name = "universal_binary",
-    binary = "//srcs/swift_binaries:bin",
+    binary = "//srcs/binary/swift_binaries:bin",
     forced_cpus = ["x86_64", "arm64"],
     minimum_os_version = "11.0",
     platform_type = "macos",

@@ -33,7 +33,7 @@ macos_application(
     name = "HelloWorld",
     bundle_id = "com.example.hello-world",
     infoplists = [":Info.plist"],
-    minimum_os_version = "10.15",
+    minimum_os_version = "11.0",
     version = ":HelloWorldVersion",
     deps = [":Sources"],
 )
