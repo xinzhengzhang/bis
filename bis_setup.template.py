@@ -63,6 +63,7 @@ def create_bis_build(args):
             parsed_aquery_output = json.loads(
                 aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
             if not hasattr(parsed_aquery_output, 'targets'):
+                print("No target found", file=sys.stderr)
                 os._exit(ERR_NO_TARGET_FOUND)
 
             def label_transfer(label):
@@ -112,7 +113,6 @@ refresh_launch_json(
     Path(".bis").mkdir(parents=True, exist_ok=True)
     with open('.bis/BUILD', 'w') as output_file:
         output_file.write(template)
-
     if not args.ignore_parsing_targets:
         cmd = f'bazel build {target} {args.optionals} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="{outputs_group_str}"'
         
@@ -120,7 +120,9 @@ refresh_launch_json(
         process = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
         print(f"End build", flush=True)
     
-        cmd = f"bazel run //.bis:refresh_compile_commands -- --file={args.file_path}"
+        cmd = "bazel run //.bis:refresh_compile_commands"
+        if len(args.file_path) > 0:
+            cmd += f" -- --file={args.file_path}"
         print(f"Start refresh_compile_commands command = {cmd}", flush=True)
         pricess = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
         print(f"End refresh_compile_commands", flush=True)
