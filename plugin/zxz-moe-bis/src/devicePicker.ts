@@ -10,12 +10,13 @@ interface TargetDeviceQuickPickItem extends vscode.QuickPickItem {
     target: Target;
 }
 
-
 let devicePickerStatusBarIndiator: vscode.StatusBarItem;
 
 export function activate(c: vscode.ExtensionContext) {
-
-    devicePickerStatusBarIndiator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
+    devicePickerStatusBarIndiator = vscode.window.createStatusBarItem(
+        vscode.StatusBarAlignment.Left,
+        0
+    );
     devicePickerStatusBarIndiator.command = "zxz-moe-bis.selectDevice";
     devicePickerStatusBarIndiator.tooltip = "Select target device";
     _updateIndiator(deviceVariable.get());
@@ -28,7 +29,7 @@ export function lastSelected(): Promise<Target | undefined> {
     const selected = deviceVariable.get();
     if (!selected) {
         return selectDevice();
-    };
+    }
     return Promise.resolve(selected);
 }
 
@@ -38,7 +39,7 @@ export async function getTargetFromUDID(udid: string) {
         return selected;
     }
     let device = (await listAllDevices()).find((t: Target) => t.udid === udid);
-   
+
     if (device && device.udid) {
         _update(device);
     }
@@ -46,56 +47,66 @@ export async function getTargetFromUDID(udid: string) {
 
     return device;
 }
-export async function listAllDevices(): Promise<Array<Target>>{
-    return [await _localDevice(), ...await iosTargets.listTargets()];
+export async function listAllDevices(): Promise<Array<Target>> {
+    return [await _localDevice(), ...(await iosTargets.listTargets())];
 }
 
 export async function selectDevice(): Promise<Target | undefined> {
-
-    let quickPickItems = await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: "Loading devices...",
-        cancellable: false
-    }, async (progress) => {
-        progress.report({ message: "loading..." });
-        return [await _localDevice(), ...await iosTargets.listTargets()]
-            .sort((a, b) => {
-                if (a.type !== b.type) {
-                    return a.type.localeCompare(b.type);
-                }
-                if (a.type === "Simulator") {
-                    const simA = a as Simulator;
-                    const simB = b as Simulator;
-                    if (simA.state !== simB.state) {
-                        return simA.state === "Booted" ? -1 : simB.state === "Booted" ? 1 : 0;
+    let quickPickItems = await vscode.window.withProgress(
+        {
+            location: vscode.ProgressLocation.Notification,
+            title: "Loading devices...",
+            cancellable: false,
+        },
+        async (progress) => {
+            progress.report({ message: "loading..." });
+            return [await _localDevice(), ...(await iosTargets.listTargets())]
+                .sort((a, b) => {
+                    if (a.type !== b.type) {
+                        return a.type.localeCompare(b.type);
                     }
-                }
-                return a.name.localeCompare(b.name);
-            })
-            .map((t): TargetDeviceQuickPickItem => ({
-                label: t.name,
-                description:
-                    (t.type === "Simulator") ?
-                        (t as Simulator).state === "Booted" ? "Booted" : "" :
-                        (t as Device).modelName,
-                detail: `${t.type} ‧ ${t.runtime}`,
-                target: t,
-            }));
-
-    });
+                    if (a.type === "Simulator") {
+                        const simA = a as Simulator;
+                        const simB = b as Simulator;
+                        if (simA.state !== simB.state) {
+                            return simA.state === "Booted"
+                                ? -1
+                                : simB.state === "Booted"
+                                ? 1
+                                : 0;
+                        }
+                    }
+                    return a.name.localeCompare(b.name);
+                })
+                .map(
+                    (t): TargetDeviceQuickPickItem => ({
+                        label: t.name,
+                        description:
+                            t.type === "Simulator"
+                                ? (t as Simulator).state === "Booted"
+                                    ? "Booted"
+                                    : ""
+                                : (t as Device).modelName,
+                        detail: `${t.type} ‧ ${t.runtime}`,
+                        target: t,
+                    })
+                );
+        }
+    );
 
     let quickPickOptions: vscode.QuickPickOptions = {
         title: "Select device Target:",
         matchOnDescription: true,
     };
 
-    let target = (await vscode.window.showQuickPick(quickPickItems, quickPickOptions))?.target;
+    let target = (
+        await vscode.window.showQuickPick(quickPickItems, quickPickOptions)
+    )?.target;
 
     logger.log("Picked target", target);
 
     _update(target);
     return target;
-
 }
 function _update(target: Target | undefined) {
     deviceVariable.update(target);
@@ -104,7 +115,9 @@ function _update(target: Target | undefined) {
 
 function _updateIndiator(target: Target | undefined) {
     if (target && target.sdk === "macosx") {
-        devicePickerStatusBarIndiator.text = `$(device-desktop) ${(target as Device).modelName}`;
+        devicePickerStatusBarIndiator.text = `$(device-desktop) ${
+            (target as Device).modelName
+        }`;
     } else if (target && target.udid) {
         devicePickerStatusBarIndiator.text = `$(device-mobile) ${target.name}`;
     } else {
@@ -113,7 +126,6 @@ function _updateIndiator(target: Target | undefined) {
 }
 
 async function _localDevice(): Promise<Device> {
-
     const userInfo = os.userInfo({ encoding: "utf8" });
     const versions = await macOSVersions();
     return {

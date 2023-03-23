@@ -20,10 +20,14 @@ import {
 import * as eventEmitter from "./eventEmitter";
 import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
-import { deleteCompileCommandsFile, isBisInstalled, touchBisBuild } from "./utils";
+import {
+    deleteCompileCommandsFile,
+    isBisInstalled,
+    touchBisBuild,
+} from "./utils";
 import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
-import WorkspaceService from './workspace';
+import WorkspaceService from "./workspace";
 import { TreeProvider } from "./treeProvider";
 
 import * as targetCommand from "vscode-ios-debug/src/targetCommand";
@@ -124,13 +128,10 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand(
-            "zxz-moe-bis.targetSdk",
-            () => {
-                const target = deviceVariable.get();
-                return target?.sdk ?? "iphonesimulator";
-            }
-        )
+        vscode.commands.registerCommand("zxz-moe-bis.targetSdk", () => {
+            const target = deviceVariable.get();
+            return target?.sdk ?? "iphonesimulator";
+        })
     );
 
     // Task Provider
@@ -154,31 +155,35 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.registerTreeDataProvider("buildWorkspace", treeProvider)
     );
     context.subscriptions.push(
-        vscode.commands.registerCommand(
-            "zxz-moe-bis.refreshTreeViewer", () => treeProvider.refresh())
+        vscode.commands.registerCommand("zxz-moe-bis.refreshTreeViewer", () =>
+            treeProvider.refresh()
+        )
     );
 
     // Debugger
     context.subscriptions.push(
-        vscode.debug.registerDebugConfigurationProvider('lldb', new debugConfigProvider.DebugConfigurationProvider())
+        vscode.debug.registerDebugConfigurationProvider(
+            "lldb",
+            new debugConfigProvider.DebugConfigurationProvider()
+        )
     );
 
     // Rx
-    deviceVariable.asObservable()
-    .pipe(distinctUntilChanged(isEqual))
-    .pipe(skip(1))
-    .subscribe((d) => {
-        cpuProvider.updateCpu(d);
-        vscode.commands.executeCommand("zxz-moe-bis.inputBuildTarget");
-    });
-
-    eventEmitter.buildFileChangedEmitter
-        .subscribe((file) => {
-            treeProvider.refresh();
-            vscode.workspace.workspaceFolders?.forEach((folder) => {
-                deleteCompileCommandsFile(folder);
-            });
+    deviceVariable
+        .asObservable()
+        .pipe(distinctUntilChanged(isEqual))
+        .pipe(skip(1))
+        .subscribe((d) => {
+            cpuProvider.updateCpu(d);
+            vscode.commands.executeCommand("zxz-moe-bis.inputBuildTarget");
         });
+
+    eventEmitter.buildFileChangedEmitter.subscribe((file) => {
+        treeProvider.refresh();
+        vscode.workspace.workspaceFolders?.forEach((folder) => {
+            deleteCompileCommandsFile(folder);
+        });
+    });
     combineLatest([
         targetVariable.asObservable().pipe(filter((x) => x !== undefined)),
         compilationModeVariable.asObservable(),
@@ -205,21 +210,23 @@ export function activate(context: vscode.ExtensionContext) {
                     "zxz-moe-bis.refreshDummyProjectForInjectionIII"
                 );
             }
-            vscode.commands.executeCommand(
-                "zxz-moe-bis.refreshTreeViewer"
-            );
+            vscode.commands.executeCommand("zxz-moe-bis.refreshTreeViewer");
 
             vscode.workspace.workspaceFolders?.forEach((folder) => {
                 deleteCompileCommandsFile(folder);
             });
         });
 
-    isBisInstalled().then(() => {
-        touchBisBuild();
-    }).catch(error => {
-        vscode.window.showInformationMessage("Bis rule not detected");
-        logger.log("If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line");
-    });
+    isBisInstalled()
+        .then(() => {
+            touchBisBuild();
+        })
+        .catch((error) => {
+            vscode.window.showInformationMessage("Bis rule not detected");
+            logger.log(
+                "If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line"
+            );
+        });
 }
 
-export function deactivate() { }
+export function deactivate() {}

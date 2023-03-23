@@ -1,11 +1,7 @@
 import * as vscode from "vscode";
 import * as logger from "./logger";
 import { deviceVariable, targetVariable } from "./variables";
-import {
-    executeBazelCommands,
-    WriteStream,
-    WriteStreamType,
-} from "./utils";
+import { executeBazelCommands, WriteStream, WriteStreamType } from "./utils";
 import configuration from "./configuration";
 
 const LABEL_REGEX = RegExp("@?[\\w-]*//[\\w-/]*:[\\w-]+");
@@ -35,7 +31,8 @@ function execResult(sdk: string, folderString: string): Promise<string[]> {
         if (sdk === "iphoneos" || sdk === "iphonesimulator") {
             kindFilter = "ios_application";
         } else if (sdk === "macosx") {
-            kindFilter = "macos_application|macos_command_line_application|cc_binary|swift_binary|apple_universal_binary|cc_test";
+            kindFilter =
+                "macos_application|macos_command_line_application|cc_binary|swift_binary|apple_universal_binary|cc_test";
         } else {
             reject("Unsupported yet");
             return;
@@ -45,7 +42,11 @@ function execResult(sdk: string, folderString: string): Promise<string[]> {
             kindFilter += "|" + configFilter;
         }
         const process = executeBazelCommands(
-            ["query", `'kind("${kindFilter}", "//...")'`, "--output=label_kind"],
+            [
+                "query",
+                `'kind("${kindFilter}", "//...")'`,
+                "--output=label_kind",
+            ],
             folderString,
             (exception, stdout, stderr) => {
                 if (stdout) {
@@ -100,8 +101,8 @@ export async function inputBuildTarget() {
     };
 
     let choose = await vscode.window.showQuickPick(
-        getDeviceSDKCompatibleLabels(sdk)
-            .then<vscode.QuickPickItem[]>((labels): vscode.QuickPickItem[] => {
+        getDeviceSDKCompatibleLabels(sdk).then<vscode.QuickPickItem[]>(
+            (labels): vscode.QuickPickItem[] => {
                 return labels.map((label) => {
                     const matches = label.match("(.*) rule (.*)");
                     let rule = "";
@@ -117,9 +118,9 @@ export async function inputBuildTarget() {
                         kind: kind,
                         description: matches ? `(${rule})` : undefined,
                     };
-
                 });
-            }),
+            }
+        ),
         quickPickOptions
     );
 

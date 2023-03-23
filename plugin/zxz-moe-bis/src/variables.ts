@@ -14,7 +14,9 @@ class Variable<T> {
 
     active(context: vscode.ExtensionContext) {
         this.context = context;
-        this.subject = new BehaviorSubject<T | undefined>(context.workspaceState.get(this.key));
+        this.subject = new BehaviorSubject<T | undefined>(
+            context.workspaceState.get(this.key)
+        );
     }
 
     update(value: T | undefined) {
@@ -26,13 +28,15 @@ class Variable<T> {
 
     check() {
         if (!this.subject || !this.context) {
-            throw new Error("This variable `active(context)` has not been called!");
+            throw new Error(
+                "This variable `active(context)` has not been called!"
+            );
         }
     }
     get(): T | undefined {
         return this.subject?.value;
     }
-    asObservable(): Observable<T | undefined > {
+    asObservable(): Observable<T | undefined> {
         this.check();
         return this.subject!;
     }
@@ -56,6 +60,8 @@ export enum CompilationMode {
 }
 
 export const targetVariable = new Variable<string>(INPUTED_LABEL_STRING);
-export const compilationModeVariable = new Variable<CompilationMode>(SELECTED_COMPILATION_MODE_KEY);
+export const compilationModeVariable = new Variable<CompilationMode>(
+    SELECTED_COMPILATION_MODE_KEY
+);
 export const cpuVariable = new Variable<string>(CPU_VARIABLE_KEY);
 export const deviceVariable = new Variable<Target>(DEVICE_VARIABLE_KEY);

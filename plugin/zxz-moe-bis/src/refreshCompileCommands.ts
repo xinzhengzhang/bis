@@ -5,7 +5,14 @@ import * as cpuProvider from "./cpuProvider";
 import * as path from "path";
 import * as logger from "./logger";
 import configuration from "./configuration";
-import { isBisWorkspace, getCompileCommandsSize, WriteStream, WriteStreamType, deleteCompileCommandsFile, executeBazelCommands } from "./utils";
+import {
+    isBisWorkspace,
+    getCompileCommandsSize,
+    WriteStream,
+    WriteStreamType,
+    deleteCompileCommandsFile,
+    executeBazelCommands,
+} from "./utils";
 import { showIfError } from "./error";
 import { ChildProcess, execFile } from "child_process";
 import * as readline from "readline";
@@ -29,12 +36,35 @@ export function onDidChangeActiveTextEditorMaker() {
                         editor?.document.uri.fsPath
                     );
                     logger.log(`TextEditor changed...\r\n${relative}\r\n`);
-                    // Is there a more elegant way?
                     // cpp extension:... https://github.com/llvm/llvm-project/blob/b9f3b7f89a4cb4cf541b7116d9389c73690f78fa/clang/lib/Driver/Types.cpp#L293
-                    const supportExt = [".h", ".swift", ".m", ".mm", ".c", ".cc", ".cpp", ".cxx", ".c++", ".C", ".CC", ".CPP", ".CXX", ".C++"];
-                    const resetCtxFileName = ["BUILD", "BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel", "MODULE.bazel"];
+                    const supportExt = [
+                        ".h",
+                        ".swift",
+                        ".m",
+                        ".mm",
+                        ".c",
+                        ".cc",
+                        ".cpp",
+                        ".cxx",
+                        ".c++",
+                        ".C",
+                        ".CC",
+                        ".CPP",
+                        ".CXX",
+                        ".C++",
+                    ];
+                    const resetCtxFileName = [
+                        "BUILD",
+                        "BUILD.bazel",
+                        "WORKSPACE",
+                        "WORKSPACE.bazel",
+                        "MODULE.bazel",
+                    ];
 
-                    if (!relative.startsWith("../") && resetCtxFileName.includes(path.basename(relative))) {
+                    if (
+                        !relative.startsWith("../") &&
+                        resetCtxFileName.includes(path.basename(relative))
+                    ) {
                         context.terminal.reset();
                     }
 
@@ -81,22 +111,25 @@ async function refresh(
     );
 }
 
-async function containesFiles(workspace: vscode.WorkspaceFolder,filePath: string) {
+async function containesFiles(
+    workspace: vscode.WorkspaceFolder,
+    filePath: string
+) {
     let containts = false;
     if (getCompileCommandsSize(workspace)) {
         let path = workspace.uri.fsPath + "/compile_commands.json";
         const rl = readline.createInterface({
             input: fs.createReadStream(path),
-            crlfDelay: Infinity
+            crlfDelay: Infinity,
         });
-        rl.on('line', (line) => {
+        rl.on("line", (line) => {
             if (line.includes(`"file": "${filePath}"`)) {
                 containts = true;
                 rl.close();
             }
         });
-    
-        await new Promise((res) => rl.once('close', res));
+
+        await new Promise((res) => rl.once("close", res));
     }
     return containts;
 }
@@ -146,7 +179,7 @@ class CustomBuildTaskTerminal {
                 "--optionals",
                 `\"--compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}\"`,
                 "--file_path",
-                `${filePath}`
+                `${filePath}`,
             ],
             (success) => {
                 if (!success) {
@@ -172,7 +205,7 @@ class CustomBuildTaskTerminal {
                         "--check_visibility=false",
                         `--compilation_mode=${compilationMode}`,
                         `--cpu=${cpu}`,
-                        `${configuration.buildOptions}`
+                        `${configuration.buildOptions}`,
                     ],
                     (success) => {
                         this.parsingFilePath = "";
@@ -196,7 +229,6 @@ class CustomBuildTaskTerminal {
         cmd: string[],
         callback: (success: boolean) => void
     ): ChildProcess {
-        
         let process = executeBazelCommands(cmd, cwd, (exception) => {
             callback(exception ? false : true);
             showIfError(Number(exception?.code));

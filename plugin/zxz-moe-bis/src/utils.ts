@@ -2,7 +2,13 @@ import { promisify } from "util";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { execFile, ChildProcess, ExecOptions, exec, ExecFileException } from "child_process";
+import {
+    execFile,
+    ChildProcess,
+    ExecOptions,
+    exec,
+    ExecFileException,
+} from "child_process";
 import configuration from "./configuration";
 import { Transform } from "stream";
 import { TextDecoder } from "util";
@@ -41,21 +47,28 @@ export function deleteCompileCommandsFile(workspace: vscode.WorkspaceFolder) {
 
 export function isBisInstalled(): Promise<void> {
     return new Promise((resolve, reject) => {
-        vscode.commands.executeCommand<string | undefined>('zxz-moe-bis.workspace', true).then((workspaceRoot) => {
-            promisify(executeBazelCommands)(["query", "@bis//:setup"], workspaceRoot).then((stdout) => {
-                const splited = stdout.split(/\r?\n/);
-                const containsBis = splited.some((item) => {
-                    return item.startsWith("@bis//");
-                });
-                if (containsBis) {
-                    resolve(undefined);
-                } else {
-                    reject(new Error('no @bis found'));
-                }
-            }).catch(error => {
-                reject(error);
+        vscode.commands
+            .executeCommand<string | undefined>("zxz-moe-bis.workspace", true)
+            .then((workspaceRoot) => {
+                promisify(executeBazelCommands)(
+                    ["query", "@bis//:setup"],
+                    workspaceRoot
+                )
+                    .then((stdout) => {
+                        const splited = stdout.split(/\r?\n/);
+                        const containsBis = splited.some((item) => {
+                            return item.startsWith("@bis//");
+                        });
+                        if (containsBis) {
+                            resolve(undefined);
+                        } else {
+                            reject(new Error("no @bis found"));
+                        }
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
             });
-        });
     });
 }
 
@@ -95,13 +108,26 @@ export class WriteStream extends Transform {
     }
 }
 
-export function executeBazelCommands(args?: ReadonlyArray<string> | null, workspace?: string | undefined, callback?: (error: ExecFileException | null, stdout: string, stderr: string) => void): ChildProcess {
+export function executeBazelCommands(
+    args?: ReadonlyArray<string> | null,
+    workspace?: string | undefined,
+    callback?: (
+        error: ExecFileException | null,
+        stdout: string,
+        stderr: string
+    ) => void
+): ChildProcess {
     const bazelExe = configuration.bazelExecutablePath;
-    return execFile(bazelExe, args, { shell: true, cwd: workspace }, (error, stdout, stderr) => {
-        if (callback) {
-            callback(error, stdout, stderr);
+    return execFile(
+        bazelExe,
+        args,
+        { shell: true, cwd: workspace },
+        (error, stdout, stderr) => {
+            if (callback) {
+                callback(error, stdout, stderr);
+            }
         }
-    });
+    );
 }
 
 export async function macOSVersions() {
@@ -110,7 +136,7 @@ export async function macOSVersions() {
     let productName = "";
     let productVersion = "";
     let buildVersion = "";
-    for (const prop of (props.trim().split('\n'))) {
+    for (const prop of props.trim().split("\n")) {
         let [k, v] = prop.split(":");
         if (k === "ProductName") {
             productName = v.trim();
@@ -121,8 +147,8 @@ export async function macOSVersions() {
         }
     }
     return {
-        "name": productName,
-        "version": productVersion,
-        "buildVersion": buildVersion,
+        name: productName,
+        version: productVersion,
+        buildVersion: buildVersion,
     };
 }

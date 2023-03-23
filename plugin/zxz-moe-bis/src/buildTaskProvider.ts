@@ -6,10 +6,7 @@ import configuration from "./configuration";
 import { exec, execFile, ChildProcess } from "child_process";
 import * as logger from "./logger";
 import { promisify } from "util";
-import {
-    WriteStream,
-    WriteStreamType,
-} from "./utils";
+import { WriteStream, WriteStreamType } from "./utils";
 
 export class BuildTaskProvider implements vscode.TaskProvider {
     static scriptType = "bis.build";
@@ -27,7 +24,13 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         const compilationMode = (await picker.compilationMode()) ?? "dbg";
         const cpu = await cpuProvider.cpu();
         const result: vscode.Task[] = [
-            this.createTask(buildTarget!, undefined, compilationMode, cpu, "build"),
+            this.createTask(
+                buildTarget!,
+                undefined,
+                compilationMode,
+                cpu,
+                "build"
+            ),
         ];
 
         for (const workspaceFolder of workspaceFolders) {
@@ -78,7 +81,10 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                                     compilationMode,
                                     cpu,
                                     // Delete the starting character string
-                                    `build ${str.replace(/^bis artifacts /, "")}`
+                                    `build ${str.replace(
+                                        /^bis artifacts /,
+                                        ""
+                                    )}`
                                 )
                             );
                         });

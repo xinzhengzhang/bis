@@ -9,9 +9,9 @@ export function updateCpu(device: Target | undefined) {
     let sdk = device?.sdk;
     if (sdk === "macosx") {
         const arch = process.arch;
-        if ('arm64' === arch) {
+        if ("arm64" === arch) {
             result = "darwin_arm64";
-        } else if ('x64' === arch) {
+        } else if ("x64" === arch) {
             result = "darwin_x86_64";
         }
     } else if (sdk === "iphonesimulator") {
@@ -21,7 +21,6 @@ export function updateCpu(device: Target | undefined) {
     } else {
         // Should not need support armv7?
         result = "ios_arm64";
-
     }
     cpuVariable.update(result);
     return result;

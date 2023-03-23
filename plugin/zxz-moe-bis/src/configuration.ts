@@ -56,18 +56,17 @@ const configuration = {
                 .get<string>("query_kind_filter") ?? "(swift|objc|cc)_library"
         );
     },
-    get targetQueryKindFilter(): string|undefined {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<string>("target_query_kind_filter")
-        );
+    get targetQueryKindFilter(): string | undefined {
+        return vscode.workspace
+            .getConfiguration("bis")
+            .get<string>("target_query_kind_filter");
     },
     get autoRefreshDummyProjectForInjectionIII(): boolean {
         return (
             vscode.workspace
                 .getConfiguration("bis")
-                .get<boolean>("auto_refresh_dummy_project_for_InjectionIII") ?? true
+                .get<boolean>("auto_refresh_dummy_project_for_InjectionIII") ??
+            true
         );
     },
     /**
@@ -75,12 +74,15 @@ const configuration = {
      * configuration, if present.
      */
     get bazelExecutablePath(): string {
-        const bazelExecutable = vscode.workspace.getConfiguration("bis").get<string>("bazel_executable") ?? '';
+        const bazelExecutable =
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<string>("bazel_executable") ?? "";
         if (bazelExecutable.length === 0) {
             return "bazel";
         }
         return bazelExecutable;
-    }
+    },
 };
 
 export default configuration;

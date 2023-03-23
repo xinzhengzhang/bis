@@ -1,19 +1,20 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 import * as cp from "child_process";
-import * as fs from 'fs';
-import * as path from 'path';
-import { promisify } from 'util';
-import { Command, Service } from './services';
-import configuration from './configuration';
+import * as fs from "fs";
+import * as path from "path";
+import { promisify } from "util";
+import { Command, Service } from "./services";
+import configuration from "./configuration";
 
 const exec = promisify(cp.exec);
 
 export default class WorkspaceService extends Service {
-
     @Command({ cmd: "zxz-moe-bis.workspace" })
     async workSpacePath(args: any[]) {
-        let bazelWss = vscode.workspace.workspaceFolders?.filter(wf => fs.existsSync(path.join(wf.uri.fsPath, 'WORKSPACE')));
+        let bazelWss = vscode.workspace.workspaceFolders?.filter((wf) =>
+            fs.existsSync(path.join(wf.uri.fsPath, "WORKSPACE"))
+        );
         if (!bazelWss || bazelWss.length === 0) {
             return undefined;
         }
@@ -26,7 +27,9 @@ export default class WorkspaceService extends Service {
         // User Defaults
         // from cmd palette: always show pick
         // from cmd call: return with the default exists
-        let defaultWorkspace = vscode.workspace.getConfiguration("bis").get<string>("default_workspace");
+        let defaultWorkspace = vscode.workspace
+            .getConfiguration("bis")
+            .get<string>("default_workspace");
         if (defaultWorkspace && args.length > 0 && args[0]) {
             return defaultWorkspace;
         }
@@ -36,14 +39,23 @@ export default class WorkspaceService extends Service {
             title: "Select Workspace",
             matchOnDescription: true,
         };
-        let quickPickItems = bazelWss.map((t): vscode.QuickPickItem => ({
-            label: `${t.uri.fsPath === defaultWorkspace ? '$(check)' : ''}\t${path.parse(t.uri.fsPath).base}`,
-            description: t.uri.fsPath
-        }));
-        let target = (await vscode.window.showQuickPick(quickPickItems, quickPickOptions))?.description;
+        let quickPickItems = bazelWss.map(
+            (t): vscode.QuickPickItem => ({
+                label: `${
+                    t.uri.fsPath === defaultWorkspace ? "$(check)" : ""
+                }\t${path.parse(t.uri.fsPath).base}`,
+                description: t.uri.fsPath,
+            })
+        );
+        let target = (
+            await vscode.window.showQuickPick(quickPickItems, quickPickOptions)
+        )?.description;
 
         // Store
-        target && (await vscode.workspace.getConfiguration("bis").update("default_workspace", target));
+        target &&
+            (await vscode.workspace
+                .getConfiguration("bis")
+                .update("default_workspace", target));
         return target;
     }
 
@@ -53,19 +65,26 @@ export default class WorkspaceService extends Service {
         let statement = configuration.queryKindFilter;
         let cmd = `${configuration.bazelExecutablePath} query 'kind("${statement}", //...)' --output label`;
         let { stdout } = await exec(cmd, { cwd });
-        return stdout.split('\n').map(e => e.trim());
+        return stdout.split("\n").map((e) => e.trim());
     }
 }
 
 /**
  * use @Workspace() to a function to make sure `cd ${workspace}`
- * @returns 
+ * @returns
  */
 export function Workspace(): any {
-    return function (target: any, methodName: string, descriptor: PropertyDescriptor) {
+    return function (
+        target: any,
+        methodName: string,
+        descriptor: PropertyDescriptor
+    ) {
         const originalMethod = descriptor.value;
         descriptor.value = async function (...args: any[]) {
-            const ws = await vscode.commands.executeCommand<string | undefined>('zxz-moe-bis.workspace', true);
+            const ws = await vscode.commands.executeCommand<string | undefined>(
+                "zxz-moe-bis.workspace",
+                true
+            );
             if (!ws) {
                 vscode.window.showErrorMessage("Please select a workspace");
                 return;
@@ -75,4 +94,3 @@ export function Workspace(): any {
         return descriptor;
     };
 }
-
