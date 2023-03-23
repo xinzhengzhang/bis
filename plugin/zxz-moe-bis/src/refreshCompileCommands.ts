@@ -38,8 +38,15 @@ export function onDidChangeActiveTextEditorMaker() {
                     logger.log(`TextEditor changed...\r\n${relative}\r\n`);
                     // cpp extension:... https://github.com/llvm/llvm-project/blob/b9f3b7f89a4cb4cf541b7116d9389c73690f78fa/clang/lib/Driver/Types.cpp#L293
                     const supportExt = [
+                        // header
                         ".h",
+                        ".hpp",
+                        ".hh",
+                        ".hxx",
+                        ".h++",
+                        // swift
                         ".swift",
+                        // c family
                         ".m",
                         ".mm",
                         ".c",
