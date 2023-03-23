@@ -82,7 +82,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                                     cpu,
                                     // Delete the starting character string
                                     `build ${str.replace(
-                                        /^bis artifacts /,
+                                        /^bis /,
                                         ""
                                     )}`
                                 )

@@ -16,12 +16,26 @@ class TreeItem implements ITreeItem {
     task: vscode.Task | undefined;
     path: string;
     label: string;
+    icon: vscode.ThemeIcon;
     children: TreeItem[] = [];
 
     constructor(task: vscode.Task | undefined, path: string) {
         this.task = task;
         this.path = path;
         this.label = path.split("/").pop() ?? path;
+        if (task) {
+            if (path.startsWith("all index dependents ")) {
+                this.path = path.replace(/^all index dependents /, "");
+                this.icon = new vscode.ThemeIcon("wrench");
+            } else if (path.startsWith("artifacts ")) {
+                this.path = path.replace(/^artifacts /, "");
+                this.icon = new vscode.ThemeIcon("debug-start");
+            } else {
+                this.icon = new vscode.ThemeIcon("debug-start");
+            }
+        } else {
+           this.icon = vscode.ThemeIcon.Folder;
+        }
     }
 
     public insertItem(item: TreeItem) {
@@ -74,11 +88,7 @@ class TreeItem implements ITreeItem {
         }
     }
     getIcon(): string | vscode.ThemeIcon | undefined {
-        if (this.task) {
-            return new vscode.ThemeIcon("debug-start");
-        } else {
-            return vscode.ThemeIcon.Folder;
-        }
+        return this.icon;
     }
     getChildren(): Thenable<ITreeItem[]> {
         return Promise.resolve(this.children);
@@ -173,7 +183,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
             new BuildTaskProvider().provideTasks().then((tasks) => {
                 const items = tasks.map(
                     (task) =>
-                        new TreeItem(task, task.name.replace(/^build /, ""))
+                    new TreeItem(task, task.name.replace(/^build /, ""))
                 );
                 const root = new TreeItem(undefined, "");
                 for (const item of items) {
