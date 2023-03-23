@@ -4,11 +4,11 @@ Bazel rules and plugin for developing iOS project on vscode
 # Bzlmod
 ```sh
 # MODULE.bazel
-bazel_dep(name = "bis", version = "0.2.7", dev_dependency = True)
+bazel_dep(name = "bis", version = "0.3.0", dev_dependency = True)
 archive_override(
     module_name = "bis",
-    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.2.7.tar.gz",
-    strip_prefix = "bis-0.2.7"
+    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.3.0.tar.gz",
+    strip_prefix = "bis-0.3.0"
 )
 ```
 # Non-bzlmod
@@ -19,7 +19,7 @@ load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
 git_repository(
     name = "bis",
     remote = "git@github.com:xinzhengzhang/bis.git",
-    tag = "0.2.7",
+    tag = "0.3.0",
 )
 
 load("@bis//:repositories.bzl", "bis_rules_dependencies")
@@ -46,16 +46,17 @@ If you insist on independent use, the following are simple ways to use it.
 ```sh
 cd examples
 # Extract for single file
-bazel run @bis//:setup -- --target //srcs/binary/ios_application:App --optional "--compilation_mode dbg --cpu 'ios_x86_64'" --file_path srcs/module_a/a.m
+bazel run @bis//:setup -- --target //srcs/ios:App --optionals "--compilation_mode=dbg --cpu="ios_x86_64" --features=oso_prefix_is_pwd" --file_path srcs/ios/app.swift
 # Extract for whole target
-bazel run @bis//:setup -- --target //srcs/binary/ios_application:App --optional "--compilation_mode dbg --cpu 'ios_x86_64'"
-# Generate compile_commands.json
-bazel run //.bis:refresh_compile_commands --compilation_mode=dbg --cpu=ios_x86_64 --check_visibility=False
+bazel run @bis//:setup -- --target //srcs/ios:App --optionals "--compilation_mode=dbg --cpu="ios_x86_64" --features=oso_prefix_is_pwd"
 # Build sub target
-bazel build //srcs/binary/ios_application:App --compilation_mode=dbg --cpu="ios_x86_64" --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/module_a:module_a"
+bazel build //srcs/ios:App --compilation_mode=dbg --cpu=ios_x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/ios:lib"
 # Build app
-bazel  build //srcs/binary/ios_application:App --compilation_mode=dbg --cpu="ios_x86_64" --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/binary/ios_application:App"
-
+bazel build //srcs/ios:App --compilation_mode=dbg --cpu=ios_x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/ios:App"
+# Build index dependents for sub target
+bazel  build //srcs/ios:App --compilation_mode=dbg --cpu=ios_x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis all index dependents @@//srcs/ios:lib"
+# Build  index dependents for whole target
+bazel build //srcs/ios:App --compilation_mode=dbg --cpu=ios_x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis all index dependents @@//srcs/ios:App"
 ```
 
 # Components
@@ -73,7 +74,7 @@ This step is done automatically by the plugin
     Arguments:
         -h, --help            show this help message and exit
         --optionals OPTIONALS
-                              --compilation_mode=dbg --cpu=ios_x86_6
+                                --compilation_mode=dbg --cpu=ios_x86_64
         --target TARGET       target labels
         --file_path FILE_PATH
                                 source code path
@@ -85,25 +86,14 @@ This step is done automatically by the plugin
 
 ### refresh_compile_commands
 ---
-Create `compile_commands.json` into WORKSAPCE
+Wrapper of https://github.com/hedronvision/bazel-compile-commands-extractor.
+We use it for hidding visibility under bzlmod.
 
-* file_path: source code path you want to extract
-    * this strings was passed to `inputs` in [bazel aquery](https://bazel.build/query/aquery)
-    * `.*` means extract all path in targets
-* targets: build targets which you want to extract
-* pre_compile_targets: targets which you want to pre compile
-* optionals: to hedron_compile_commands
-* pre_compile_swift_module: should pre build swift module when refreshing `compile_commands.json`
-
-### refresh_compile_commands_apple_bundle_cfg
----
-Exactly like `refresh_compile_commands`, except configured with ios cfg
-* minimum_os_version: the same attr with `ios_application`
 
 ### refresh_launch_json
 ---
 Create `.vscode/launch.json` for vscode plugins
 * target: ios_application
-
+* pre_launch_task_name: pre_launch_task_name add in `.vscode/launch.json`
 ## Thanks to
 * [zhao han](https://github.com/BarneyZhaoooo) - For his excellent icon design

@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### 0.3.0
+This is a major release that almost refactored all rules and expanded the scope from iOS to all C-family(include swift) platforms.
+UI
+* Added platform options and select appropriate rules based on the platform
+* Added tree viewer and provided sub-target compilation and index dependency building
+Features
+* Added multiple rules prompt for target selector
+iOS
+* Updated ios-deploy to main version for preventing stuck in install process
+Debugger
+* Add support for binaries macos_application|macos_command_line_application|cc_binary|swift_binary|apple_universal_binary|cc_test
+* Add support for library cc_libray|objc_library|swift_library
+Rules
+* Refactored build rules using aspects
+
+
 ### 0.2.8
 Fix
 * Fix bad path handling logic

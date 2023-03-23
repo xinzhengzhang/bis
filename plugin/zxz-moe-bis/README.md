@@ -2,12 +2,37 @@
 
 The plugin is used in conjunction with rules [bis](github.com:xinzhengzhang/bis)
 
-It provides the IDE to develop iOS application which compiled by [rules_apple](http://github.com/bazelbuild/rules_apple)
+This plugin provides the ability to develop in the Apple ecosystem using Bazel.
+
+| Platform | Rule | Editor Features | Debugging |
+|------|-----|--------|--------|
+| MacOSX | macos_application  | ✅  | ✅  |
+| MacOSX | macos_command_line_application  | ✅  | ✅  |
+| MacOSX | cc_binary  | ✅   | ✅   |
+| MacOSX | swift_binary  | ✅  | ✅   |
+| MacOSX | apple_universal_binary  | ✅  |  ✅   |
+| MacOSX | cc_test  | ✅   | ✅   |
+| iPhoneOS | ios_application  | ✅  | ✅  |
+| iPhoneOS | ios_ui_test  | ✅  | ❌  |
+| iPhoneOS | ios_unit_test  | ✅ | ❌ |
+| iPhoneSimulator | ios_application  | ✅  | ✅ |
+| iPhoneSimulator | ios_ui_test  | ✅  | ❌  |
+| iPhoneSimulator | ios_unit_test  | ✅ | ❌ |
+| iPhoneOS | ios_application  | ✅  | ✅  |
+| / | cc_library  | ✅ | ✅ |
+| / | objc_library  | ✅ | ✅ |
+| / | swift_library  | ✅ | ✅ |
+
+Editor features was provided by sourcekit-lsp embed in `sswg.swift-lang` The main function of this plugin is to generate dependents(like compile_commands.json modulemap swiftmodule) used in LSP (Language Server Protocol) as quickly as possible through the current build target.
+
+It theoretically supports all rules of languages that can be supported by sourcekit-lsp and clangd, but I have not tested it. If you find any that can be used, please add them to the examples and expand the list.
+
+As an iOS developer, I urgently hope to use the debugging ability of XCTest. If you have any ideas, welcome to discuss it by implementing it through the .xctest bundle.
 
 ---
 ## Features
 
-* UE for iOS developing
+* UE for apple developing
 * Tree viewer for buildable targets
 * Extract source info from build target and generate `compile_commands.json` for Sourcekit-lsp
 * Generate `launch.json` for debug
@@ -28,11 +53,11 @@ It provides the IDE to develop iOS application which compiled by [rules_apple](h
 * Import bis rules in your MODULE.bazel
     ```
     # MODULE.bazel
-    bazel_dep(name = "bis", version = "0.2.7", dev_dependency = True)
+    bazel_dep(name = "bis", version = "0.3.0", dev_dependency = True)
     archive_override(
         module_name = "bis",
-        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.2.7.tar.gz",
-        strip_prefix = "bis-0.2.7"
+        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.3.0.tar.gz",
+        strip_prefix = "bis-0.3.0"
     )
 
     # If you are not in bzlmod please check the bis rules README.md
@@ -114,11 +139,6 @@ This extension contributes the following settings:
 
 1. It bridged rules_apple with CodeLLDB and generate `launch.json` automatically
 2. It generate and refresh `compile_commands.json` automatically which is provided to SourceKit-lsp embed in [swift extension](https://marketplace.visualstudio.com/items?itemName=sswg.swift-lang)
-
----
-## Acknowledge
-
-* It only support ios_application for now
 
 ---
 ## Frequently Asked Questions
