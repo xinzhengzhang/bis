@@ -17,6 +17,9 @@ Debugger
 Rules
 * Refactored build rules using aspects
 
+**Important**
+* There is a breaking change for all rules, please update bis_rules to the specified version (0.3.0)
+* There is a breaking change for all rules, we recommanded to delete the `.bis/BUILD` or update it by `Generate launch.json`
 
 ### 0.2.8
 Fix
