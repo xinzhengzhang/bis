@@ -131,9 +131,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
 
         vscode.workspace.onDidChangeWorkspaceFolders(this.refresh, this);
 
-        if (targetVariable.get() && deviceVariable.get()) {
-            this.updateWorkspaceFolderTreeItems();
-        }
+        this.updateWorkspaceFolderTreeItems();
     }
 
     public getChildren(element?: ITreeItem): Thenable<ITreeItem[]> {
@@ -174,6 +172,10 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
 
     /** Refresh the cached BazelWorkspaceFolderTreeItems. */
     private updateWorkspaceFolderTreeItems() {
+        if (!targetVariable.get() || !deviceVariable.get()) {
+            // no target specified
+            return;
+        }
         if (this.isProcessing) {
             this.isPending = true;
             return;
