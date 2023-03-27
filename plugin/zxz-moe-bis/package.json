@@ -104,7 +104,7 @@
             "type": "integer",
             "markdownDescription": "Rolling size of compile_commands.json",
             "order": 9,
-            "default": "300000000"
+            "default": 300000000
           },
           "bis.default_workspace": {
             "type": "string",
