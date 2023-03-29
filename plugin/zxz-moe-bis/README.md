@@ -5,7 +5,7 @@ The plugin is used in conjunction with rules [bis](github.com:xinzhengzhang/bis)
 This plugin provides the ability to develop in the Apple ecosystem using Bazel.
 
 | Platform | Rule | Editor Features | Debugging |
-|------|-----|--------|--------|
+|:------:|:-----:|:--------:|:--------:|
 | MacOSX | macos_application  | ✅  | ✅  |
 | MacOSX | macos_command_line_application  | ✅  | ✅  |
 | MacOSX | cc_binary  | ✅   | ✅   |
@@ -26,8 +26,6 @@ This plugin provides the ability to develop in the Apple ecosystem using Bazel.
 Editor features was provided by sourcekit-lsp embed in `sswg.swift-lang` The main function of this plugin is to generate dependents(like compile_commands.json modulemap swiftmodule) used in LSP (Language Server Protocol) as quickly as possible through the current build target.
 
 It theoretically supports all rules of languages that can be supported by sourcekit-lsp and clangd, but I have not tested it. If you find any that can be used, please add them to the examples and expand the list.
-
-As an iOS developer, I urgently hope to use the debugging ability of XCTest. If you have any ideas, welcome to discuss it by implementing it through the .xctest bundle.
 
 ---
 ## Features
