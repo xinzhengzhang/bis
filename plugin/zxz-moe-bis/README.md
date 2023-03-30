@@ -19,9 +19,9 @@ This plugin provides the ability to develop in the Apple ecosystem using Bazel.
 | iPhoneSimulator | ios_ui_test  | ✅  | ❌  |
 | iPhoneSimulator | ios_unit_test  | ✅ | ❌ |
 | iPhoneOS | ios_application  | ✅  | ✅  |
-| / | cc_library  | ✅ | ✅ |
-| / | objc_library  | ✅ | ✅ |
-| / | swift_library  | ✅ | ✅ |
+| / | cc_library  | ✅ | / |
+| / | objc_library  | ✅ | / |
+| / | swift_library  | ✅ | / |
 
 Editor features was provided by sourcekit-lsp embed in `sswg.swift-lang` The main function of this plugin is to generate dependents(like compile_commands.json modulemap swiftmodule) used in LSP (Language Server Protocol) as quickly as possible through the current build target.
 
@@ -88,7 +88,7 @@ This extension contributes the following commands:
     * `zxz-moe-bis.buildTarget`
         * Label of selected target
             
-            ex: `//binary:app`
+            ex: `//srcs/ios:App`
     * `zxz-moe-bis.cpu`
         * Cpu string of selected device
 
