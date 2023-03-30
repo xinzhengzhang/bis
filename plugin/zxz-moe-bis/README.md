@@ -69,8 +69,10 @@ It theoretically supports all rules of languages that can be supported by source
 ---
 
 ## Usage Visuals
-![out_2](https://user-images.githubusercontent.com/1487445/209274772-9b0e8230-dd9c-47ef-86f6-e295d5ae4451.gif)
-![out_1](https://user-images.githubusercontent.com/1487445/209274776-b4c8c7b3-0b1b-4376-88c4-c1739422fc90.gif)
+![out_1](https://user-images.githubusercontent.com/1487445/228768773-db799a39-99fe-42c5-8e5f-dcc6a4b281cb.gif)
+![out_2](https://user-images.githubusercontent.com/1487445/209274776-b4c8c7b3-0b1b-4376-88c4-c1739422fc90.gif)
+
+
 
 ---
 ## Extension Commands
