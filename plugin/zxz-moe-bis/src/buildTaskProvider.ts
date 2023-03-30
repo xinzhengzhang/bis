@@ -25,11 +25,18 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         const cpu = await cpuProvider.cpu();
         const result: vscode.Task[] = [
             this.createTask(
+                "build",
                 buildTarget!,
                 undefined,
                 compilationMode,
-                cpu,
-                "build"
+                cpu
+            ),
+            this.createTask(
+                "run",
+                buildTarget!,
+                undefined,
+                compilationMode,
+                cpu
             ),
         ];
 
@@ -75,17 +82,17 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                             if (!str) {
                                 return;
                             }
+                            const labelIdentifier = `${str.replace(
+                                /^bis /,
+                                ""
+                            )}`;
                             result.push(
                                 _this.createTask(
+                                    "build",
                                     buildTarget,
-                                    str,
+                                    labelIdentifier,
                                     compilationMode,
-                                    cpu,
-                                    // Delete the starting character string
-                                    `build ${str.replace(
-                                        /^bis /,
-                                        ""
-                                    )}`
+                                    cpu
                                 )
                             );
                         });
@@ -104,24 +111,24 @@ export class BuildTaskProvider implements vscode.TaskProvider {
     }
 
     private createTask(
+        command: string = "build",
         target: string,
-        labelIdentifier: string | undefined,
+        labelIdentifier: string|undefined,
         compilationMode: string,
         cpu: string | undefined,
-        source: string
     ) {
         const cpuOpts = cpu ? `--cpu=${cpu}` : "";
-        let executionCommands = `${configuration.bazelExecutablePath} ${configuration.startupOptions} build ${target} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions}`;
+        let executionCommands = `${configuration.bazelExecutablePath} ${configuration.startupOptions} ${command} ${target} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions}`;
         if (labelIdentifier) {
-            executionCommands += ` --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="${labelIdentifier}"`;
+            executionCommands += ` --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis ${labelIdentifier}"`;
         }
         const task = new vscode.Task(
             {
                 type: BuildTaskProvider.scriptType,
-                target: target + labelIdentifier,
+                target: target + (labelIdentifier??command),
             },
             vscode.TaskScope.Workspace,
-            source,
+            labelIdentifier??command,
             BuildTaskProvider.scriptType,
             new vscode.ShellExecution(executionCommands)
         );

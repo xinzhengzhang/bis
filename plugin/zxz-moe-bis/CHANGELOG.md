@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+Features
+* Add `bazel run ${target} in task provider`
 Fix
 * Fix type of rolling size
 
