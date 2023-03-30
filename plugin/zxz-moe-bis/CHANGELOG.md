@@ -1,10 +1,10 @@
 # Change Log
 
 ## [Unreleased]
-Features
+### 0.3.1
 * Add `bazel run ${target} in task provider`
-Fix
-* Fix type of rolling size
+* Fix type of rolling size in configuration
+* Correct README.md
 
 ### 0.3.0
 This is a major release that almost refactored all rules and expanded the scope from iOS to all C-family(include swift) platforms.
