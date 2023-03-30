@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        ".bis": true,
+        "*.xcodeproj": true,
+        "bazel-*": true
+    }
+}
