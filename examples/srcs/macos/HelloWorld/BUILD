@@ -31,8 +31,8 @@ apple_bundle_version(
 )
 
 macos_application(
-    name = "HelloWorld2",
-    bundle_id = "com.example.hello-world2",
+    name = "HelloWorld",
+    bundle_id = "com.example.hello-world",
     infoplists = [":Info.plist"],
     minimum_os_version = "11.0",
     version = ":HelloWorldVersion",
