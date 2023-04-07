@@ -20,7 +20,8 @@ objc_library(
         "Resources/Main.storyboard",
     ],
     deps = [
-         "//srcs/shared/module_a:module_a"
+         "//srcs/shared/module_a:module_a",
+         "//srcs/shared/module_d:module_d"
     ],
 )
 
@@ -30,8 +31,8 @@ apple_bundle_version(
 )
 
 macos_application(
-    name = "HelloWorld",
-    bundle_id = "com.example.hello-world",
+    name = "HelloWorld2",
+    bundle_id = "com.example.hello-world2",
     infoplists = [":Info.plist"],
     minimum_os_version = "11.0",
     version = ":HelloWorldVersion",

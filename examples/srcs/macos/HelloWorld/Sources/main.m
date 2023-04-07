@@ -13,9 +13,13 @@
 // limitations under the License.
 
 #import "a.h"
+#import "AppDelegate.h"
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 int main(int argc, const char * argv[]) {
   NSLog(@"Greetings from %@", foo());
+  NSApplication *application = [NSApplication sharedApplication];
+  AppDelegate *delegate = [[AppDelegate alloc] init];
+  [application setDelegate:delegate];
   return NSApplicationMain(argc, argv);
 }
