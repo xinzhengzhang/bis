@@ -13,7 +13,8 @@ swift_library(
         "app.swift",
     ],
     deps = [
-        "//srcs/shared/module_a:module_a"
+        "//srcs/shared/module_a:module_a",
+        "//srcs/shared/module_d:module_d",
     ]
 )
 
