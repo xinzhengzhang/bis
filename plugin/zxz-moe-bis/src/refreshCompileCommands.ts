@@ -14,7 +14,7 @@ import {
     executeBazelCommands,
 } from "./utils";
 import { showIfError } from "./error";
-import { ChildProcess, execFile } from "child_process";
+import { ChildProcess, exec, execFile, execSync } from "child_process";
 import * as readline from "readline";
 import * as fs from "fs";
 
@@ -122,23 +122,13 @@ async function containesFiles(
     workspace: vscode.WorkspaceFolder,
     filePath: string
 ) {
-    let containts = false;
     if (getCompileCommandsSize(workspace)) {
         let path = workspace.uri.fsPath + "/compile_commands.json";
-        const rl = readline.createInterface({
-            input: fs.createReadStream(path),
-            crlfDelay: Infinity,
-        });
-        rl.on("line", (line) => {
-            if (line.includes(`"file": "${filePath}"`)) {
-                containts = true;
-                rl.close();
-            }
-        });
-
-        await new Promise((res) => rl.once("close", res));
+        const command = `grep -q "${filePath}" "${path}" && echo 1 || echo 0`;
+        const output = execSync(command, { encoding: 'utf8' });
+        return parseInt(output) == 1;
     }
-    return containts;
+    return false;
 }
 
 class CustomBuildTaskTerminal {
