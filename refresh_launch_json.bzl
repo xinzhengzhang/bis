@@ -1,17 +1,17 @@
 load("@build_bazel_rules_apple//apple:providers.bzl", "AppleBundleInfo")
+load("//:bisproject_aspect.bzl", "bis_aspect")
+load("//:providers.bzl", "BisProjInfo")
 
-def _refresh_launch_json(ctx):
-    
-    # Launch configurations
+def _create_launch_items(target, pre_launch_task_name):
+    # Return launch_items[], dep_files[]
     launch_items = []
+    dep_files = []
+    if not AppleBundleInfo in target:
+        return launch_items, dep_files
 
-    target = ctx.attr.target
-    pre_launch_task_name = ctx.attr.pre_launch_task_name
-
-    if AppleBundleInfo in target:
-        bundle_info = target[AppleBundleInfo]
+    bundle_info = target[AppleBundleInfo]
+    if bundle_info.bundle_extension == ".app":
         program = "{}{}".format(bundle_info.bundle_name, bundle_info.bundle_extension)
-
         # ios-debug cannot run .app so we need to convert it into executable in payload
         if bundle_info.platform_type == "ios":
             program = "Payload/{}.app".format(bundle_info.bundle_name)
@@ -51,8 +51,49 @@ def _refresh_launch_json(ctx):
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
                 sourceMap = {"./": "${workspaceFolder}"}
             ))
+    elif bundle_info.bundle_extension == ".xctest":
+        bis_info = target[BisProjInfo]
+        xctest_infos = bis_info.transitive_xctest_infos.to_list()
+        if len(xctest_infos) != 1:
+            fail("There should be only one xctest info in the target")
+        xctest_info = xctest_infos[0]
+        if xctest_info.xctest_run_file:
+            launch_items.append(struct(
+                name = "Launch",
+                type = "lldb",
+                sourceMap = {"./": "${workspaceFolder}"},
+                preLaunchTask = "bis.build: xctest bundle outputs",
+                BIS_XCTEST_RUN_FILE = xctest_info.xctest_run_file.path,
+                BIS_XCTEST_IS_DEVICE = xctest_info.xctest_is_device,
+            ))
+            dep_files.append(xctest_info.xctest_run_file)
+        else:
+            launch_items.append(struct(
+                name = "Launch",
+                type = "lldb",
+                cwd = "${workspaceFolder}",
+                internalConsoleOptions = "openOnSessionStart",
+                console = "internalConsole",
+                sourceMap = {"./": "${workspaceFolder}"},
+                preLaunchTask = "bis.build: xctest bundle outputs",
+                BIS_XCTEST_BUNDLE = xctest_info.xctest_bundle.path,
+                BIS_XCTEST_IS_DEVICE = xctest_info.xctest_is_device,
+                BIS_XCTEST_ARCH_CPU = xctest_info.xctest_arch_cpu,
+            ))
+        dep_files.append(xctest_info.xctest_bundle)
+    return launch_items, dep_files
 
-    else:
+
+def _refresh_launch_json(ctx):
+    # Launch configurations
+    launch_items = []
+    dep_files = []
+
+    target = ctx.attr.target
+    pre_launch_task_name = ctx.attr.pre_launch_task_name
+    launch_items, dep_files = _create_launch_items(target, pre_launch_task_name)
+
+    if len(launch_items) == 0:
         # We should assert that if the files do not exist, we should not create a launch configuration. So just throw an exception
         launch_items.append(struct(
             name = "Launch",
@@ -90,6 +131,7 @@ def _refresh_launch_json(ctx):
     return [
         DefaultInfo(
             executable = output,
+            files = depset(dep_files)
         ),
     ]
 
@@ -98,6 +140,7 @@ refresh_launch_json = rule(
     attrs = {
         "target": attr.label(
             mandatory = True,
+            aspects = [bis_aspect],
         ),
         "pre_launch_task_name": attr.string(
             default = "${config:bis.pre_launch_task_name}"
