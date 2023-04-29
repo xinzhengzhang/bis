@@ -1,6 +1,16 @@
 # Change Log
 
 ## [Unreleased]
+### 0.3.2
+Note that this version must be upgraded together with the rules
+
+Features
+* Add support for ios_unit_test (logic test without test_host)
+* Add support for ios_unit_test (app test with test_host)
+
+**Important**
+* For logical tests, the architecture of the testbundle must be consistent with the current environment architecture. If you are under apple silicon, the default simulator architecture is `ios_x86_64`, which is conflict with silicon please modify `bis.simulator_cpu_string` to `ios_sim_arm64`
+
 ### 0.3.1
 * Add `bazel run ${target} in task provider`
 * Fix type of rolling size in configuration
@@ -8,6 +18,7 @@
 
 ### 0.3.0
 This is a major release that almost refactored all rules and expanded the scope from iOS to all C-family(include swift) platforms.
+
 UI
 * Added platform options and select appropriate rules based on the platform
 * Added tree viewer and provided sub-target compilation and index dependency building

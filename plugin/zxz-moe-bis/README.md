@@ -14,10 +14,12 @@ This plugin provides the ability to develop in the Apple ecosystem using Bazel.
 | MacOSX | cc_test  | ✅   | ✅   |
 | iPhoneOS | ios_application  | ✅  | ✅  |
 | iPhoneOS | ios_ui_test  | ✅  | ❌  |
-| iPhoneOS | ios_unit_test  | ✅ | ❌ |
+| iPhoneOS | ios_unit_test (logic test)  | ✅ |  ❌ |
+| iPhoneOS | ios_unit_test (app test)  | ✅ |  ✅ |
 | iPhoneSimulator | ios_application  | ✅  | ✅ |
 | iPhoneSimulator | ios_ui_test  | ✅  | ❌  |
-| iPhoneSimulator | ios_unit_test  | ✅ | ❌ |
+| iPhoneSimulator | ios_unit_test (logic test)  | ✅ |  ✅ |
+| iPhoneSimulator | ios_unit_test (app test)  | ✅ |  ✅ |
 | iPhoneOS | ios_application  | ✅  | ✅  |
 | / | cc_library  | ✅ | / |
 | / | objc_library  | ✅ | / |
@@ -51,11 +53,11 @@ It theoretically supports all rules of languages that can be supported by source
 * Import bis rules in your MODULE.bazel
     ```
     # MODULE.bazel
-    bazel_dep(name = "bis", version = "0.3.1", dev_dependency = True)
+    bazel_dep(name = "bis", version = "0.3.2", dev_dependency = True)
     archive_override(
         module_name = "bis",
-        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.3.1.tar.gz",
-        strip_prefix = "bis-0.3.1"
+        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.3.2.tar.gz",
+        strip_prefix = "bis-0.3.2"
     )
 
     # If you are not in bzlmod please check the bis rules README.md
