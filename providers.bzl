@@ -19,5 +19,7 @@ A `list` of direct outputs((bis artifacts str(target), target[DefaultInfo].files
         "transitive_outputs": """\
 A `depset` of transitive outputs((bis artifacts str(target), target[DefaultInfo].files)).
 """,
+        "transitive_xctest_infos": """\
+A `depset` of transitive struct(xctest_run_file:File, xctest_bundle:File, xctest_is_device:Bool, xctest_arch_cpu:String).""",
     }
 )
