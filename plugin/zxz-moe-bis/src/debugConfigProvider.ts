@@ -218,6 +218,17 @@ export class DebugConfigurationProvider
             dbgConfig.preRunCommands.push(
                 `process connect connect://127.0.0.1:${debugserverPort}`
             );
+
+            if (dbgConfig.env) {
+                let newEnv: {[key: string]: string} = {};
+                for (let key in dbgConfig.env) {
+                    newEnv[key] = dbgConfig.env[key].replace(
+                        "__TESTHOST__",
+                        platformPath
+                    );
+                }
+                dbgConfig.env = newEnv;
+            }
         }
 
         logger.log("resolved debug configuration", dbgConfig);
