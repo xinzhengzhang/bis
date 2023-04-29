@@ -24,6 +24,17 @@ def bis_rules_dependencies_hedron_compile_commands(remote = "git@github.com:hedr
         ]
     )
 
+def bis_rules_dependencies_xctestrunner(mirror_host = ""):
+    hosts = ["github.com"]
+    if len(mirror_host) > 0:
+        hosts.insert(0, mirror_host)
+    urls = ["https://{}/google/xctestrunner/archive/24629f3e6c0dda397f14924b64eb45d04433c07e.tar.gz".format(host) for host in hosts]
+    http_archive(
+        name = "xctestrunner",
+        urls = urls,
+        strip_prefix = "xctestrunner-24629f3e6c0dda397f14924b64eb45d04433c07e",
+        sha256 = "6e692722c3b3d5f2573357870c78febe8419b18ab28565bc6a1d9ddd28c8ec51",
+    )
 
 def bis_rules_dependencies():
 
@@ -36,3 +47,5 @@ def bis_rules_dependencies():
 
     if not native.existing_rule("hedron_compile_commands"):
         bis_rules_dependencies_hedron_compile_commands()
+    if not native.existing_rule("xctestrunner"):
+        bis_rules_dependencies_xctestrunner()

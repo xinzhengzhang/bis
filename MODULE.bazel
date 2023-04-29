@@ -8,3 +8,4 @@ bazel_dep(name = "rules_apple", version = "2.2.0", repo_name = "build_bazel_rule
 
 deps_ext = use_extension("//:extensions.bzl", "deps_ext")
 use_repo(deps_ext, "hedron_compile_commands")
+use_repo(deps_ext, "xctestrunner")
