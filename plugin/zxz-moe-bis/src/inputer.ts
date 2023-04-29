@@ -29,7 +29,7 @@ function execResult(sdk: string, folderString: string): Promise<string[]> {
         let result: string[] = [];
         let kindFilter;
         if (sdk === "iphoneos" || sdk === "iphonesimulator") {
-            kindFilter = "ios_application";
+            kindFilter = "ios_application|ios_unit_test";
         } else if (sdk === "macosx") {
             kindFilter =
                 "macos_application|macos_command_line_application|cc_binary|swift_binary|apple_universal_binary|cc_test";
