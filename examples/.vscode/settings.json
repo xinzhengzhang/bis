@@ -3,5 +3,6 @@
         ".bis": true,
         "*.xcodeproj": true,
         "bazel-*": true
-    }
+    },
+    "bis.simulator_cpu_string": "ios_sim_arm64"
 }

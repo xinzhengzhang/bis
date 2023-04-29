@@ -7,6 +7,8 @@ load(
   "ios_application",
 )
 
+exports_files(glob(["*.mobileprovision"]))
+
 swift_library(
     name = "lib",
     srcs = [
@@ -25,4 +27,7 @@ ios_application(
     infoplists = [":Info.plist"],
     minimum_os_version = "15.0",
     deps = [":lib"],
+    # Set provisioning_profile if using real device
+    # provisioning_profile = ":debug.mobileprovision",
+    visibility = ["//visibility:public"],
 )
