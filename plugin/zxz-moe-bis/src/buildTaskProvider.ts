@@ -38,6 +38,13 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                 compilationMode,
                 cpu
             ),
+            this.createTask(
+                "build",
+                buildTarget,
+                "xctest bundle outputs",
+                compilationMode,
+                cpu
+            )
         ];
 
         for (const workspaceFolder of workspaceFolders) {
