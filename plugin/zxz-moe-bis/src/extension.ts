@@ -134,6 +134,13 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    context.subscriptions.push(
+        vscode.commands.registerCommand("zxz-moe-bis.targetUDID", () => {
+            const target = deviceVariable.get();
+            return target?.udid ?? "";
+        })
+    );
+
     // Task Provider
     context.subscriptions.push(
         vscode.tasks.registerTaskProvider(
@@ -227,6 +234,14 @@ export function activate(context: vscode.ExtensionContext) {
                 "If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line"
             );
         });
+
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(event => {
+            if (event.affectsConfiguration("bis.simulator_cpu_string")) {
+                cpuProvider.updateCpu(deviceVariable.get());
+            }
+        })
+    );
 }
 
 export function deactivate() {}
