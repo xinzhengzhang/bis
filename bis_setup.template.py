@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import types
+import re
 
 from pathlib import Path
 
@@ -32,7 +33,7 @@ def create_bis_build(args):
     if not args.ignore_parsing_targets:
         target_stetment = f'deps({args.target})'
         if len(args.file_path) > 0:
-            fname = os.path.basename(args.file_path)
+            fname = re.escape(os.path.basename(args.file_path))
             target_stetment = f"let v = {target_stetment} in attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)"
 
         aquery_args = [
