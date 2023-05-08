@@ -14,7 +14,7 @@ This plugin provides the ability to develop in the Apple ecosystem using Bazel.
 | MacOSX | cc_test  | ✅   | ✅   |
 | iPhoneOS | ios_application  | ✅  | ✅  |
 | iPhoneOS | ios_ui_test  | ✅  | ❌  |
-| iPhoneOS | ios_unit_test (logic test)  | ✅ |  ❌ |
+| iPhoneOS | ios_unit_test (logic test)  | ✅ |  / |
 | iPhoneOS | ios_unit_test (app test)  | ✅ |  ✅ |
 | iPhoneSimulator | ios_application  | ✅  | ✅ |
 | iPhoneSimulator | ios_ui_test  | ✅  | ❌  |
