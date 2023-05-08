@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased]
+Enhance
+* Change the implementation to fix compile_commands too large, causing node to crash https://github.com/xinzhengzhang/bis/pull/9
+
 ### 0.3.2
 Note that this version must be upgraded together with the rules
 
