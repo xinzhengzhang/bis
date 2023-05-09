@@ -126,7 +126,7 @@ async function containesFiles(
         let path = workspace.uri.fsPath + "/compile_commands.json";
         const command = `grep -q "${filePath}" "${path}" && echo 1 || echo 0`;
         const output = execSync(command, { encoding: 'utf8' });
-        return parseInt(output) == 1;
+        return parseInt(output) === 1;
     }
     return false;
 }
