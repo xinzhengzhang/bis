@@ -33,10 +33,13 @@ def _bis_aspect_impl(target, ctx):
     direct_xctest_infos = []
 
     is_swift = SwiftInfo in target
+    is_java = JavaInfo in target
     is_xctest = IosXcTestBundleInfo in target and AppleResourceInfo in target
 
     if is_swift:
         direct_index_dependents = [depset([direct_index_dependent for direct_index_dependent in target[DefaultInfo].files.to_list() if direct_index_dependent.extension in ["h", "swiftmodule"]])]
+    if is_java:
+        direct_index_dependents = [target[JavaInfo].compile_jars]
     if is_xctest:
         if AppleTestInfo not in target:
             fail("xc_test_bundle {} must also have apple_test".format(target.label))
