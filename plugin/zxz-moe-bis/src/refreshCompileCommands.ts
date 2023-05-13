@@ -196,30 +196,6 @@ class CustomBuildTaskTerminal {
                 if (shouldCleanCompileCommands) {
                     deleteCompileCommandsFile(workspace);
                 }
-                this.process = this.runBazelProcess(
-                    workspace.uri.fsPath,
-                    [
-                        `${configuration.startupOptions}`,
-                        "run",
-                        "//.bis:refresh_compile_commands",
-                        "--check_visibility=false",
-                        `--compilation_mode=${compilationMode}`,
-                        `--cpu=${cpu}`,
-                        `${configuration.buildOptions}`,
-                    ],
-                    (success) => {
-                        this.parsingFilePath = "";
-                        if (!success) {
-                            logger.error(
-                                `File path=${filePath} failed in refresh_compile_commands`
-                            );
-                            return;
-                        }
-                        logger.log(`Ending refresh...\r\n${filePath}\r\n`);
-
-                        this.currentFilePath = filePath;
-                    }
-                );
             }
         );
     }
