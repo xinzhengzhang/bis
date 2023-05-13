@@ -69,6 +69,13 @@ const configuration = {
             true
         );
     },
+    get autoRefreshTreeViewerWhenConfigurationChanged(): boolean {
+        return (
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<boolean>("auto_refresh_tree_viewer_configuration_changed") ?? false
+        );
+    },
     get supportKotlinExtension(): boolean {
         return (
             vscode.workspace

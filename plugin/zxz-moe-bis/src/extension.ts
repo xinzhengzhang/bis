@@ -186,7 +186,9 @@ export function activate(context: vscode.ExtensionContext) {
         });
 
     eventEmitter.buildFileChangedEmitter.subscribe((file) => {
-        treeProvider.refresh();
+        if (configuration.autoRefreshTreeViewerWhenConfigurationChanged) {
+            treeProvider.refresh();
+        }
         vscode.workspace.workspaceFolders?.forEach((folder) => {
             deleteCompileCommandsFile(folder);
         });
