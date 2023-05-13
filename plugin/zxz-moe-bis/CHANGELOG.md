@@ -1,8 +1,14 @@
 # Change Log
 
 ## [Unreleased]
+### 0.3.3
 Enhance
+* Remove a useless refresh_compile_commands left in the plugin for compatibility
 * Change the implementation to fix compile_commands too large, causing node to crash https://github.com/xinzhengzhang/bis/pull/9
+
+Configuration
+* BUILD/WORKSPACE changes in the case of git pull or checkout branch can cause invalid refresh, and may cause some exceptions due to the unstable workspace at that time. So the switch is added, and the default is off. You can choose to turn it on in daily Coding
+* Added support for kotlin, the corresponding kotlin rules have not been released in publich
 
 ### 0.3.2
 Note that this version must be upgraded together with the rules
