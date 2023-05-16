@@ -174,7 +174,7 @@ class CustomBuildTaskTerminal {
                 "--target",
                 `${buildTarget}`,
                 "--optionals",
-                `\"--compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions}\"`,
+                `\"--compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions} --profile .bis/bis_bazel_profile\"`,
                 "--file_path",
                 `${filePath}`,
             ],
