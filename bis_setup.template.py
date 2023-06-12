@@ -39,7 +39,7 @@ def create_bis_build(args):
         aquery_args = [
             'bazel',
             'aquery',
-            f"mnemonic('(Swift|Objc|Cpp|Kotlin)Compile', {target_stetment})",
+            f"mnemonic('(Swift|Objc|Cpp)Compile', {target_stetment})",
             '--output=jsonproto',
             '--include_artifacts=false',
             '--ui_event_filters=-info',
@@ -115,28 +115,18 @@ refresh_launch_json(
     with open('.bis/BUILD', 'w') as output_file:
         output_file.write(template)
     if not args.ignore_parsing_targets:
-        kt_mode = args.file_path and args.file_path.endswith(".kt")
         cmd = f'bazel build {target} {args.optionals} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="{outputs_group_str}"'
         
-        if kt_mode:
-            with open("kls-classpath", "w") as output_file:
-                output_file.write(f"#!/bin/bash\n{cmd} 2> >(grep -o 'bazel-.*\.jar') | tr '\\n' ':'")
-                mode = os.fstat(output_file.fileno()).st_mode
-                mode |= 0o111
-                os.fchmod(output_file.fileno(), mode & 0o7777)
-        else:
-            print(f"Start build command = {cmd}", flush=True)
-            process = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
-            print(f"End build", flush=True)
-
-            cmd = "bazel run //.bis:refresh_compile_commands"
-            if len(args.file_path) > 0:
-                cmd += f" -- --file={args.file_path}"
-            print(f"Start refresh_compile_commands command = {cmd}", flush=True)
-            pricess = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
-            print(f"End refresh_compile_commands", flush=True)
-
-
+        print(f"Start build command = {cmd}", flush=True)
+        process = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
+        print(f"End build", flush=True)
+    
+        cmd = "bazel run //.bis:refresh_compile_commands"
+        if len(args.file_path) > 0:
+            cmd += f" -- --file={args.file_path}"
+        print(f"Start refresh_compile_commands command = {cmd}", flush=True)
+        pricess = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
+        print(f"End refresh_compile_commands", flush=True)
 
 
 # main
