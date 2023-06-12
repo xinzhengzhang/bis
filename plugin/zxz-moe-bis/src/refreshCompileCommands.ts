@@ -59,7 +59,6 @@ export function onDidChangeActiveTextEditorMaker() {
                         ".CPP",
                         ".CXX",
                         ".C++",
-                        ".kt",
                     ];
                     const resetCtxFileName = [
                         "BUILD",
