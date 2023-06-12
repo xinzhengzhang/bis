@@ -37,7 +37,7 @@ export function onDidChangeActiveTextEditorMaker() {
                     );
                     logger.log(`TextEditor changed...\r\n${relative}\r\n`);
                     // cpp extension:... https://github.com/llvm/llvm-project/blob/b9f3b7f89a4cb4cf541b7116d9389c73690f78fa/clang/lib/Driver/Types.cpp#L293
-                    let supportExt = [
+                    const supportExt = [
                         // header
                         ".h",
                         ".hpp",
@@ -59,10 +59,8 @@ export function onDidChangeActiveTextEditorMaker() {
                         ".CPP",
                         ".CXX",
                         ".C++",
+                        ".kt",
                     ];
-                    if (configuration.supportKotlinExtension) {
-                        supportExt.push(".kt");
-                    }
                     const resetCtxFileName = [
                         "BUILD",
                         "BUILD.bazel",

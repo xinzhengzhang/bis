@@ -76,13 +76,6 @@ const configuration = {
                 .get<boolean>("auto_refresh_tree_viewer_configuration_changed") ?? false
         );
     },
-    get supportKotlinExtension(): boolean {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<boolean>("supportKotlinExtension") ?? false
-        );
-    },
     /**
      * Gets the path to the Bazel executable specified by the workspace
      * configuration, if present.
