@@ -1,6 +1,7 @@
 # Change Log
 
 ## [Unreleased]
+* Revert kotlin support. There are too many problems with the kotlin language server and it cannot be used in production at all, so the implementation method still generates the corresponding gradle template
 ### 0.3.3
 Enhance
 * Remove a useless refresh_compile_commands left in the plugin for compatibility
