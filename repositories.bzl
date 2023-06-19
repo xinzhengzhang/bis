@@ -12,7 +12,7 @@ def _maybe(repo_rule, name, **kwargs):
     if not native.existing_rule(name):
         repo_rule(name = name, **kwargs)
 
-def bis_rules_dependencies_hedron_compile_commands(remote = "git@github.com:hedronvision/bazel-compile-commands-extractor.git"):
+def bis_rules_dependencies_hedron_compile_commands(remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git"):
     git_repository(
         name = "hedron_compile_commands",
         remote = remote,
