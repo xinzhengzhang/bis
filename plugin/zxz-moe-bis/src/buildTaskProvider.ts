@@ -46,6 +46,22 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                 cpu
             )
         ];
+        return result;
+    }
+
+    public async provideAllTasks(): Promise<vscode.Task[]> {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders?.length) {
+            return [];
+        }
+        const buildTarget = await inputer.buildTarget();
+        if (!buildTarget) {
+            return [];
+        }
+
+        const compilationMode = (await picker.compilationMode()) ?? "dbg";
+        const cpu = await cpuProvider.cpu();
+        const result: vscode.Task[] = await this.provideTasks();
 
         for (const workspaceFolder of workspaceFolders) {
             const folderString = workspaceFolder.uri.fsPath;

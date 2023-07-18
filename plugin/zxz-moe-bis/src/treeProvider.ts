@@ -182,7 +182,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
         }
         const run = () => {
             this.isProcessing = true;
-            new BuildTaskProvider().provideTasks().then((tasks) => {
+            new BuildTaskProvider().provideAllTasks().then((tasks) => {
                 const items = tasks.map(
                     (task) =>
                     new TreeItem(task, task.name.replace(/^build /, ""))
