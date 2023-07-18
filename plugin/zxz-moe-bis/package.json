@@ -271,7 +271,7 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "ios-deploy": "github:ios-control/ios-deploy#main",
+    "ios-deploy": "github:ios-control/ios-deploy#master",
     "lodash": "^4.17.21",
     "rxjs": "^7.8.0",
     "vscode-ios-debug": "github:nisargjhaveri/vscode-ios-debug"
