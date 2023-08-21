@@ -45,7 +45,7 @@ It theoretically supports all rules of languages that can be supported by source
 ---
 ## Requirements
 
-* [bazel](http://github.com/bazelbuild/bazel)
+* [bazel](http://github.com/bazelbuild/bazel) The bazel version is used according to the corresponding rules
 
 ---
 ## Usage
