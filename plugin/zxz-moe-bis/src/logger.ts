@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
+import configuration  from "./configuration";
 
 let channel: vscode.OutputChannel;
+
+const loggerPrefix = (): string => {
+    return configuration.pluginMode;
+};
 
 function getFormattedTime() {
     let time = new Date();
@@ -11,7 +16,7 @@ function getFormattedTime() {
     const minutes = time.getMinutes().toString().padStart(2, '0');
     const seconds = time.getSeconds().toString().padStart(2, '0');
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
+};
 
 function formatSingleMessage(message: any) {
     if (typeof message === "undefined") {
@@ -28,7 +33,7 @@ function formatSingleMessage(message: any) {
 function formatMessage(severity: "ERROR" | "WARN" | "INFO", messages: any[]) {
     let message = messages.map(formatSingleMessage).join(" ");
 
-    return `[${getFormattedTime()}] [${severity}] ${message}`;
+    return `[${getFormattedTime()}] [${severity}] [${loggerPrefix()}] ${message}`;
 }
 
 export function activate() {

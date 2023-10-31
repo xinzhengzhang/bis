@@ -137,6 +137,16 @@
             "description": "The name of the Bazel executable. This may be an absolute path.  If empty, \"bazel\" on the system path will be used.",
             "order": 14,
             "default": ""
+          },
+          "bis.plugin_mode": {
+            "type": "string",
+            "default": "mixed",
+            "enum": [
+              "mixed",
+              "ios-deploy",
+              "pymobiledevice3"
+            ],
+            "description": "Select your plugin mode.<br> - `mixed`: only device running iOS 17 or above will use `pymobiledevice3` to start a debug server, all other functionability will fallback to `ios-deploy`.<br> - `ios-deploy`: use `ios-deploy` only (devices running iOS 17 or above will **fail** to launch a debug server).<br> - `pymobiledevice3`: use `pymobiledevice3` to do all the work (beta)."
           }
         }
       },
@@ -154,6 +164,23 @@
             "markdownDescription": "Include devices connected via WIFI",
             "order": 2,
             "default": true
+          }
+        }
+      },
+      {
+        "title": "pymobiledevice3",
+        "properties": {
+          "pymobiledevice3.debug_server_port": {
+            "type": "number",
+            "markdownDescription": "Debug Server Port (only for device running < iOS 17)",
+            "order": 1,
+            "default": 51968
+          },
+          "pymobiledevice3.sudo_password": {
+            "type": "string",
+            "markdownDescription": "Sudo password",
+            "order": 2,
+            "default": ""
           }
         }
       }
