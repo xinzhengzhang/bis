@@ -29,11 +29,9 @@ import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
 import WorkspaceService from "./workspace";
 import { TreeProvider } from "./treeProvider";
+import * as pymobiledevice3 from "./pymobiledevice3";
 
-import * as targetCommand from "vscode-ios-debug/src/targetCommand";
 import * as debugConfigProvider from "./debugConfigProvider";
-import * as debugLifecycleManager from "vscode-ios-debug/src/debugLifecycleManager";
-import * as iosDebugLogger from "vscode-ios-debug/src/logger";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -44,7 +42,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Component
     // UI
-    iosDebugLogger.activate();
     targetVariable.active(context);
     compilationModeVariable.active(context);
     deviceVariable.active(context);
@@ -52,13 +49,12 @@ export function activate(context: vscode.ExtensionContext) {
     picker.activate(context);
     devicePicker.activate(context);
     inputer.activate(context);
-    targetCommand.activate(context);
     cpuProvider.activate(context);
     eventEmitter.activate(context);
+    pymobiledevice3.activate(context);
 
     // Debugger
     debugConfigProvider.activate(context);
-    debugLifecycleManager.activate(context);
 
     // Commands get variable
     context.subscriptions.push(

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { BehaviorSubject, Observable, Subscription } from "rxjs";
-import { Target, Device } from "vscode-ios-debug/src/commonTypes";
+import { Target, Device } from "./commonTypes";
 import * as os from "node:os";
 
 class Variable<T> {

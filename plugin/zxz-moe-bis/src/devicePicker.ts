@@ -1,7 +1,7 @@
 import * as os from "node:os";
 import * as vscode from "vscode";
-import { Device, Simulator, Target } from "vscode-ios-debug/src/commonTypes";
-import * as iosTargets from "vscode-ios-debug/src/targets";
+import { Device, Simulator, Target } from "./commonTypes";
+import * as iosTargets from './targets';
 import * as logger from "./logger";
 import { macOSVersions } from "./utils";
 import { deviceVariable } from "./variables";
