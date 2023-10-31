@@ -1,3 +1,4 @@
+import * as pymobiledevice3 from './pymobiledevice3';
 import * as iosDeploy from './iosDeploy';
 import * as simulators from './simulators';
 import { Device, Target } from "./commonTypes";
@@ -12,7 +13,7 @@ let debugserverProcesses: { [port: string]: ChildProcess } = {};
 
 export async function listTargets(): Promise<Target[]> {
 	let [dev, sim] = await Promise.all([
-		iosDeploy.listDevices(),
+		configuration.pluginMode === "pymobiledevice3" ? pymobiledevice3.listDevices() : iosDeploy.listDevices(),
 		simulators.listSimulators()
 	]);
 
@@ -20,8 +21,11 @@ export async function listTargets(): Promise<Target[]> {
 }
 
 async function install(udid: string, path: string, ipaPath: string, bundleID: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void) {
-
-	return await iosDeploy.deviceInstall({ udid, path }, cancellationToken, progressCallback);
+	if (configuration.pluginMode === "pymobiledevice3") {
+		return await pymobiledevice3.deviceInstall(udid, ipaPath, bundleID, cancellationToken, progressCallback);
+	} else {
+		return await iosDeploy.deviceInstall({ udid, path }, cancellationToken, progressCallback);
+	}
 }
 
 export async function deviceInstall(device: Device, path: string, ipaPath: string, bundleID: string) {
@@ -56,11 +60,20 @@ export async function deviceInstall(device: Device, path: string, ipaPath: strin
 }
 
 export async function deviceAppPath(udid: string, bundleId: string): Promise<string | undefined> {
-	return await iosDeploy.getAppDevicePath(udid, bundleId);
+	if (configuration.pluginMode === "pymobiledevice3") {
+		return await pymobiledevice3.appPath(udid, bundleId);
+	} else {
+		return await iosDeploy.getAppDevicePath(udid, bundleId);
+	}
 }
 
 async function debugserver(device: Device, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: string, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
-	return await iosDeploy.debugserver(device.udid, cancellationToken, progressCallback);
+	if (configuration.pluginMode === "pymobiledevice3" ||
+		(configuration.pluginMode === 'mixed' && isIOS17OrLater(device.version))) {
+		return await pymobiledevice3.debugserver(device, cancellationToken, progressCallback);
+	} else {
+		return await iosDeploy.debugserver(device.udid, cancellationToken, progressCallback);
+	}
 }
 
 export async function deviceDebugserver(device: Device): Promise<void | { host: string, port: string }> {

@@ -90,6 +90,13 @@ const configuration = {
         }
         return bazelExecutable;
     },
+    get pluginMode(): string {
+        return (
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<string>("plugin_mode") ?? "mixed"
+        );
+    },
     get isWifiDeviceIncluded(): boolean {
         return (
             vscode.workspace
@@ -111,6 +118,13 @@ const configuration = {
                 .get<number>("debugserver_local_port") ?? 51968
         );
     },
+    get sudoPassword(): string {
+        return (
+            vscode.workspace
+                .getConfiguration("pymobiledevice3")
+                .get<string>("sudo_password") ?? ""
+        );
+    }
 };
 
 export default configuration;

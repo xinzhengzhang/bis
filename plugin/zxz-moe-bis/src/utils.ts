@@ -155,3 +155,7 @@ export async function macOSVersions() {
         buildVersion: buildVersion,
     };
 }
+
+export let isIOS17OrLater = (version: string): boolean => {
+    return parseInt(version, 10) >= 17;
+};
