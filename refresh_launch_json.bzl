@@ -20,6 +20,7 @@ def _create_launch_items(target, pre_launch_task_name):
                 type = "lldb",
                 request = "launch",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
+                ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 iosBundleId = bundle_info.bundle_id,
                 iosTarget = "last-selected",
                 preLaunchTask = pre_launch_task_name,
@@ -30,6 +31,7 @@ def _create_launch_items(target, pre_launch_task_name):
                 type = "lldb",
                 request = "attach",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
+                ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 iosBundleId = bundle_info.bundle_id,
                 iosTarget = "last-selected",
                 sourceMap = {"./": "${workspaceFolder}"}
