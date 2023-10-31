@@ -5,9 +5,9 @@ import * as crypto from "crypto";
 import * as path from "path";
 import * as vscode from "vscode";
 import * as logger from "./logger";
-import { Target, TargetType } from "vscode-ios-debug/src/commonTypes";
-import * as targetCommand from "vscode-ios-debug/src/targetCommand";
-import * as simulatorFocus from "vscode-ios-debug/src/simulatorFocus";
+import { Device, Target, TargetType } from "./commonTypes";
+import * as targets from "./targets";
+import * as simulatorFocus from "./simulatorFocus";
 import { getTargetFromUDID, lastSelected, selectDevice } from "./devicePicker";
 
 let context: vscode.ExtensionContext;
@@ -17,6 +17,12 @@ const lldbPlatform: { [T in TargetType]: string } = {
     Simulator: "ios-simulator",
     // eslint-disable-next-line @typescript-eslint/naming-convention
     Device: "remote-ios",
+};
+
+const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
+const isIPv4 = (address: string): boolean => {
+    return ipv4Pattern.test(address);
 };
 
 function randomString() {
@@ -36,8 +42,7 @@ function getOutputBasename() {
 }
 
 export class DebugConfigurationProvider
-    implements vscode.DebugConfigurationProvider
-{
+    implements vscode.DebugConfigurationProvider {
     private async getTarget(iosTarget: string): Promise<Target | undefined> {
         if (iosTarget === "select") {
             return await selectDevice();
@@ -144,7 +149,7 @@ export class DebugConfigurationProvider
                 let stdout = `${outputBasename}-stdout`;
                 let stderr = `${outputBasename}-stderr`;
 
-                pid = await targetCommand.simulatorInstallAndLaunch({
+                pid = await targets.simulatorInstallAndLaunch({
                     udid: target.udid,
                     path: dbgConfig.program,
                     bundleId: dbgConfig.iosBundleId,
@@ -157,7 +162,7 @@ export class DebugConfigurationProvider
                 dbgConfig.initCommands.push(`follow ${stdout}`);
                 dbgConfig.initCommands.push(`follow ${stderr}`);
             } else {
-                pid = await targetCommand.simulatorGetPidFor({
+                pid = await targets.simulatorGetPidFor({
                     udid: target.udid,
                     bundleId: dbgConfig.iosBundleId,
                 });
@@ -184,29 +189,30 @@ export class DebugConfigurationProvider
         } else if (target.type === "Device") {
             let platformPath: string | void;
             if (dbgConfig.iosRequest === "launch") {
-                platformPath = await targetCommand.deviceInstall({
-                    udid: target.udid,
-                    path: dbgConfig.program,
-                });
+                platformPath = await targets.deviceInstall(
+                    target as Device,
+                    dbgConfig.program,
+                    dbgConfig.ipaPath,
+                    dbgConfig.iosBundleId
+                );
             } else {
-                platformPath = await targetCommand.deviceAppPath({
-                    udid: target.udid,
-                    bundleId: dbgConfig.iosBundleId,
-                });
+                platformPath = await targets.deviceAppPath(
+                    target.udid,
+                    dbgConfig.iosBundleId,
+                );
             }
 
             if (!platformPath) {
                 return null;
             }
 
-            let debugserverPort = await targetCommand.deviceDebugserver({
-                udid: target.udid,
-            });
-            if (!debugserverPort) {
+            let debugServerInfo = await targets.deviceDebugserver(target as Device);
+
+            if (!debugServerInfo) {
                 return null;
             }
 
-            dbgConfig.iosDebugserverPort = debugserverPort;
+            dbgConfig.iosDebugserverPort = debugServerInfo.port;
 
             dbgConfig.preRunCommands =
                 dbgConfig.preRunCommands instanceof Array
@@ -215,12 +221,18 @@ export class DebugConfigurationProvider
             dbgConfig.preRunCommands.push(
                 `script lldb.target.module[0].SetPlatformFileSpec(lldb.SBFileSpec('${platformPath}'))`
             );
-            dbgConfig.preRunCommands.push(
-                `process connect connect://127.0.0.1:${debugserverPort}`
-            );
+            if (isIPv4(debugServerInfo.host)) {
+                dbgConfig.preRunCommands.push(
+                    `process connect connect://${debugServerInfo.host}:${debugServerInfo.port}`
+                );
+            } else {
+                dbgConfig.preRunCommands.push(
+                    `process connect connect://[${debugServerInfo.host}]:${debugServerInfo.port}`
+                );
+            }
 
             if (dbgConfig.env) {
-                let newEnv: {[key: string]: string} = {};
+                let newEnv: { [key: string]: string } = {};
                 for (let key in dbgConfig.env) {
                     newEnv[key] = dbgConfig.env[key].replace(
                         "__TESTHOST__",

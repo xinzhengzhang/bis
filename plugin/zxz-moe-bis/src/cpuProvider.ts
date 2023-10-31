@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as process from "node:process";
-import { Target } from "vscode-ios-debug/src/commonTypes";
+import { Target } from "./commonTypes";
 import configuration from "./configuration";
 import { cpuVariable, deviceVariable } from "./variables";
 

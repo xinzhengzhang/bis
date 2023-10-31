@@ -90,6 +90,27 @@ const configuration = {
         }
         return bazelExecutable;
     },
+    get isWifiDeviceIncluded(): boolean {
+        return (
+            vscode.workspace
+                .getConfiguration("ios-deploy")
+                .get<boolean>("wifi_device_enabled") ?? true
+        );
+    },
+    get isIncrementalInstallEnabled(): boolean {
+        return (
+            vscode.workspace
+                .getConfiguration("ios-deploy")
+                .get<boolean>("incremental_installation_enabled") ?? true
+        );
+    },
+    get debugServerLocalPort(): number {
+        return (
+            vscode.workspace
+                .getConfiguration("pymobiledevice3")
+                .get<number>("debugserver_local_port") ?? 51968
+        );
+    },
 };
 
 export default configuration;

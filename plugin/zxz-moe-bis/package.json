@@ -139,6 +139,23 @@
             "default": ""
           }
         }
+      },
+      {
+        "title": "ios-deploy",
+        "properties": {
+          "ios-deploy.incremental_installation_enabled": {
+            "type": "boolean",
+            "markdownDescription": "Incremental installation",
+            "order": 1,
+            "default": true
+          },
+          "ios-deploy.wifi_device_enabled": {
+            "type": "boolean",
+            "markdownDescription": "Include devices connected via WIFI",
+            "order": 2,
+            "default": true
+          }
+        }
       }
     ],
     "taskDefinitions": [
@@ -204,6 +221,10 @@
               "sessionName": {
                 "description": "Update the debug session name to easily identify multiple running sessions",
                 "type": "string"
+              },
+              "ipaPath": {
+                "description": "Path to the .ipa file ",
+                "type": "string"
               }
             }
           },
@@ -230,6 +251,10 @@
               },
               "sessionName": {
                 "description": "Update the debug session name to easily identify multiple running sessions",
+                "type": "string"
+              },
+              "ipaPath": {
+                "description": "Path to the .ipa file ",
                 "type": "string"
               }
             }
@@ -274,6 +299,7 @@
     "ios-deploy": "github:ios-control/ios-deploy#master",
     "lodash": "^4.17.21",
     "rxjs": "^7.8.0",
-    "vscode-ios-debug": "github:nisargjhaveri/vscode-ios-debug"
+    "sudo-prompt": "^1.0.0",
+    "stream-json": "^1.8.0"
   }
 }

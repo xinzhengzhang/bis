@@ -5,7 +5,6 @@ import * as fs from "fs";
 import {
     execFile,
     ChildProcess,
-    ExecOptions,
     exec,
     ExecFileException,
 } from "child_process";
@@ -13,6 +12,10 @@ import configuration from "./configuration";
 import { Transform } from "stream";
 import { TextDecoder } from "util";
 import * as logger from "./logger";
+
+export let _execFile = promisify(execFile);
+
+export let _exec = promisify(exec);
 
 export function isBisWorkspace(workspace: vscode.WorkspaceFolder) {
     return fs.existsSync(workspace.uri.fsPath + "/.bis/BUILD");
