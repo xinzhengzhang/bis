@@ -10,18 +10,20 @@ import { isIOS17OrLater } from './utils';
 import * as path from 'path';
 import * as fs from 'fs';
 
-let PYMOBILEDEVICELITE = "pymobiledevicelite";
+let PYMDWORKSPACE = "pymobiledevicelite";
 
 export function activate(context: vscode.ExtensionContext) {
     // 获取当前扩展的路径
     let extensionPath = context.extensionPath;
 
-    // 计算 abc 二进制文件的完整路径
-    PYMOBILEDEVICELITE = path.join(extensionPath, 'pymobiledevicelite', 'pymobiledevicelite');
-    logger.log(PYMOBILEDEVICELITE);
-
-    // 你现在可以使用 abcBinaryPath 来运行或处理 abc 二进制文件
+    // 计算 pymobiledevicelite 完整路径
+    PYMDWORKSPACE = path.join(extensionPath, 'pymobiledevicelite');
+    logger.log(PYMDWORKSPACE);
 }
+
+const bazelExe = configuration.bazelExecutablePath;
+
+const baseArgs = ['run', '--ui_event_filters=ERROR', '--noshow_progress', '//:pymobiledevicelite', '--']
 
 /*
 {"PercentComplete": 5, "Status": "CreatingStagingDirectory"}
@@ -41,12 +43,15 @@ export function activate(context: vscode.ExtensionContext) {
 async function install(udid: string, path: string, bundleID: string, cancellationToken: { cancel?(): void }, progressCallback?: (event: any) => void): Promise<string | undefined> {
     let time = new Date().getTime();
 
-    let command = PYMOBILEDEVICELITE;
-    let args = ['install-app', '--udid', udid, path];
+    let args = baseArgs.concat(['install-app', '--udid', udid, path]);
 
-    logger.log(`Running ${command} ${args.join(' ')}`);
+    logger.log(`Running bazel ${args.join(' ')}`);
 
-    let p = _execFile(command, args);
+    let p = _execFile(
+        bazelExe,
+        args,
+        { shell: true, cwd: PYMDWORKSPACE }
+    );
 
     cancellationToken.cancel = () => p.child.kill();
 
@@ -70,11 +75,16 @@ async function install(udid: string, path: string, bundleID: string, cancellatio
 
 async function rsd(udid: string): Promise<{ host: string, port: string }> {
     logger.log(`creating quic tunel to device (udid: ${udid})`);
-    let command = `echo ${configuration.sudoPassword} | sudo -S ${PYMOBILEDEVICELITE} ` + ["start-quic-tunnel", "--udid", udid].join(' ');
+
+    let command = `echo ${configuration.sudoPassword} | sudo -S ${bazelExe} ` + baseArgs.concat(["start-quic-tunnel", "--udid", udid]).join(' ');
     logger.log(`Running ${command}`);
 
     return new Promise((resolve, reject) => {
-        let p = _exec(command);
+
+        let p = _exec(
+            command,
+            { cwd: PYMDWORKSPACE }
+        );
 
         logger.log(`rsd pid: ${p.child.pid}`);
 
@@ -100,12 +110,15 @@ async function rsd(udid: string): Promise<{ host: string, port: string }> {
 async function debug(host: string, port: string): Promise<{ host: string, port: string }> {
     return new Promise((resolve, reject) => {
         logger.log(`launch debug server device (rsd: ${host} ${port})`);
-        let command = PYMOBILEDEVICELITE;
-        let args = ['debug-server', '--rsd', host, port];
+        let args = baseArgs.concat(['debug-server', '--rsd', host, port]);
 
-        logger.log(`Running ${command} ${args.join(' ')}`);
+        logger.log(`Running bazel ${args.join(' ')}`);
 
-        let p = _execFile(command,args);
+        let p = _execFile(
+            bazelExe,
+            args,
+            { shell: true, cwd: PYMDWORKSPACE }
+        );
 
         p.child.stdout?.pipe(StreamValues.withParser())
             .on('data', (data) => {
@@ -123,11 +136,14 @@ async function debug(host: string, port: string): Promise<{ host: string, port: 
 
 export async function appPath(udid: string, bundleID: string): Promise<string> {
     return new Promise((resolve, reject) => {
-        let command = PYMOBILEDEVICELITE;
-        let args = ['installed-app-path', '--udid', udid];
-        logger.log(`Running ${command} ${args.join(' ')}`);
+        let args = baseArgs.concat(['installed-app-path', '--udid', udid]);
+        logger.log(`Running bazel ${args.join(' ')}`);
 
-        let p = _execFile(command, args);
+        let p = _execFile(
+            bazelExe,
+            args,
+            { shell: true, cwd: PYMDWORKSPACE }
+        );
 
         p.child.stdout?.pipe(StreamValues.withParser())
             .on('data', (data) => {
@@ -149,11 +165,13 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
 }
 
 export async function listDevices(): Promise<Device[]> {
-    let command = PYMOBILEDEVICELITE;
-    let args = ['list-device'];
-    logger.log(`Running ${command} ${args.join(' ')}`);
-
-    return _execFile(command, args)
+    let args = baseArgs.concat(['list-device']);
+    logger.log(`Running bazel ${args.join(' ')}`);
+    return _execFile(
+        bazelExe,
+        args,
+        { shell: true, cwd: PYMDWORKSPACE }
+    )
         .then(({ stdout, stderr }): Device[] => {
             if (stderr) { logger.error(stderr); }
             logger.log(`list-device ${stdout} devices`);
@@ -194,14 +212,14 @@ export async function listDevices(): Promise<Device[]> {
         });
 }
 
-export async function deviceInstall(udid: string, path: string, bundleID: string, cancellationToken: {cancel(): void}, progressCallback?: (event: any) => void) {
+export async function deviceInstall(udid: string, path: string, bundleID: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void) {
     return Promise.resolve()
-            .then(() => install(udid, path, bundleID, cancellationToken, (event) => {
-                progressCallback && progressCallback(event);
-            }))
-            .catch((e) => {
-                vscode.window.showErrorMessage("Failed to install app on device");
-            });
+        .then(() => install(udid, path, bundleID, cancellationToken, (event) => {
+            progressCallback && progressCallback(event);
+        }))
+        .catch((e) => {
+            vscode.window.showErrorMessage("Failed to install app on device");
+        });
 }
 
 export async function debugserver(device: Device, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: string, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
@@ -210,15 +228,21 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
     let p: PromiseWithChild<{ stdout: string, stderr: string }>;
     if (isIOS17OrLater(device.version)) {
         let rsdInfo = await rsd(device.udid);
-        let command = PYMOBILEDEVICELITE;
-        let args = ['debug-server', '--rsd', rsdInfo.host, rsdInfo.port];
-        logger.log(`Running ${command} ${args.join(' ')}`);
-        p = _execFile(command,args);
+        let args = baseArgs.concat(['debug-server', '--rsd', rsdInfo.host, rsdInfo.port]);
+        logger.log(`Running bazel ${args.join(' ')}`);
+        p = _execFile(
+            bazelExe,
+            args,
+            { shell: true, cwd: PYMDWORKSPACE }
+        );
     } else {
-        let command = PYMOBILEDEVICELITE;
-        let args = ['debug-server', '--udid', device.udid, configuration.debugServerLocalPort.toString()];
-        logger.log(`Running ${command} ${args.join(' ')}`);
-        p = _execFile(command, args);
+        let args = baseArgs.concat(['debug-server', '--udid', device.udid, configuration.debugServerLocalPort.toString()]);
+        logger.log(`Running bazel ${args.join(' ')}`);
+        p = _execFile(
+            bazelExe,
+            args,
+            { shell: true, cwd: PYMDWORKSPACE }
+        );
     }
 
     cancellationToken.cancel = () => p.child.kill();
