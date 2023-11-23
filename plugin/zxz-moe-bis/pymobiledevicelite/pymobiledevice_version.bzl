@@ -1,2 +1,2 @@
 """pymobiledevice3's version"""
-PYMOBILEDEVICE3_VERSION = "2.17.2"
+PYMOBILEDEVICE3_VERSION = "2.29.2"
