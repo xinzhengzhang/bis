@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 const bazelExe = configuration.bazelExecutablePath;
 
-const baseArgs = ['run', '--ui_event_filters=ERROR', '--noshow_progress', '//:pymobiledevicelite', '--']
+const baseArgs = ['run', '--ui_event_filters=ERROR', '--noshow_progress', '//:pymobiledevicelite', '--'];
 
 /*
 {"PercentComplete": 5, "Status": "CreatingStagingDirectory"}
