@@ -1,4 +1,4 @@
-import asyncio, click, json
+import asyncio, click, json, re
 from packaging.version import Version
 from pymobiledevice3.exceptions import NoDeviceConnectedError
 from pymobiledevice3.cli.cli_common import Command
@@ -10,7 +10,15 @@ from installationProxyService import SimplifiedInstallationProxyService
 from typing import Optional
 from untils import tunnel_task
 
-@click.group()
+def pymobiledevice3_version():
+    with open('pymobiledevice_version.bzl', 'r') as f:
+        file_content = f.read()
+        pattern = r'PYMOBILEDEVICE3_VERSION = "([0-9.]+)"'
+        match = re.search(pattern, file_content)
+        version = match.group(1) if match else "Version not found"
+    return version
+
+@click.group(help=f'pymobiledevicelite cli, based on pymobiledevice3({pymobiledevice3_version()})')
 def cli():
     pass
 
