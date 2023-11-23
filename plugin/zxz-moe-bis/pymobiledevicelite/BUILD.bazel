@@ -5,6 +5,13 @@ This python program is a very simplified version of pymobiledevice3(https://gith
 load("@my_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load(":pymobiledevice_version.bzl", "PYMOBILEDEVICE3_VERSION")
+
+genrule(
+    name = "generate_requirements",
+    outs = ["requirements.in"],
+    cmd = "echo '--extra-index-url https://pypi.python.org/simple/\n\npymobiledevice3=={}' > $@".format(PYMOBILEDEVICE3_VERSION),
+)
 
 compile_pip_requirements(
     name = "requirements",
@@ -12,13 +19,16 @@ compile_pip_requirements(
         "--allow-unsafe",
         "--resolver=backtracking",
     ],
-    requirements_in = "requirements.in",
+    requirements_in = ":generate_requirements",
     requirements_txt = "requirements_lock.txt",
 )
 
 py_binary(
     name = "pymobiledevicelite",
     srcs = ["pymobiledevicelite.py"],
+    data = [
+        "pymobiledevice_version.bzl",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         requirement("pymobiledevice3"),
