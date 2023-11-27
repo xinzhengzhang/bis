@@ -8,6 +8,7 @@ swift_binary(
     ],
     deps = [
         "//srcs/shared/module_b:module_b",
+        "//srcs/shared/macros:stringify",
         "@swift_argument_parser//:ArgumentParser"
     ]
 )
