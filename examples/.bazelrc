@@ -1,2 +1,5 @@
 common --enable_bzlmod
 build --experimental_cc_implementation_deps
+
+build --host_macos_minimum_os=13.0
+build --macos_minimum_os=13.0
