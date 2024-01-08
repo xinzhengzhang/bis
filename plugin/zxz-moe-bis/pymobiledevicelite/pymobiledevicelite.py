@@ -9,6 +9,23 @@ from pymobiledevice3.usbmux import list_devices
 from installationProxyService import SimplifiedInstallationProxyService
 from typing import Optional
 from untils import tunnel_task
+from pymobiledevice3.remote.module_imports import MAX_IDLE_TIMEOUT, start_tunnel, verify_tunnel_imports
+from functools import partial
+from pymobiledevice3.tunneld import TunneldRunner
+from pymobiledevice3.remote.utils import TUNNELD_DEFAULT_ADDRESS, stop_remoted
+from pymobiledevice3.remote.common import TunnelProtocol
+import tempfile
+from pymobiledevice3.remote.remote_service_discovery import RemoteServiceDiscoveryService
+
+DEBUGSERVER_CONNECTION_STEPS = '''
+Follow the following connections steps from LLDB:
+
+(lldb) platform select remote-ios
+(lldb) target create /path/to/local/application.app
+(lldb) script lldb.target.module[0].SetPlatformFileSpec(lldb.SBFileSpec('/private/var/containers/Bundle/Application/<APP-UUID>/application.app'))
+(lldb) process connect connect://[{host}]:{port}   <-- ACTUAL CONNECTION DETAILS!
+(lldb) process launch
+'''
 
 def pymobiledevice3_version():
     with open('pymobiledevice_version.bzl', 'r') as f:
@@ -65,38 +82,37 @@ def debug_server(service_provider: LockdownClient, local_port: Optional[int] = N
         click.echo(json.dumps({"host": '127.0.0.1', "port": local_port}))
         LockdownTcpForwarder(service_provider, local_port, service_name).start()
     elif Version(service_provider.product_version) >= Version('17.0'):
+        if not isinstance(service_provider, RemoteServiceDiscoveryService):
+            raise RSDRequiredError()
         debugserver_port = service_provider.get_service_port(service_name)
+        print(DEBUGSERVER_CONNECTION_STEPS.format(host=service_provider.service.address[0], port=debugserver_port))
         click.echo(json.dumps({"host": service_provider.service.address[0], "port": debugserver_port}))
     else:
         click.BadOptionUsage('--local_port', 'local_port is required for iOS < 17.0')
 
-@click.command(name='start-quic-tunnel')
-@click.option('--udid', help='UDID for a specific device to look for')
-def cli_start_quic_tunnel(udid: str):
-    """ start quic tunnel """
-    devices = get_device_list()
-    rsd = [device for device in devices if device.udid == udid]
-    if len(rsd) > 0:
-        rsd = rsd[0]
-    else:
-        raise NoDeviceConnectedError()
-
-    if udid is not None and rsd.udid != udid:
-        raise NoDeviceConnectedError()
-
-    asyncio.run(tunnel_task(rsd), debug=True)
-
-@click.command(cls=Command)
-def installed_app_path(service_provider: LockdownClient):
-    """ get installed app path """
-    result = SimplifiedInstallationProxyService(service_provider).get_apps(['User'])
-    click.echo(json.dumps(result))
+@click.command()
+def tunneld():
+    """ Start Tunneld service for remote tunneling """
+    host = '127.0.0.1'
+    port = 5555
+    if not verify_tunnel_imports():
+        return
+    tunneld_runner = partial(TunneldRunner.create, host, port, TunnelProtocol.QUIC)
+    try:
+        from daemonize import Daemonize
+    except ImportError:
+        raise NotImplementedError('daemonizing is only supported on unix platforms')
+    with tempfile.NamedTemporaryFile('wt') as pid_file:
+        daemon = Daemonize(app=f'Tunneld {host}:{port}', pid=pid_file.name,
+                            action=tunneld_runner)
+        click.echo(json.dumps({"host": host, "port": port}))
+        daemon.start()
 
 cli.add_command(list_device)
 cli.add_command(install_app)
 cli.add_command(debug_server)
-cli.add_command(cli_start_quic_tunnel)
 cli.add_command(installed_app_path)
+cli.add_command(tunneld)
 
 if __name__ == '__main__':
   cli()
