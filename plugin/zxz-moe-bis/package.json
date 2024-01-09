@@ -175,12 +175,6 @@
             "markdownDescription": "Debug Server Port (only for device running < iOS 17)",
             "order": 1,
             "default": 51968
-          },
-          "pymobiledevice3.sudo_password": {
-            "type": "string",
-            "markdownDescription": "Sudo password",
-            "order": 2,
-            "default": ""
           }
         }
       }
@@ -326,7 +320,6 @@
     "ios-deploy": "github:ios-control/ios-deploy#master",
     "lodash": "^4.17.21",
     "rxjs": "^7.8.0",
-    "sudo-prompt": "^9.2.1",
     "stream-json": "^1.8.0"
   }
 }
