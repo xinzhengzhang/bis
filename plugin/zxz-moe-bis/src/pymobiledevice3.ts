@@ -24,6 +24,7 @@ const bazelExe = configuration.bazelExecutablePath;
 
 const baseArgs = ['run', '//:pymobiledevicelite', '--'];
 
+// to check if the specific device is connected via a tunnel or not
 async function rsdInfo(udid: string): Promise<{ host: string, port: string } | undefined> {
     let args = baseArgs.concat(['rsd-info', '--tunnel', udid]);
     logger.log(`Running bazel ${args.join(' ')}`);
@@ -47,11 +48,6 @@ async function rsdInfo(udid: string): Promise<{ host: string, port: string } | u
 
             return undefined;
         });
-}
-
-async function startTunneld() {
-    let args = baseArgs.concat(['tunneld']);
-    logger.log(`Running bazel ${args.join(' ')}`);
 }
 
 /*
@@ -206,7 +202,12 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
                     ignoreFocusOut: false
                 }
             )
-            throw(Error(userInput))
+            let command = `echo ${userInput} | sudo -S ${bazelExe} ` + baseArgs.concat(["tunneld"]).join(' ');
+            logger.log('Start tunneld:' + `echo ****** | sudo -S ${bazelExe} ` + baseArgs.concat(["tunneld"]).join(' '));
+            await _exec(
+                command,
+                { cwd: PYMDWORKSPACE }
+            );
         } else {
             logger.log(`RSD info ${rsd.host} ${rsd.port}`);
         }
