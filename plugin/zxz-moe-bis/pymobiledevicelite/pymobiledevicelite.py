@@ -1,21 +1,16 @@
-import asyncio, click, json, re
+import asyncio, click, json, re, tempfile
+from functools import partial
+from installationProxyService import SimplifiedInstallationProxyService
 from packaging.version import Version
-from pymobiledevice3.exceptions import NoDeviceConnectedError
-from pymobiledevice3.cli.cli_common import Command
-from pymobiledevice3.cli.remote import get_device_list
+from pymobiledevice3.cli.cli_common import Command, RSDCommand
 from pymobiledevice3.lockdown import create_using_usbmux, LockdownClient
 from pymobiledevice3.tcp_forwarder import LockdownTcpForwarder
-from pymobiledevice3.usbmux import list_devices
-from installationProxyService import SimplifiedInstallationProxyService
-from typing import Optional
-from untils import tunnel_task
-from pymobiledevice3.remote.module_imports import MAX_IDLE_TIMEOUT, start_tunnel, verify_tunnel_imports
-from functools import partial
 from pymobiledevice3.tunneld import TunneldRunner
-from pymobiledevice3.remote.utils import TUNNELD_DEFAULT_ADDRESS, stop_remoted
 from pymobiledevice3.remote.common import TunnelProtocol
-import tempfile
+from pymobiledevice3.remote.module_imports import verify_tunnel_imports
 from pymobiledevice3.remote.remote_service_discovery import RemoteServiceDiscoveryService
+from pymobiledevice3.usbmux import list_devices
+from typing import Optional
 
 DEBUGSERVER_CONNECTION_STEPS = '''
 Follow the following connections steps from LLDB:
@@ -66,13 +61,8 @@ def debug_server(service_provider: LockdownClient, local_port: Optional[int] = N
     if local_port is not provided and iOS version >= 17.0 then just print the connect string
 
     Please note the connection must be done soon afterwards using your own lldb client.
-    This can be done using the following commands within lldb shell:
-
-    (lldb) platform select remote-ios
-
-    (lldb) platform connect connect://localhost:<local_port>
+    This can be done using the following commands within lldb shell.
     """
-
     if Version(service_provider.product_version) < Version('17.0'):
         service_name = 'com.apple.debugserver.DVTSecureSocketProxy'
     else:
@@ -85,16 +75,22 @@ def debug_server(service_provider: LockdownClient, local_port: Optional[int] = N
         if not isinstance(service_provider, RemoteServiceDiscoveryService):
             raise RSDRequiredError()
         debugserver_port = service_provider.get_service_port(service_name)
-        print(DEBUGSERVER_CONNECTION_STEPS.format(host=service_provider.service.address[0], port=debugserver_port))
+        # print(DEBUGSERVER_CONNECTION_STEPS.format(host=service_provider.service.address[0], port=debugserver_port))
         click.echo(json.dumps({"host": service_provider.service.address[0], "port": debugserver_port}))
     else:
         click.BadOptionUsage('--local_port', 'local_port is required for iOS < 17.0')
 
+@click.command(cls=Command)
+def installed_app_path(service_provider: LockdownClient):
+    """ get installed app path """
+    result = SimplifiedInstallationProxyService(service_provider).get_apps(['User'])
+    click.echo(json.dumps(result))
+
 @click.command()
-def tunneld():
+@click.option('--host', default='127.0.0.1')
+@click.option('--port', type=click.INT, default=5555)
+def tunneld(host: str, port: int):
     """ Start Tunneld service for remote tunneling """
-    host = '127.0.0.1'
-    port = 5555
     if not verify_tunnel_imports():
         return
     tunneld_runner = partial(TunneldRunner.create, host, port, TunnelProtocol.QUIC)
@@ -103,16 +99,25 @@ def tunneld():
     except ImportError:
         raise NotImplementedError('daemonizing is only supported on unix platforms')
     with tempfile.NamedTemporaryFile('wt') as pid_file:
+        print(pid_file.name)
         daemon = Daemonize(app=f'Tunneld {host}:{port}', pid=pid_file.name,
                             action=tunneld_runner)
-        click.echo(json.dumps({"host": host, "port": port}))
+        click.echo(json.dumps({"host": host, "port": port, "pid": pid_file.name}))
         daemon.start()
+
+@click.command(cls=RSDCommand)
+def rsd_info(service_provider: RemoteServiceDiscoveryService):
+    """ show info extracted from RSD peer """
+    host = service_provider.service.address[0]
+    port = service_provider.service.address[1]
+    click.echo(json.dumps({"host": host, "port": port}))
 
 cli.add_command(list_device)
 cli.add_command(install_app)
 cli.add_command(debug_server)
 cli.add_command(installed_app_path)
 cli.add_command(tunneld)
+cli.add_command(rsd_info)
 
 if __name__ == '__main__':
   cli()
