@@ -8,7 +8,6 @@ import { PromiseWithChild } from 'child_process';
 import configuration from './configuration';
 import { isIOS17OrLater } from './utils';
 import * as path from 'path';
-import * as fs from 'fs';
 
 let PYMDWORKSPACE = "pymobiledevicelite";
 
@@ -23,7 +22,37 @@ export function activate(context: vscode.ExtensionContext) {
 
 const bazelExe = configuration.bazelExecutablePath;
 
-const baseArgs = ['run', '--ui_event_filters=ERROR', '--noshow_progress', '//:pymobiledevicelite', '--'];
+const baseArgs = ['run', '//:pymobiledevicelite', '--'];
+
+async function rsdInfo(udid: string): Promise<{ host: string, port: string } | undefined> {
+    let args = baseArgs.concat(['rsd-info', '--tunnel', udid]);
+    logger.log(`Running bazel ${args.join(' ')}`);
+    return _execFile(
+        bazelExe,
+        args,
+        { shell: true, cwd: PYMDWORKSPACE }
+    )
+        .then(({ stdout, stderr }) => {
+            if (stderr) { logger.error(stderr); }
+            let json = JSON.parse(stdout);
+            logger.log(`rsd-info ${stdout}`);
+
+            return {
+                host: json.host,
+                port: json.port,
+            };
+        }).catch((e: any) => {
+            logger.log(`Could not find any connected device: ${e.toString().trimEnd()}`);
+            e.stderr && logger.error(e.stderr);
+
+            return undefined;
+        });
+}
+
+async function startTunneld() {
+    let args = baseArgs.concat(['tunneld']);
+    logger.log(`Running bazel ${args.join(' ')}`);
+}
 
 /*
 {"PercentComplete": 5, "Status": "CreatingStagingDirectory"}
@@ -71,67 +100,6 @@ async function install(udid: string, path: string, bundleID: string, cancellatio
     let installationPath = await appPath(udid, bundleID);
 
     return installationPath;
-}
-
-async function rsd(udid: string): Promise<{ host: string, port: string }> {
-    logger.log(`creating quic tunel to device (udid: ${udid})`);
-
-    let command = `echo ${configuration.sudoPassword} | sudo -S ${bazelExe} ` + baseArgs.concat(["start-quic-tunnel", "--udid", udid]).join(' ');
-    logger.log(`Running ${command}`);
-
-    return new Promise((resolve, reject) => {
-
-        let p = _exec(
-            command,
-            { cwd: PYMDWORKSPACE }
-        );
-
-        logger.log(`rsd pid: ${p.child.pid}`);
-
-        p.child.stdout?.pipe(StreamValues.withParser())
-            .on('data', (data) => {
-                p.child.stdout?.removeAllListeners();
-                let info = data.value;
-                if (info.host !== undefined && info.port !== undefined) {
-                    logger.log(`RSD Info: ${info.host} ${info.port}`);
-                    resolve({ host: info.host, port: info.port });
-                }
-            });
-
-        p.child.stderr?.on('data', (data) => {
-            logger.log(`RSD Error: ${data}`);
-            // if (!data.includes('Password')) {
-            //   reject(data);
-            // }
-        });
-    });
-}
-
-async function debug(host: string, port: string): Promise<{ host: string, port: string }> {
-    return new Promise((resolve, reject) => {
-        logger.log(`launch debug server device (rsd: ${host} ${port})`);
-        let args = baseArgs.concat(['debug-server', '--rsd', host, port]);
-
-        logger.log(`Running bazel ${args.join(' ')}`);
-
-        let p = _execFile(
-            bazelExe,
-            args,
-            { shell: true, cwd: PYMDWORKSPACE }
-        );
-
-        p.child.stdout?.pipe(StreamValues.withParser())
-            .on('data', (data) => {
-                let info = data.value;
-                logger.log(`Debug Server Info: ${info.host} ${info.port}`);
-                resolve({ host: info.host, port: info.port });
-            });
-
-        p.child.stderr?.on('data', (data) => {
-            logger.log(`Debug Server Error: ${data}`);
-            reject(data);
-        });
-    });
 }
 
 export async function appPath(udid: string, bundleID: string): Promise<string> {
@@ -227,8 +195,22 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
 
     let p: PromiseWithChild<{ stdout: string, stderr: string }>;
     if (isIOS17OrLater(device.version)) {
-        let rsdInfo = await rsd(device.udid);
-        let args = baseArgs.concat(['debug-server', '--rsd', rsdInfo.host, rsdInfo.port]);
+        // check if rsd is running
+        let rsd = await rsdInfo(device.udid);
+        if (rsd === undefined) {
+            const userInput = await vscode.window.showInputBox(
+                {
+                    title: "Input your password",
+                    prompt: "This command requires root privileges.",
+                    password: true,
+                    ignoreFocusOut: false
+                }
+            )
+            throw(Error(userInput))
+        } else {
+            logger.log(`RSD info ${rsd.host} ${rsd.port}`);
+        }
+        let args = baseArgs.concat(['debug-server', '--tunnel', device.udid]);
         logger.log(`Running bazel ${args.join(' ')}`);
         p = _execFile(
             bazelExe,
