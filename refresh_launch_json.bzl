@@ -43,6 +43,7 @@ def _create_launch_items(target, pre_launch_task_name):
                 type = "lldb",
                 request = "launch",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
+                ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 preLaunchTask = pre_launch_task_name,
                 sourceMap = {"./": "${workspaceFolder}"}
             ))
@@ -51,6 +52,7 @@ def _create_launch_items(target, pre_launch_task_name):
                 type = "lldb",
                 request = "attach",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
+                ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 sourceMap = {"./": "${workspaceFolder}"}
             ))
     elif bundle_info.bundle_extension == ".xctest":
