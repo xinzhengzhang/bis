@@ -87,7 +87,7 @@ async function install(udid: string, path: string, bundleID: string, cancellatio
         });
 
     p.child.stderr?.on('data', (data) => {
-        logger.log(`Installing Error: ${data}`);
+        logger.log(`${data}`);
     });
 
     await p;
@@ -111,19 +111,17 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
 
         p.child.stdout?.pipe(StreamValues.withParser())
             .on('data', (data) => {
-                let info = data.value;
-                let appInfo = info[bundleID];
-                if (appInfo === undefined) {
-                    reject(`[pymobiledevice3] App ${bundleID} not found`);
-                    return;
+                let reuslt = data.value;
+                let path = reuslt[bundleID].Path;
+                if (path) {
+                    resolve(path);
+                } else {
+                    reject(`Could not find app path for ${bundleID}`);
                 }
-                logger.log(`[pymobiledevice3] App Path: ${appInfo.Path}`);
-                resolve(appInfo.Path);
             });
 
         p.child.stderr?.on('data', (data) => {
-            logger.log(`[pymobiledevice3] Debug Server Error: ${data}`);
-            reject(data);
+            logger.log(`${data}`);
         });
     });
 }
@@ -201,7 +199,7 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
                     password: true,
                     ignoreFocusOut: false
                 }
-            )
+            );
             let command = `echo ${userInput} | sudo -S ${bazelExe} ` + baseArgs.concat(["tunneld"]).join(' ');
             logger.log('Start tunneld:' + `echo ****** | sudo -S ${bazelExe} ` + baseArgs.concat(["tunneld"]).join(' '));
             await _exec(
