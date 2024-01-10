@@ -43,9 +43,7 @@ async function rsdInfo(udid: string): Promise<{ host: string, port: string } | u
                 port: json.port,
             };
         }).catch((e: any) => {
-            logger.log(`Could not find any connected device: ${e.toString().trimEnd()}`);
-            e.stderr && logger.error(e.stderr);
-
+            logger.log(`No available RSD tunnel`);
             return undefined;
         });
 }
