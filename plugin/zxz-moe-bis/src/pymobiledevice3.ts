@@ -63,7 +63,7 @@ async function rsdInfo(udid: string): Promise<{ host: string, port: number } | u
 }
 
 async function statrTunnel(password: string): Promise<{host: string, port: number, pid: string, message: string}> {
-    let args = baseArgs.concat(["tunneld", "--pid_file", configuration.pidFile]);
+    let args = baseArgs.concat(["tunneld", "--pid_file", configuration.daemonPidFile, "--host", configuration.daemonHost, "--port", configuration.daemonPort.toString()]);
     logger.log(`Running bazel ${args.join(' ')}`);
 
     let command = `echo ${password} | sudo -S ${bazelExe} ` + args.join(' ');
