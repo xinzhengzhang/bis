@@ -4,7 +4,8 @@ from functools import partial
 from installationProxyService import SimplifiedInstallationProxyService
 from packaging.version import Version
 from pymobiledevice3.cli.cli_common import Command, RSDCommand
-from pymobiledevice3.exceptions import DeviceNotFoundError, NoDeviceConnectedError, AppInstallError, TunneldConnectionError
+from pymobiledevice3.exceptions import *
+from pymobiledevice3.exceptions import AppInstallError
 from pymobiledevice3.lockdown import create_using_usbmux, LockdownClient
 from pymobiledevice3.tcp_forwarder import LockdownTcpForwarder
 from pymobiledevice3.tunneld import TunneldRunner
@@ -135,12 +136,24 @@ if __name__ == '__main__':
     try:
         cli()
     except NoDeviceConnectedError as e:
-        click.echo(json.dumps({"code": -1, "message": "No device connected"}))
+        click.echo(json.dumps({"code": 100, "message": "No device connected"}))
     except DeviceNotFoundError as e:
-        click.echo(json.dumps({"code": -2, "message": f"Device Not Found: {e.udid}"}))
+        click.echo(json.dumps({"code": 100, "message": f"Device Not Found: {e.udid}"}))
     except AppInstallError as e:
-        click.echo(json.dumps({"code": -3, "message": f"App Install Error: {e.args}"}))
+        click.echo(json.dumps({"code": 100, "message": f"App Install Error: {e.args}"}))
     except TunneldConnectionError as e:
-        click.echo(json.dumps({"code": -4, "message": f"Tunneld Connect Failed"}))
+        click.echo(json.dumps({"code": 100, "message": "Tunneld Connect Failed"}))
+    except PasswordRequiredError as e:
+        click.echo(json.dumps({"code": 100, "message": "Device is locked"}))
+    except DeveloperModeError as e:
+        click.echo(json.dumps({"code": 100, "message": "amfid failed to enable developer mode"}))
+    except DeveloperModeIsNotEnabledError as e:
+        click.echo(json.dumps({"code": 100, "message": "Developer mode is not enabled"}))
+    except NotTrustedError as e:
+        click.echo(json.dumps({"code": 100, "message": "Device is not trusted"}))
+    except PyMobileDevice3Exception as e:
+        click.echo(json.dumps({"code": 100, "message": f"PyMobileDevice3Exception: {type(e).__name__}"}))
+    except OSError as e:
+        click.echo(json.dumps({"code": e.errno, "message": f"OSError: {e.strerror}"}))
     except Exception as e:
-        click.echo(json.dumps({"code": -999, "message": f"Unknown Error: {type(e).__name__}"}))
+        click.echo(json.dumps({"code": 999, "message": f"Unknown Error: {type(e).__name__}"}))

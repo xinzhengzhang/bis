@@ -24,6 +24,11 @@ const bazelExe = configuration.bazelExecutablePath;
 
 const baseArgs = ['run', '//:pymobiledevicelite', '--'];
 
+function handleError(code: number, message: string) {
+    logger.error(`${message}\nerror code: ${code}`);
+    throw new Error(`${message}\nerror code: ${code}`);
+}
+
 // to check if the specific device is connected via a tunnel or not
 async function rsdInfo(udid: string): Promise<{ host: string, port: number } | undefined> {
     let args = baseArgs.concat(['rsd-info', '--tunnel', udid]);
@@ -157,7 +162,7 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
                     logger.log(`App path: ${path}`);
                     resolve(path);
                 } else {
-                    logger.error(data.value.message);
+                    handleError(data.value.code, data.value.message);
                     reject(`Could not find app path for ${bundleID}`);
                 }
             });
@@ -210,7 +215,7 @@ export async function listDevices(): Promise<Device[]> {
 
                     resolve(devices);
                 } else {
-                    logger.error(output.message);
+                    handleError(data.value.code, data.value.message);
                     resolve([]);
                 }
             });
@@ -280,8 +285,7 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
                 if (output.code === 0) {
                     logger.log(`debug server info:\nHost: ${output.data.host}\nPort: ${output.data.port}\nUsage: ${output.data.usage}`);
                 } else {
-                    logger.error(output.message);
-
+                    handleError(data.value.code, data.value.message);
                 }
                 resolve({
                     host: output.data.host,
