@@ -175,6 +175,12 @@
             "markdownDescription": "Debug Server Port (only for device running < iOS 17)",
             "order": 1,
             "default": 51968
+          },
+          "pymobiledevice3.pid_file": {
+            "type": "string",
+            "markdownDescription": "Tunneld daemon PID File",
+            "order": 2,
+            "default": "/tmp/bis_pymobieldevicelite.pid"
           }
         }
       }
