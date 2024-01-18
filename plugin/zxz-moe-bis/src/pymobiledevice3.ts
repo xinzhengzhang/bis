@@ -28,25 +28,68 @@ const baseArgs = ['run', '//:pymobiledevicelite', '--'];
 async function rsdInfo(udid: string): Promise<{ host: string, port: number } | undefined> {
     let args = baseArgs.concat(['rsd-info', '--tunnel', udid]);
     logger.log(`Running bazel ${args.join(' ')}`);
-    return _execFile(
-        bazelExe,
-        args,
-        { shell: true, cwd: PYMDWORKSPACE }
-    )
-        .then(({ stdout, stderr }) => {
-            if (stderr) { logger.error(stderr); }
-            let json = JSON.parse(stdout);
-            logger.log(`rsd-info ${stdout}`);
+    return new Promise((resolve, reject) => {
+        let p = _execFile(
+            bazelExe,
+            args,
+            { shell: true, cwd: PYMDWORKSPACE }
+        );
 
-            return {
-                host: json.host,
-                port: json.port,
-            };
-        }).catch((e: any) => {
-            logger.log(`No available RSD tunnel`);
-            return undefined;
+        p.child.stdout?.pipe(StreamValues.withParser())
+            .on('data', (data) => {
+                let output = data.value;
+                if (output.code === 0) {
+                    let rsd = output.data;
+                    logger.log(`rsd-info: ${JSON.stringify(rsd)}`);
+                    resolve({
+                        host: rsd.host,
+                        port: rsd.port,
+                    });
+                } else {
+                    logger.error(output.message);
+                    resolve(undefined);
+                }
+            });
+
+        p.child.stderr?.on('data', (data) => {
+            logger.log(`${data}`);
         });
+    });
 }
+
+async function statrTunnel(password: string): Promise<{host: string, port: number, pid: string, message: string}> {
+    let args = baseArgs.concat(["tunneld", "--pid_file", configuration.pidFile]);
+    logger.log(`Running bazel ${args.join(' ')}`);
+
+    let command = `echo ${password} | sudo -S ${bazelExe} ` + args.join(' ');
+
+    return new Promise((resolve, reject) => {
+      let p = _exec(
+        command,
+        { cwd: PYMDWORKSPACE }
+      );
+
+      p.child.stdout?.pipe(StreamValues.withParser())
+      .on('data', (data) => {
+          if (data.value.code === 0) {
+            logger.log('Tunneld info: \n', data.value.data);
+            resolve({
+              host: data.value.data.host,
+              port: data.value.data.port,
+              pid: data.value.data.pid,
+              message: `(${data.value.data.code})` + data.value.data.message
+            });
+          } else {
+            logger.error(data.value.message);
+            reject(`Could not start tunneld daemon`);
+          }
+      });
+
+      p.child.stderr?.on('data', (data) => {
+        logger.log(`${data}`);
+      });
+    });
+  }
 
 /*
 {"PercentComplete": 5, "Status": "CreatingStagingDirectory"}
@@ -80,7 +123,7 @@ async function install(udid: string, path: string, bundleID: string, cancellatio
 
     p.child.stdout?.pipe(StreamValues.withParser())
         .on('data', (data) => {
-            let event = data.value;
+            let event = data.value.data;
             progressCallback && progressCallback(event);
         });
 
@@ -109,17 +152,18 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
 
         p.child.stdout?.pipe(StreamValues.withParser())
             .on('data', (data) => {
-                let reuslt = data.value;
-                let path = reuslt[bundleID].Path;
-                if (path) {
+                if (data.value.code === 0) {
+                    let path = data.value.data[bundleID].Path;
+                    logger.log(`App path: ${path}`);
                     resolve(path);
                 } else {
+                    logger.error(data.value.message);
                     reject(`Could not find app path for ${bundleID}`);
                 }
             });
 
         p.child.stderr?.on('data', (data) => {
-            logger.log(`${data}`);
+            logger.error(`${data}`);
         });
     });
 }
@@ -127,49 +171,54 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
 export async function listDevices(): Promise<Device[]> {
     let args = baseArgs.concat(['list-device']);
     logger.log(`Running bazel ${args.join(' ')}`);
-    return _execFile(
-        bazelExe,
-        args,
-        { shell: true, cwd: PYMDWORKSPACE }
-    )
-        .then(({ stdout, stderr }): Device[] => {
-            if (stderr) { logger.error(stderr); }
-            logger.log(`list-device ${stdout} devices`);
+    return new Promise((resolve, reject) => {
+        let p = _execFile(
+            bazelExe,
+            args,
+            { shell: true, cwd: PYMDWORKSPACE }
+        );
 
-            let devices: Device[] = JSON.parse(stdout) || {};
+        p.child.stdout?.pipe(StreamValues.withParser())
+            .on('data', (data) => {
+                let output = data.value;
+                if (output.code === 0) {
+                    let devices: Device[] = output.data;
+                    /*
+                    {
+                        "BuildVersion": "19H365",
+                        "ConnectionType": "USB",
+                        "DeviceClass": "iPhone",
+                        "DeviceName": "\ud83d\udc36\ud83d\udcf1",
+                        "Identifier": "a50b2ae37f010229e0bbcfabe9a7a7e054fdb818",
+                        "ProductType": "iPhone9,1",
+                        "ProductVersion": "15.7.9"
+                    }
+                    */
+                    devices = devices
+                        .map((d: any): Device => ({
+                            udid: d.Identifier,
+                            name: d.DeviceName,
+                            type: "Device",
+                            version: d.ProductVersion,
+                            buildVersion: d.BuildVersion,
+                            runtime: `iOS ${d.ProductVersion}`,
+                            sdk: "iphoneos",
+                            modelName: d.ProductType,
+                        }));
 
-            /*
-            {
-                "BuildVersion": "19H365",
-                "ConnectionType": "USB",
-                "DeviceClass": "iPhone",
-                "DeviceName": "\ud83d\udc36\ud83d\udcf1",
-                "Identifier": "a50b2ae37f010229e0bbcfabe9a7a7e054fdb818",
-                "ProductType": "iPhone9,1",
-                "ProductVersion": "15.7.9"
-            }
-            */
-            devices = devices
-                .map((d: any): Device => ({
-                    udid: d.Identifier,
-                    name: d.DeviceName,
-                    type: "Device",
-                    version: d.ProductVersion,
-                    buildVersion: d.BuildVersion,
-                    runtime: `iOS ${d.ProductVersion}`,
-                    sdk: "iphoneos",
-                    modelName: d.ProductType,
-                }));
+                    logger.log(`Found ${devices.length} devices`);
 
-            logger.log(`Found ${devices.length} devices`);
+                    resolve(devices);
+                } else {
+                    logger.error(output.message);
+                    resolve([]);
+                }
+            });
 
-            return devices;
-        }).catch((e: any) => {
-            logger.log(`Could not find any connected device: ${e.toString().trimEnd()}`);
-            e.stderr && logger.error(e.stderr);
-
-            return [];
+        p.child.stderr?.on('data', (data) => {
+            logger.log(`${data}`);
         });
+    });
 }
 
 export async function deviceInstall(udid: string, path: string, bundleID: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void) {
@@ -195,15 +244,11 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
                     title: "Input your password",
                     prompt: "This command requires root privileges.",
                     password: true,
-                    ignoreFocusOut: false
+                    ignoreFocusOut: true
                 }
             );
-            let command = `echo ${userInput} | sudo -S ${bazelExe} ` + baseArgs.concat(["tunneld"]).join(' ');
-            logger.log('Start tunneld:' + `echo ****** | sudo -S ${bazelExe} ` + baseArgs.concat(["tunneld"]).join(' '));
-            await _exec(
-                command,
-                { cwd: PYMDWORKSPACE }
-            );
+            let tunnelInfo = await statrTunnel(userInput || "");
+            logger.log('Tunneld info: ', tunnelInfo);
         } else {
             logger.log(`RSD info ${rsd.host} ${rsd.port}`);
         }
@@ -231,14 +276,27 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
 
         p.child.stdout?.pipe(StreamValues.withParser())
             .on('data', (data) => {
-                let info = data.value;
-                resolve({ host: info.host, port: info.port });
+                let output = data.value;
+                if (output.code === 0) {
+                    logger.log(`debug server info:\nHost: ${output.data.host}\nPort: ${output.data.port}\nUsage: ${output.data.usage}`);
+                } else {
+                    logger.error(output.message);
+
+                }
+                resolve({
+                    host: output.data.host,
+                    port: output.data.port,
+                });
 
                 progressCallback && progressCallback({
                     "Event": "DebugServerLaunched",
-                    "Port": info.port
+                    "Port": output.data.port
                 });
             });
+
+        p.child.stderr?.on('data', (data) => {
+            logger.log(`${data}`);
+        });
     });
 
     logger.log(`Debugserver started in ${new Date().getTime() - time} ms`);
@@ -250,6 +308,6 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
     return {
         host: info.host,
         port: info.port,
-        exec: p,
+        exec: p
     };
 }
