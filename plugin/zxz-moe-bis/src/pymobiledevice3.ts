@@ -25,7 +25,7 @@ const bazelExe = configuration.bazelExecutablePath;
 const baseArgs = ['run', '//:pymobiledevicelite', '--'];
 
 // to check if the specific device is connected via a tunnel or not
-async function rsdInfo(udid: string): Promise<{ host: string, port: string } | undefined> {
+async function rsdInfo(udid: string): Promise<{ host: string, port: number } | undefined> {
     let args = baseArgs.concat(['rsd-info', '--tunnel', udid]);
     logger.log(`Running bazel ${args.join(' ')}`);
     return _execFile(
@@ -182,7 +182,7 @@ export async function deviceInstall(udid: string, path: string, bundleID: string
         });
 }
 
-export async function debugserver(device: Device, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: string, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
+export async function debugserver(device: Device, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: number, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
     let time = new Date().getTime();
 
     let p: PromiseWithChild<{ stdout: string, stderr: string }>;
@@ -226,7 +226,7 @@ export async function debugserver(device: Device, cancellationToken: { cancel():
 
     cancellationToken.cancel = () => p.child.kill();
 
-    let info: { host: string, port: string } = await new Promise((resolve, reject) => {
+    let info: { host: string, port: number } = await new Promise((resolve, reject) => {
         p.catch(reject);
 
         p.child.stdout?.pipe(StreamValues.withParser())
