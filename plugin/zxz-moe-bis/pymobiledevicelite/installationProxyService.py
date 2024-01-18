@@ -55,7 +55,7 @@ class SimplifiedInstallationProxyService(LockdownService):
             response = self.service.recv_plist()
             if not response:
                 break
-            click.echo(json.dumps(response))
+            click.echo(json.dumps({"code": 0, "data": response}))
             error = response.get('Error')
             if error:
                 raise AppInstallError(f'{error}: {response.get("ErrorDescription")}')
