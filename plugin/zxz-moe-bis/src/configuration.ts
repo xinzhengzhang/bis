@@ -117,6 +117,13 @@ const configuration = {
                 .getConfiguration("pymobiledevice3")
                 .get<number>("debugserver_local_port") ?? 51968
         );
+    },
+    get pidFile(): string {
+        return (
+            vscode.workspace
+                .getConfiguration("pymobiledevice3")
+                .get<string>("pid_file") ?? '/tmp/bis_pymobieldevicelite.pid'
+        );
     }
 };
 
