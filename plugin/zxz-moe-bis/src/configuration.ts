@@ -118,11 +118,25 @@ const configuration = {
                 .get<number>("debugserver_local_port") ?? 51968
         );
     },
-    get pidFile(): string {
+    get daemonPidFile(): string {
         return (
             vscode.workspace
                 .getConfiguration("pymobiledevice3")
-                .get<string>("pid_file") ?? '/tmp/bis_pymobieldevicelite.pid'
+                .get<string>("daemon_pid_file") ?? '/tmp/bis_pymobieldevicelite.pid'
+        );
+    },
+    get daemonHost(): string {
+        return (
+            vscode.workspace
+                .getConfiguration("pymobiledevice3")
+                .get<string>("daemon_host") ?? '127.0.0.1'
+        );
+    },
+    get daemonPort(): number {
+        return (
+            vscode.workspace
+                .getConfiguration("pymobiledevice3")
+                .get<number>("daemon_port") ?? 5555
         );
     }
 };

@@ -170,17 +170,29 @@
       {
         "title": "pymobiledevice3",
         "properties": {
-          "pymobiledevice3.debug_server_port": {
+          "pymobiledevice3.debugserver_local_port": {
             "type": "number",
             "markdownDescription": "Debug Server Port (only for device running < iOS 17)",
             "order": 1,
             "default": 51968
           },
-          "pymobiledevice3.pid_file": {
+          "pymobiledevice3.daemon_pid_file": {
             "type": "string",
             "markdownDescription": "Tunneld daemon PID File",
             "order": 2,
             "default": "/tmp/bis_pymobieldevicelite.pid"
+          },
+          "pymobiledevice3.daemon_host": {
+            "type": "string",
+            "markdownDescription": "Tunneld daemon host",
+            "order": 3,
+            "default": "127.0.0.1"
+          },
+          "pymobiledevice3.daemon_port": {
+            "type": "number",
+            "markdownDescription": "Tunneld daemon port",
+            "order": 4,
+            "default": 5555
           }
         }
       }
