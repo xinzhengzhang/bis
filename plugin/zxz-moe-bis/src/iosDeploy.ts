@@ -151,7 +151,7 @@ export async function deviceInstall(args: { udid: string, path: string }, cancel
     });
 }
 
-export async function debugserver(udid: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: string, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
+export async function debugserver(udid: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: number, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
   let time = new Date().getTime();
 
   let command = IOS_DEPLOY;
@@ -185,7 +185,7 @@ export async function debugserver(udid: string, cancellationToken: { cancel(): v
 
   return {
     host: "127.0.0.1",
-    port: port.toString(),
+    port: port,
     exec: p,
   };
 }

@@ -8,7 +8,7 @@ import { ChildProcess, PromiseWithChild } from 'child_process';
 import * as logger from "./logger";
 import { isIOS17OrLater } from './utils';
 
-let debugserverProcesses: { [port: string]: ChildProcess } = {};
+let debugserverProcesses: { [port: number]: ChildProcess } = {};
 
 
 export async function listTargets(): Promise<Target[]> {
@@ -67,7 +67,7 @@ export async function deviceAppPath(udid: string, bundleId: string): Promise<str
 	}
 }
 
-async function debugserver(device: Device, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: string, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
+async function debugserver(device: Device, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: number, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
 	if (configuration.pluginMode === "pymobiledevice3" ||
 		(configuration.pluginMode === 'mixed' && isIOS17OrLater(device.version))) {
 		return await pymobiledevice3.debugserver(device, cancellationToken, progressCallback);
@@ -76,7 +76,7 @@ async function debugserver(device: Device, cancellationToken: { cancel(): void }
 	}
 }
 
-export async function deviceDebugserver(device: Device): Promise<void | { host: string, port: string }> {
+export async function deviceDebugserver(device: Device): Promise<void | { host: string, port: number}> {
 	logger.log(`Starting debugserver for device (udid: ${device.udid})`);
 	return vscode.window.withProgress({
 		"location": vscode.ProgressLocation.Notification,
