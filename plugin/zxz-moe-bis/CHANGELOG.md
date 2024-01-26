@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased]
+### 0.4.0
+* 
+
 ### 0.3.4
 * Revert kotlin support. There are too many problems with the kotlin language server and it cannot be used in production at all, so the implementation method still generates the corresponding gradle template
 * Solve the timeout problem of pulling build task after vscode1.79.0 by returning static fixed compilation task (The original subtarget compilation can be implemented through the build tree viewer)
