@@ -53,11 +53,11 @@ It theoretically supports all rules of languages that can be supported by source
 * Import bis rules in your MODULE.bazel
     ```
     # MODULE.bazel
-    bazel_dep(name = "bis", version = "0.3.4", dev_dependency = True)
+    bazel_dep(name = "bis", version = "0.4.0", dev_dependency = True)
     archive_override(
         module_name = "bis",
-        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.3.4.tar.gz",
-        strip_prefix = "bis-0.3.4"
+        urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.4.0.tar.gz",
+        strip_prefix = "bis-0.4.0"
     )
 
     # If you are not in bzlmod please check the bis rules README.md

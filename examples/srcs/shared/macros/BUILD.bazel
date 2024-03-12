@@ -1,0 +1,33 @@
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_binary", "swift_library", "swift_test")
+load("@build_bazel_rules_swift//swift:swift_compiler_plugin.bzl", "swift_compiler_plugin", "universal_swift_compiler_plugin")
+
+
+swift_library(
+    name = "stringify",
+    srcs = ["Stringify.swift"],
+    module_name = "Stringify",
+    plugins = [":stringify_macro"],
+    visibility = ["//visibility:public"],
+)
+
+swift_compiler_plugin(
+    name = "stringify_macro",
+    srcs = [
+        "StringifyMacro.swift",
+        "StringifyMacroPlugin.swift",
+    ],
+    module_name = "StringifyMacroPlugin",
+    deps = [
+        "@SwiftSyntax",
+        "@SwiftSyntax//:SwiftCompilerPlugin",
+        "@SwiftSyntax//:SwiftSyntaxBuilder",
+        "@SwiftSyntax//:SwiftSyntaxMacros",
+    ],
+)
+
+swift_binary(
+    name = "stringify_client",
+    srcs = ["StringifyClient.swift"],
+    deps = [":stringify"],
+)
+

@@ -4,11 +4,11 @@ Bazel rules and plugin for developing iOS project on vscode
 # Bzlmod
 ```sh
 # MODULE.bazel
-bazel_dep(name = "bis", version = "0.3.4", dev_dependency = True)
+bazel_dep(name = "bis", version = "0.4.0", dev_dependency = True)
 archive_override(
     module_name = "bis",
-    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.3.4.tar.gz",
-    strip_prefix = "bis-0.3.4"
+    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.4.0.tar.gz",
+    strip_prefix = "bis-0.4.0"
 )
 ```
 # Non-bzlmod
@@ -19,7 +19,7 @@ load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
 git_repository(
     name = "bis",
     remote = "git@github.com:xinzhengzhang/bis.git",
-    tag = "0.3.4",
+    tag = "0.4.0",
 )
 
 load("@bis//:repositories.bzl", "bis_rules_dependencies")

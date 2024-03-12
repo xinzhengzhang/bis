@@ -1,6 +1,7 @@
 import Foundation
 import srcs_shared_module_b_module_b
 import ArgumentParser
+import Stringify
 
 @main
 struct Entrance: ParsableCommand {
@@ -10,5 +11,6 @@ struct Entrance: ParsableCommand {
     func run() throws {
         print(name)
         print(greeting_from_module_b())
+        print(#stringify(1 + 2))
     }
 }

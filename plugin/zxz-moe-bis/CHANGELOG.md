@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased]
+### 0.4.0
+* Switched to using [pymobiledevice3](https://github.com/doronz88/pymobiledevice3) for real device debugging due to `ios-deploy` being broken after Xcode 15. Please note that `pymobiledevice3` is currently unstable and should be used for testing purposes only. Special thanks to [@ihomway](https://github.com/ihomway) for their support and contributions in [pull request #14](https://github.com/xinzhengzhang/bis/pull/14).
+
 ### 0.3.4
 * Revert kotlin support. There are too many problems with the kotlin language server and it cannot be used in production at all, so the implementation method still generates the corresponding gradle template
 * Solve the timeout problem of pulling build task after vscode1.79.0 by returning static fixed compilation task (The original subtarget compilation can be implemented through the build tree viewer)
