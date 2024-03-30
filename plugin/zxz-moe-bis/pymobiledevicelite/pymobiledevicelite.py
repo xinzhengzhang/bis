@@ -88,7 +88,7 @@ def installed_app_path(service_provider: LockdownClient):
 
 @click.command()
 @click.option('--host', default='127.0.0.1')
-@click.option('--port', type=click.INT, default=5555)
+@click.option('--port', type=click.INT, default=49151)
 @click.option('--pid_file', default='/tmp/bis_pymobieldevicelite.pid')
 def tunneld(host: str, port: int, pid_file: str):
     """ Start Tunneld service for remote tunneling """

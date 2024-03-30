@@ -136,7 +136,7 @@ const configuration = {
         return (
             vscode.workspace
                 .getConfiguration("pymobiledevice3")
-                .get<number>("daemon_port") ?? 5555
+                .get<number>("daemon_port") ?? 49151
         );
     }
 };

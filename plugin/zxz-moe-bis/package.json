@@ -192,7 +192,7 @@
             "type": "number",
             "markdownDescription": "Tunneld daemon port",
             "order": 4,
-            "default": 5555
+            "default": 49151
           }
         }
       }
@@ -259,10 +259,6 @@
               },
               "sessionName": {
                 "description": "Update the debug session name to easily identify multiple running sessions",
-                "type": "string"
-              },
-              "ipaPath": {
-                "description": "Path to the .ipa file ",
                 "type": "string"
               }
             }

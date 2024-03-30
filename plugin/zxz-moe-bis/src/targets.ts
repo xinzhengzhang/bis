@@ -28,7 +28,7 @@ async function install(udid: string, path: string, ipaPath: string, bundleID: st
 	}
 }
 
-export async function deviceInstall(device: Device, path: string, ipaPath: string, bundleID: string) {
+export async function deviceInstall(device: Device, path: string, bundleID: string) {
 	return vscode.window.withProgress({
 		"location": vscode.ProgressLocation.Notification,
 		"title": "Installing",
@@ -44,7 +44,7 @@ export async function deviceInstall(device: Device, path: string, ipaPath: strin
 		logger.log(`Installing app (path: ${path}) to device (udid: ${device.udid})`);
 
 		return Promise.resolve()
-			.then(() => install(device.udid, path, ipaPath, bundleID, cancellationToken, (event) => {
+			.then(() => install(device.udid, path, bundleID, cancellationToken, (event) => {
 				logger.log(event);
 
 				let message = event.Status;
