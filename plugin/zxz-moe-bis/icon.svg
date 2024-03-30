@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="169px" height="163px" viewBox="0 0 169 163" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-127.000000, -138.000000)">
+            <g id="Group" transform="translate(127.350761, 138.788482)">
+                <circle id="Oval" stroke="#979797" stroke-width="10" cx="92.6492386" cy="75.2115176" r="35"></circle>
+                <rect id="Rectangle" fill="#979797" transform="translate(89.098457, 29.211518) rotate(47.000000) translate(-89.098457, -29.211518) " x="77.5984574" y="-1.28848245" width="23" height="61" rx="11.5"></rect>
+                <rect id="Rectangle" fill="#979797" transform="translate(133.098457, 32.211518) rotate(47.000000) translate(-133.098457, -32.211518) " x="121.598457" y="1.71151755" width="23" height="61" rx="11.5"></rect>
+                <rect id="Rectangle" fill="#979797" transform="translate(138.098457, 76.211518) rotate(47.000000) translate(-138.098457, -76.211518) " x="126.598457" y="45.7115176" width="23" height="61" rx="11.5"></rect>
+                <rect id="Rectangle" fill="#979797" transform="translate(48.083261, 113.943475) rotate(45.000000) translate(-48.083261, -113.943475) " x="36.5832611" y="57.4434749" width="23" height="113" rx="11.5"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

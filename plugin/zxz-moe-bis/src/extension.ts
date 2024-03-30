@@ -32,6 +32,7 @@ import { TreeProvider } from "./treeProvider";
 import * as pymobiledevice3 from "./pymobiledevice3";
 
 import * as debugConfigProvider from "./debugConfigProvider";
+import { DaemonServerTreeProvider } from "./tunneldTreeProvide";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -160,6 +161,25 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand("zxz-moe-bis.refreshTreeViewer", () =>
             treeProvider.refresh()
+        )
+    );
+    const daemonServerTreeProvider = new DaemonServerTreeProvider(context);
+    context.subscriptions.push(
+        vscode.window.registerTreeDataProvider("tunneld", daemonServerTreeProvider)
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand("zxz-moe-bis.refreshConnectedDevices", () =>
+            daemonServerTreeProvider.refreshDevices()
+        )
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand("zxz-moe-bis.launchDaemonServer", () =>
+            daemonServerTreeProvider.startDaemonServer()
+        )
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand("zxz-moe-bis.stopDaemonServer", () =>
+            daemonServerTreeProvider.stopDaemonServer()
         )
     );
 

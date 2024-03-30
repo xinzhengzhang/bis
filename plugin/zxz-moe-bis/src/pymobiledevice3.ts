@@ -30,7 +30,7 @@ function handleError(code: number, message: string) {
 }
 
 // to check if the specific device is connected via a tunnel or not
-async function rsdInfo(udid: string): Promise<{ host: string, port: number } | undefined> {
+export async function rsdInfo(udid: string): Promise<{ host: string, port: number } | undefined> {
     let args = baseArgs.concat(['rsd-info', '--tunnel', udid]);
     logger.log(`Running bazel ${args.join(' ')}`);
     return new Promise((resolve, reject) => {
@@ -62,7 +62,7 @@ async function rsdInfo(udid: string): Promise<{ host: string, port: number } | u
     });
 }
 
-async function statrTunnel(password: string): Promise<{host: string, port: number, pid: string, message: string}> {
+export async function statrTunnel(password: string): Promise<{host: string, port: number, pid: string, message: string}> {
     let args = baseArgs.concat(["tunneld", "--pid_file", configuration.daemonPidFile, "--host", configuration.daemonHost, "--port", configuration.daemonPort.toString()]);
     logger.log(`Running bazel ${args.join(' ')}`);
 

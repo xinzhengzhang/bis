@@ -24,7 +24,13 @@
     "commands": [
       {
         "command": "zxz-moe-bis.refreshTreeViewer",
-        "title": "bis: refresh tree viewer"
+        "title": "bis: refresh tree viewer",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "zxz-moe-bis.refreshConnectedDevices",
+        "title": "bis: refresh tunneld devices",
+        "icon": "$(refresh)"
       },
       {
         "command": "zxz-moe-bis.generateLaunchJson",
@@ -32,8 +38,7 @@
       },
       {
         "command": "zxz-moe-bis.copyTargetPath",
-        "title": "bis: copy Target Path",
-        "enablement": ""
+        "title": "bis: copy Target Path"
       },
       {
         "command": "zxz-moe-bis.lib-deps",
@@ -46,6 +51,14 @@
       {
         "command": "zxz-moe-bis.refreshDummyProjectForInjectionIII",
         "title": "bis: refresh dummy project for InjectionIII"
+      },
+      {
+        "command": "zxz-moe-bis.launchDaemonServer",
+        "title": "bis: Launch Daemon Server"
+      },
+      {
+        "command": "zxz-moe-bis.stopDaemonServer",
+        "title": "bis: Stop Daemon Server"
       }
     ],
     "configuration": [
@@ -222,13 +235,31 @@
         {
           "command": "zxz-moe-bis.copyTargetPath"
         }
+      ],
+      "view/title": [
+        {
+          "command": "zxz-moe-bis.refreshTreeViewer",
+          "when": "view == buildWorkspace",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "zxz-moe-bis.refreshConnectedDevices",
+          "when": "viewItem == DaemonServerItem",
+          "group": "inline"
+        }
       ]
     },
     "views": {
-      "explorer": [
+      "bis-container": [
         {
           "id": "buildWorkspace",
           "name": "Bis Build Targets"
+        },
+        {
+          "id": "tunneld",
+          "name": "Tunneld"
         }
       ]
     },
@@ -296,7 +327,16 @@
           }
         }
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "bis-container",
+          "title": "Bis",
+          "icon": "icon.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run pretest && npm run esbuild-base -- --minify",
