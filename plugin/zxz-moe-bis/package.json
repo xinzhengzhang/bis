@@ -144,6 +144,12 @@
             "order": 14,
             "default": ""
           },
+          "bis.bazelisk_version": {
+            "type": "string",
+            "description": "Bazel version for Bazelisk to run",
+            "order": 15,
+            "default": "latest"
+          },
           "bis.plugin_mode": {
             "type": "string",
             "default": "mixed",
@@ -152,7 +158,8 @@
               "ios-deploy",
               "pymobiledevice3"
             ],
-            "description": "Select your plugin mode.<br> - `mixed`: only device running iOS 17 or above will use `pymobiledevice3` to start a debug server, all other functionability will fallback to `ios-deploy`.<br> - `ios-deploy`: use `ios-deploy` only (devices running iOS 17 or above will **fail** to launch a debug server).<br> - `pymobiledevice3`: use `pymobiledevice3` to do all the work (beta)."
+            "description": "Select your plugin mode.<br> - `mixed`: only device running iOS 17 or above will use `pymobiledevice3` to start a debug server, all other functionability will fallback to `ios-deploy`.<br> - `ios-deploy`: use `ios-deploy` only (devices running iOS 17 or above will **fail** to launch a debug server).<br> - `pymobiledevice3`: use `pymobiledevice3` to do all the work (beta).",
+            "order": 16
           }
         }
       },
