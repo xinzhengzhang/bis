@@ -18,6 +18,17 @@ export function activate(context: vscode.ExtensionContext) {
     // 计算 pymobiledevicelite 完整路径
     PYMDWORKSPACE = path.join(extensionPath, 'pymobiledevicelite');
     logger.log(PYMDWORKSPACE);
+
+    // Update bazel version
+    let bazel_version = `USE_BAZEL_VERSION=${configuration.bazeliskVersion}`
+    _exec(`echo ${bazel_version} > ${PYMDWORKSPACE}/.bazeliskrc`);
+
+    vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration('bis.bazelisk_version')) {
+            let bazel_version = `USE_BAZEL_VERSION=${configuration.bazeliskVersion}`
+            _exec(`echo ${bazel_version} > ${PYMDWORKSPACE}/.bazeliskrc`);
+        }
+    });
 }
 
 const bazelExe = configuration.bazelExecutablePath;
