@@ -90,6 +90,16 @@ const configuration = {
         }
         return bazelExecutable;
     },
+    get bazeliskVersion(): string {
+        const bazelVersion =
+            vscode.workspace
+                .getConfiguration("bis")
+                .get<string>("bazelisk_version") ?? "";
+        if (bazelVersion.length === 0) {
+            return "latest";
+        }
+        return bazelVersion;
+    },
     get pluginMode(): string {
         return (
             vscode.workspace
