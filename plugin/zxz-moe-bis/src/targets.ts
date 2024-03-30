@@ -1,4 +1,5 @@
 import * as pymobiledevice3 from './pymobiledevice3';
+import * as devicectl from './devicectl';
 import * as iosDeploy from './iosDeploy';
 import * as simulators from './simulators';
 import { Device, Target } from "./commonTypes";
@@ -10,22 +11,17 @@ import { isIOS17OrLater } from './utils';
 
 let debugserverProcesses: { [port: number]: ChildProcess } = {};
 
-
 export async function listTargets(): Promise<Target[]> {
 	let [dev, sim] = await Promise.all([
-		configuration.pluginMode === "pymobiledevice3" ? pymobiledevice3.listDevices() : iosDeploy.listDevices(),
+		devicectl.listDevices(),
 		simulators.listSimulators()
 	]);
 
 	return (dev as Target[]).concat(sim);
 }
 
-async function install(udid: string, path: string, ipaPath: string, bundleID: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void) {
-	if (configuration.pluginMode === "pymobiledevice3") {
-		return await pymobiledevice3.deviceInstall(udid, ipaPath, bundleID, cancellationToken, progressCallback);
-	} else {
-		return await iosDeploy.deviceInstall({ udid, path }, cancellationToken, progressCallback);
-	}
+async function install(udid: string, path: string, bundleID: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void) {
+	return devicectl.deviceInstall(udid, path, cancellationToken, progressCallback);
 }
 
 export async function deviceInstall(device: Device, path: string, bundleID: string) {
@@ -60,11 +56,7 @@ export async function deviceInstall(device: Device, path: string, bundleID: stri
 }
 
 export async function deviceAppPath(udid: string, bundleId: string): Promise<string | undefined> {
-	if (configuration.pluginMode === "pymobiledevice3") {
-		return await pymobiledevice3.appPath(udid, bundleId);
-	} else {
-		return await iosDeploy.getAppDevicePath(udid, bundleId);
-	}
+	return await devicectl.appPath(udid, bundleId);
 }
 
 async function debugserver(device: Device, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: number, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
