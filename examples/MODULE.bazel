@@ -5,16 +5,16 @@ module(
 )
 
 # rules
-bazel_dep(name = "rules_swift", version = "1.18.0", repo_name = "build_bazel_rules_swift")
-bazel_dep(name = "rules_apple", version = "3.5.1", repo_name = "build_bazel_rules_apple")
+bazel_dep(name = "rules_swift", version = "1.18.0", repo_name = "build_bazel_rules_swift", max_compatibility_level = 2)
+bazel_dep(name = "rules_apple", version = "3.11.2", repo_name = "build_bazel_rules_apple")
 bazel_dep(name = "apple_support", version = "1.15.1")
-bazel_dep(name = "swift-syntax", version = "510.0.0", repo_name = "SwiftSyntax")
+bazel_dep(name = "swift-syntax", version = "510.0.3", repo_name = "SwiftSyntax")
 
 # libraries
-bazel_dep(name = "swift_argument_parser", version = "1.3.1")
+bazel_dep(name = "swift_argument_parser", version = "1.3.1.1")
 
 # vscode plugin
-bazel_dep(name = "bis", version = "0.0.1", dev_dependency = True)
+bazel_dep(name = "bis", version = "0.4.1", dev_dependency = True)
 local_path_override(
     module_name = "bis",
     path = "../",
