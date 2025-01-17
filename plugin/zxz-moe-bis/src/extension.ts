@@ -158,8 +158,19 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.registerTreeDataProvider("buildWorkspace", treeProvider)
     );
     context.subscriptions.push(
-        vscode.commands.registerCommand("zxz-moe-bis.refreshTreeViewer", () =>
-            treeProvider.refresh()
+        vscode.commands.registerCommand("zxz-moe-bis.refreshTreeViewer", () => {
+                if (!deviceVariable.get()) {
+                    devicePicker.selectDevice();
+                    // deviceVariable will trigger the treeProvider.refresh() in the next tick
+                    return;
+                }
+                if (!targetVariable.get()) {
+                    inputer.inputBuildTarget();
+                    // targetVariable will trigger the treeProvider.refresh()
+                    return;
+                }
+                treeProvider.refresh();
+            }
         )
     );
 
@@ -177,8 +188,11 @@ export function activate(context: vscode.ExtensionContext) {
         .pipe(distinctUntilChanged(isEqual))
         .pipe(skip(1))
         .subscribe((d) => {
-            cpuProvider.updateCpu(d);
-            vscode.commands.executeCommand("zxz-moe-bis.inputBuildTarget");
+            targetVariable.update(undefined);
+            if (d !== undefined) {
+                cpuProvider.updateCpu(d);
+                vscode.commands.executeCommand("zxz-moe-bis.inputBuildTarget");
+            }
         });
 
     eventEmitter.buildFileChangedEmitter.subscribe((file) => {
@@ -203,19 +217,19 @@ export function activate(context: vscode.ExtensionContext) {
                  device = ${deviceVariable.get()}\n
                  cpu = ${cpu}`
             );
-            if (configuration.autoGenerateLaunchJson) {
+            if (deviceVariable.get() && configuration.autoGenerateLaunchJson) {
                 logger.log("Auto generate LaunchJson");
                 vscode.commands.executeCommand(
                     "zxz-moe-bis.generateLaunchJson"
                 );
             }
-            if (configuration.autoRefreshDummyProjectForInjectionIII) {
+            if (deviceVariable.get() && configuration.autoRefreshDummyProjectForInjectionIII) {
                 logger.log("Auto refresh InjectionIII project");
                 vscode.commands.executeCommand(
                     "zxz-moe-bis.refreshDummyProjectForInjectionIII"
                 );
             }
-            vscode.commands.executeCommand("zxz-moe-bis.refreshTreeViewer");
+            treeProvider.refresh();
 
             vscode.workspace.workspaceFolders?.forEach((folder) => {
                 deleteCompileCommandsFile(folder);
