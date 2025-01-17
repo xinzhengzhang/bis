@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { BuildTaskProvider } from "./buildTaskProvider";
-import { targetVariable, deviceVariable } from "./variables";
+import { targetVariable, deviceVariable, cpuVariable } from "./variables";
 
 export interface ITreeItem {
     getLabel(): string;
@@ -132,6 +132,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
         vscode.workspace.onDidChangeWorkspaceFolders(this.refresh, this);
 
         this.updateWorkspaceFolderTreeItems();
+
     }
 
     public getChildren(element?: ITreeItem): Thenable<ITreeItem[]> {
@@ -172,7 +173,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
 
     /** Refresh the cached BazelWorkspaceFolderTreeItems. */
     private updateWorkspaceFolderTreeItems() {
-        if (!targetVariable.get() || !deviceVariable.get()) {
+        if (!targetVariable.get() || !cpuVariable.get()) {
             // no target specified
             return;
         }

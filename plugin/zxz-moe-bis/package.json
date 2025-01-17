@@ -24,7 +24,8 @@
     "commands": [
       {
         "command": "zxz-moe-bis.refreshTreeViewer",
-        "title": "bis: refresh tree viewer"
+        "title": "bis: refresh tree viewer",
+        "icon": "$(refresh)"
       },
       {
         "command": "zxz-moe-bis.generateLaunchJson",
@@ -222,6 +223,13 @@
         {
           "command": "zxz-moe-bis.copyTargetPath"
         }
+      ],
+      "view/title": [
+        {
+          "command": "zxz-moe-bis.refreshTreeViewer",
+          "when": "view == buildWorkspace",
+          "group": "navigation"
+        }
       ]
     },
     "views": {
@@ -232,6 +240,12 @@
         }
       ]
     },
+    "viewsWelcome":[
+      {
+        "view": "buildWorkspace",
+        "contents": "The build targets of the current workspace"
+      }
+    ],
     "debuggers": [
       {
         "type": "lldb",
