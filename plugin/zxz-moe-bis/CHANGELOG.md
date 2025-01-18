@@ -1,6 +1,10 @@
 # Change Log
 
 ## [Unreleased]
+
+### 0.4.2
+* Auto trigger device picker when manually refreshing
+
 ### 0.4.1
 * Update rules_swift to compatible with 1.x
 
