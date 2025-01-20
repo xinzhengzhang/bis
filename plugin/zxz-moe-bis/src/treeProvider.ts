@@ -11,6 +11,7 @@ export interface ITreeItem {
     getTooltip(): string | undefined;
     getCommand(): vscode.Command | undefined;
     getContextValue(): string | undefined;
+    getPath(): string | null;
 }
 
 class TreeItem implements ITreeItem {
@@ -19,6 +20,7 @@ class TreeItem implements ITreeItem {
     label: string;
     icon: vscode.ThemeIcon;
     children: TreeItem[] = [];
+    type: string | undefined = undefined;
 
     constructor(task: vscode.Task | undefined, path: string) {
         this.task = task;
@@ -28,11 +30,14 @@ class TreeItem implements ITreeItem {
             if (path.startsWith("all index dependents ")) {
                 this.path = path.replace(/^all index dependents /, "");
                 this.icon = new vscode.ThemeIcon("wrench");
+                this.type = "dependents";
             } else if (path.startsWith("artifacts ")) {
                 this.path = path.replace(/^artifacts /, "");
                 this.icon = new vscode.ThemeIcon("debug-start");
+                this.type = "artifacts";
             } else {
                 this.icon = new vscode.ThemeIcon("debug-start");
+
             }
         } else {
             this.icon = vscode.ThemeIcon.Folder;
@@ -95,6 +100,9 @@ class TreeItem implements ITreeItem {
         return Promise.resolve(this.children).then((items) => sortBy(items, ["label", "path"]));
     }
 
+    getPath(): string | null {
+        return this.path;
+    }
     collapsibleState(): vscode.TreeItemCollapsibleState {
         if (this.children.length === 0) {
             return vscode.TreeItemCollapsibleState.None;
@@ -113,7 +121,7 @@ class TreeItem implements ITreeItem {
         };
     }
     getContextValue(): string | undefined {
-        return undefined;
+        return this.type;
     }
 }
 

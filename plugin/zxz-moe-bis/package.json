@@ -28,6 +28,11 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "zxz-moe-bis.revealTargetInBUILD",
+        "title": "Reveal Target",
+        "enablement": "view == buildWorkspace && viewItem == artifacts"
+      },
+      {
         "command": "zxz-moe-bis.generateLaunchJson",
         "title": "bis: generate bis launch json"
       },
@@ -228,6 +233,13 @@
         {
           "command": "zxz-moe-bis.refreshTreeViewer",
           "when": "view == buildWorkspace",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "zxz-moe-bis.revealTargetInBUILD",
+          "when": "view == buildWorkspace && viewItem == artifacts",
           "group": "navigation"
         }
       ]
