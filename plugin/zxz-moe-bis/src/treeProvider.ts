@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { BuildTaskProvider } from "./buildTaskProvider";
 import { targetVariable, deviceVariable, cpuVariable } from "./variables";
+import { sortBy } from "lodash";
 
 export interface ITreeItem {
     getLabel(): string;
@@ -34,7 +35,7 @@ class TreeItem implements ITreeItem {
                 this.icon = new vscode.ThemeIcon("debug-start");
             }
         } else {
-           this.icon = vscode.ThemeIcon.Folder;
+            this.icon = vscode.ThemeIcon.Folder;
         }
     }
 
@@ -91,7 +92,7 @@ class TreeItem implements ITreeItem {
         return this.icon;
     }
     getChildren(): Thenable<ITreeItem[]> {
-        return Promise.resolve(this.children);
+        return Promise.resolve(this.children).then((items) => sortBy(items, ["label", "path"]));
     }
 
     collapsibleState(): vscode.TreeItemCollapsibleState {
@@ -186,7 +187,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
             new BuildTaskProvider().provideAllTasks().then((tasks) => {
                 const items = tasks.map(
                     (task) =>
-                    new TreeItem(task, task.name.replace(/^build /, ""))
+                        new TreeItem(task, task.name.replace(/^build /, ""))
                 );
                 const root = new TreeItem(undefined, "");
                 for (const item of items) {
