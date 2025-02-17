@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/xinzhengzhang/bis"
   },
-  "version": "0.4.0",
+  "version": "0.4.2",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -31,6 +31,11 @@
         "command": "zxz-moe-bis.refreshConnectedDevices",
         "title": "bis: refresh tunneld devices",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "zxz-moe-bis.revealTargetInBUILD",
+        "title": "Reveal Target",
+        "enablement": "view == buildWorkspace && viewItem == artifacts"
       },
       {
         "command": "zxz-moe-bis.generateLaunchJson",
@@ -255,6 +260,11 @@
           "command": "zxz-moe-bis.refreshConnectedDevices",
           "when": "viewItem == DaemonServerItem",
           "group": "inline"
+        },
+        {
+          "command": "zxz-moe-bis.revealTargetInBUILD",
+          "when": "view == buildWorkspace && viewItem == artifacts",
+          "group": "navigation"
         }
       ]
     },
@@ -270,6 +280,12 @@
         }
       ]
     },
+    "viewsWelcome":[
+      {
+        "view": "buildWorkspace",
+        "contents": "The build targets of the current workspace"
+      }
+    ],
     "debuggers": [
       {
         "type": "lldb",

@@ -28,6 +28,12 @@ def _transitive_infos(*, ctx):
 
 
 def _bis_aspect_impl(target, ctx):
+    if ctx.rule.kind.endswith("_import"):
+        # skip some imported targets (e.g. objc_import, apple_static_framework_import, apple_dynamic_framework_import, etc.)
+        return []
+    if ctx.rule.kind == 'filegroup':
+        # skip filegroup targets
+        return []
     direct_index_dependents = []
     direct_outputs = [("bis artifacts {}".format(target.label), target.files)]
     direct_xctest_infos = []

@@ -22,13 +22,14 @@ import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
 import {
     deleteCompileCommandsFile,
+    queryLocationOfBUILD,
     isBisInstalled,
     touchBisBuild,
 } from "./utils";
 import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
 import WorkspaceService from "./workspace";
-import { TreeProvider } from "./treeProvider";
+import { TreeProvider, ITreeItem } from "./treeProvider";
 import * as pymobiledevice3 from "./pymobiledevice3";
 
 import * as debugConfigProvider from "./debugConfigProvider";
@@ -159,9 +160,52 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.registerTreeDataProvider("buildWorkspace", treeProvider)
     );
     context.subscriptions.push(
-        vscode.commands.registerCommand("zxz-moe-bis.refreshTreeViewer", () =>
-            treeProvider.refresh()
-        )
+        vscode.commands.registerCommand("zxz-moe-bis.refreshTreeViewer", () => {
+            if (!deviceVariable.get()) {
+                devicePicker.selectDevice();
+                // deviceVariable will trigger the treeProvider.refresh() in the next tick
+                return;
+            }
+            if (!targetVariable.get()) {
+                inputer.inputBuildTarget();
+                // targetVariable will trigger the treeProvider.refresh()
+                return;
+            }
+            treeProvider.refresh();
+        }
+        ),
+
+        vscode.commands.registerCommand("zxz-moe-bis.revealTargetInBUILD", (item: ITreeItem) => {
+            logger.log(JSON.stringify(item));
+            const path = item.getPath();
+            // @@loktar//srcs/services/biz/account:some_target
+            if (path?.startsWith("@@")) {
+                // show a progress
+                vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: `Revealing ${path}...`,
+                    cancellable: false
+                }, async () => {
+                    try {
+                        const location = await queryLocationOfBUILD(path);
+                        logger.log("BUILD file found: ", location);
+                        // location: /Users/loktar/loktar_ext/loktar/srcs/services/biz/account/BUILD:12:5
+                        const [file, line, col] = location.split(':');
+                        const uri = vscode.Uri.file(file);
+                        // Open file
+                        const doc = await vscode.workspace.openTextDocument(uri);
+                        logger.log("opened doc: ", doc.fileName);
+                        await vscode.window.showTextDocument(doc, {
+                            selection: new vscode.Range(parseInt(line) - 1, 0, parseInt(line) - 1, parseInt(col))
+                        });
+                    } catch (error) {
+                        logger.error(error);
+                    }
+                });
+
+            }
+        })
+
     );
     const daemonServerTreeProvider = new DaemonServerTreeProvider(context);
     context.subscriptions.push(
@@ -197,8 +241,11 @@ export function activate(context: vscode.ExtensionContext) {
         .pipe(distinctUntilChanged(isEqual))
         .pipe(skip(1))
         .subscribe((d) => {
-            cpuProvider.updateCpu(d);
-            vscode.commands.executeCommand("zxz-moe-bis.inputBuildTarget");
+            targetVariable.update(undefined);
+            if (d !== undefined) {
+                cpuProvider.updateCpu(d);
+                vscode.commands.executeCommand("zxz-moe-bis.inputBuildTarget");
+            }
         });
 
     eventEmitter.buildFileChangedEmitter.subscribe((file) => {
@@ -223,19 +270,19 @@ export function activate(context: vscode.ExtensionContext) {
                  device = ${deviceVariable.get()}\n
                  cpu = ${cpu}`
             );
-            if (configuration.autoGenerateLaunchJson) {
+            if (deviceVariable.get() && configuration.autoGenerateLaunchJson) {
                 logger.log("Auto generate LaunchJson");
                 vscode.commands.executeCommand(
                     "zxz-moe-bis.generateLaunchJson"
                 );
             }
-            if (configuration.autoRefreshDummyProjectForInjectionIII) {
+            if (deviceVariable.get() && configuration.autoRefreshDummyProjectForInjectionIII) {
                 logger.log("Auto refresh InjectionIII project");
                 vscode.commands.executeCommand(
                     "zxz-moe-bis.refreshDummyProjectForInjectionIII"
                 );
             }
-            vscode.commands.executeCommand("zxz-moe-bis.refreshTreeViewer");
+            treeProvider.refresh();
 
             vscode.workspace.workspaceFolders?.forEach((folder) => {
                 deleteCompileCommandsFile(folder);
@@ -262,4 +309,4 @@ export function activate(context: vscode.ExtensionContext) {
     );
 }
 
-export function deactivate() {}
+export function deactivate() { }

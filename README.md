@@ -1,17 +1,21 @@
 # bis
+
 Bazel rules and plugin for developing iOS project on vscode
 
 # Bzlmod
+
 ```sh
 # MODULE.bazel
-bazel_dep(name = "bis", version = "0.4.0", dev_dependency = True)
+bazel_dep(name = "bis", version = "0.4.2", dev_dependency = True)
 archive_override(
     module_name = "bis",
-    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.4.0.tar.gz",
-    strip_prefix = "bis-0.4.0"
+    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.4.2.tar.gz",
+    strip_prefix = "bis-0.4.2"
 )
 ```
+
 # Non-bzlmod
+
 ```sh
 # WORKSPACE
 load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
@@ -19,7 +23,7 @@ load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
 git_repository(
     name = "bis",
     remote = "git@github.com:xinzhengzhang/bis.git",
-    tag = "0.4.0",
+    tag = "0.4.2",
 )
 
 load("@bis//:repositories.bzl", "bis_rules_dependencies")
@@ -31,7 +35,8 @@ bis_rules_dependencies()
 # Setup
 
 ## Install bis plugin
-```
+
+```sh
 code --install-extension zxz-moe.zxz-moe-bis
 ```
 
@@ -42,7 +47,9 @@ These independent rules are too complicated, it is recommended to use them in co
 See [README](plugin/zxz-moe-bis/README.md) of plugin 
 
 ---
+
 If you insist on independent use, the following are simple ways to use it.
+
 ```sh
 cd examples
 # Extract for single file
@@ -60,40 +67,46 @@ bazel build //srcs/ios:App --compilation_mode=dbg --cpu=ios_x86_64 --features=os
 ```
 
 # Components
+
 ## Targets
+
 ### @bis//:setup
 ---
+
 Create `.bis/BUILD` into WORKSPACE.
 This step is done automatically by the plugin
 
+* Usage
+```
+bazel run @bis//:setup -- -h
 
-    * Usage
-    ```
-    bazel run @bis//:setup -- -h
-
-    Arguments:
-        -h, --help            show this help message and exit
-        --optionals OPTIONALS
-                                --compilation_mode=dbg --cpu=ios_x86_64
-        --target TARGET       target labels
-        --file_path FILE_PATH
-                                source code path
-        --ignore_parsing_targets IGNORE_PARSING_TARGETS
-                                skip searching compile targets
-    ``` 
+Arguments:
+    -h, --help            show this help message and exit
+    --optionals OPTIONALS
+                            --compilation_mode=dbg --cpu=ios_x86_64
+    --target TARGET       target labels
+    --file_path FILE_PATH
+                            source code path
+    --ignore_parsing_targets IGNORE_PARSING_TARGETS
+                            skip searching compile targets
+``` 
 
 ## Rules
 
 ### refresh_compile_commands
 ---
+
 Wrapper of https://github.com/hedronvision/bazel-compile-commands-extractor.
-We use it for hidding visibility under bzlmod.
+We use it for hiding visibility under bzlmod.
 
 
 ### refresh_launch_json
 ---
+
 Create `.vscode/launch.json` for vscode plugins
 * target: ios_application
 * pre_launch_task_name: pre_launch_task_name add in `.vscode/launch.json`
+
 ## Thanks to
+
 * [zhao han](https://github.com/BarneyZhaoooo) - For his excellent icon design

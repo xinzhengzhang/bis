@@ -1,6 +1,13 @@
 # Change Log
 
 ## [Unreleased]
+
+### 0.4.2
+* Auto trigger device picker when manually refreshing
+
+### 0.4.1
+* Update rules_swift to compatible with 1.x
+
 ### 0.4.0
 * Switched to using [pymobiledevice3](https://github.com/doronz88/pymobiledevice3) for real device debugging due to `ios-deploy` being broken after Xcode 15. Please note that `pymobiledevice3` is currently unstable and should be used for testing purposes only. Special thanks to [@ihomway](https://github.com/ihomway) for their support and contributions in [pull request #14](https://github.com/xinzhengzhang/bis/pull/14).
 

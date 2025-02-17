@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { BuildTaskProvider } from "./buildTaskProvider";
-import { targetVariable, deviceVariable } from "./variables";
+import { targetVariable, deviceVariable, cpuVariable } from "./variables";
+import { sortBy } from "lodash";
 
 export interface ITreeItem {
     getLabel(): string;
@@ -10,6 +11,7 @@ export interface ITreeItem {
     getTooltip(): string | undefined;
     getCommand(): vscode.Command | undefined;
     getContextValue(): string | undefined;
+    getPath(): string | null;
 }
 
 class TreeItem implements ITreeItem {
@@ -18,6 +20,7 @@ class TreeItem implements ITreeItem {
     label: string;
     icon: vscode.ThemeIcon;
     children: TreeItem[] = [];
+    type: string | undefined = undefined;
 
     constructor(task: vscode.Task | undefined, path: string) {
         this.task = task;
@@ -27,14 +30,17 @@ class TreeItem implements ITreeItem {
             if (path.startsWith("all index dependents ")) {
                 this.path = path.replace(/^all index dependents /, "");
                 this.icon = new vscode.ThemeIcon("wrench");
+                this.type = "dependents";
             } else if (path.startsWith("artifacts ")) {
                 this.path = path.replace(/^artifacts /, "");
                 this.icon = new vscode.ThemeIcon("debug-start");
+                this.type = "artifacts";
             } else {
                 this.icon = new vscode.ThemeIcon("debug-start");
+
             }
         } else {
-           this.icon = vscode.ThemeIcon.Folder;
+            this.icon = vscode.ThemeIcon.Folder;
         }
     }
 
@@ -91,9 +97,12 @@ class TreeItem implements ITreeItem {
         return this.icon;
     }
     getChildren(): Thenable<ITreeItem[]> {
-        return Promise.resolve(this.children);
+        return Promise.resolve(this.children).then((items) => sortBy(items, ["label", "path"]));
     }
 
+    getPath(): string | null {
+        return this.path;
+    }
     collapsibleState(): vscode.TreeItemCollapsibleState {
         if (this.children.length === 0) {
             return vscode.TreeItemCollapsibleState.None;
@@ -112,7 +121,7 @@ class TreeItem implements ITreeItem {
         };
     }
     getContextValue(): string | undefined {
-        return undefined;
+        return this.type;
     }
 }
 
@@ -132,6 +141,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
         vscode.workspace.onDidChangeWorkspaceFolders(this.refresh, this);
 
         this.updateWorkspaceFolderTreeItems();
+
     }
 
     public getChildren(element?: ITreeItem): Thenable<ITreeItem[]> {
@@ -172,7 +182,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
 
     /** Refresh the cached BazelWorkspaceFolderTreeItems. */
     private updateWorkspaceFolderTreeItems() {
-        if (!targetVariable.get() || !deviceVariable.get()) {
+        if (!targetVariable.get() || !cpuVariable.get()) {
             // no target specified
             return;
         }
@@ -185,7 +195,7 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
             new BuildTaskProvider().provideAllTasks().then((tasks) => {
                 const items = tasks.map(
                     (task) =>
-                    new TreeItem(task, task.name.replace(/^build /, ""))
+                        new TreeItem(task, task.name.replace(/^build /, ""))
                 );
                 const root = new TreeItem(undefined, "");
                 for (const item of items) {

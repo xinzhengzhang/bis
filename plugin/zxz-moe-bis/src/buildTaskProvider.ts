@@ -22,8 +22,8 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         }
 
         const compilationMode = (await picker.compilationMode()) ?? "dbg";
-        const cpu = await cpuProvider.cpu();
-        const result: vscode.Task[] = [
+        const cpu = cpuProvider.cpu();
+        return [
             this.createTask(
                 "build",
                 buildTarget!,
@@ -46,7 +46,6 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                 cpu
             )
         ];
-        return result;
     }
 
     public async provideAllTasks(): Promise<vscode.Task[]> {
@@ -60,7 +59,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         }
 
         const compilationMode = (await picker.compilationMode()) ?? "dbg";
-        const cpu = await cpuProvider.cpu();
+        const cpu = cpuProvider.cpu();
         const result: vscode.Task[] = await this.provideTasks();
 
         for (const workspaceFolder of workspaceFolders) {
