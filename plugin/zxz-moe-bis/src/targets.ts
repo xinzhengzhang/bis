@@ -1,6 +1,4 @@
-import * as pymobiledevice3 from './pymobiledevice3';
 import * as devicectl from './devicectl';
-import * as iosDeploy from './iosDeploy';
 import * as simulators from './simulators';
 import { Device, Target } from "./commonTypes";
 import configuration from './configuration';
@@ -40,7 +38,7 @@ export async function deviceInstall(device: Device, path: string, ipaPath: strin
 		logger.log(`Installing app (path: ${path}) to device (udid: ${device.udid})`);
 
 		return Promise.resolve()
-			.then(() => install(device.udid, path, ipaPath, bundleID, cancellationToken, (event) => {
+			.then(() => install(device.udid, path, bundleID, cancellationToken, (event) => {
 				logger.log(event);
 
 				let message = event.Status;
@@ -59,38 +57,15 @@ export async function deviceAppPath(udid: string, bundleId: string): Promise<str
 	return await devicectl.appPath(udid, bundleId);
 }
 
-async function debugserver(device: Device, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void): Promise<{ host: string, port: number, exec: PromiseWithChild<{ stdout: string, stderr: string }> }> {
-	if (configuration.pluginMode === "pymobiledevice3" ||
-		(configuration.pluginMode === 'mixed' && isIOS17OrLater(device.version))) {
-		return await pymobiledevice3.debugserver(device, cancellationToken, progressCallback);
-	} else {
-		return await iosDeploy.debugserver(device.udid, cancellationToken, progressCallback);
-	}
+export async function launchApp(udid: string, bundleId: string): Promise<Number> {
+	return await devicectl.launchProccess(udid, bundleId);
 }
 
-export async function deviceDebugserver(device: Device): Promise<void | { host: string, port: number}> {
-	logger.log(`Starting debugserver for device (udid: ${device.udid})`);
-	return vscode.window.withProgress({
-		"location": vscode.ProgressLocation.Notification,
-		"title": "Starting debugserver",
-		"cancellable": true
-	}, (progress, token) => {
-		let cancellationToken = { cancel: () => { } };
+export async function deviceGetPidFor(args: { udid: string, appPath: string }) {
+	let { udid, appPath } = args;
 
-		token.onCancellationRequested((e) => cancellationToken.cancel());
-
-		return Promise.resolve()
-			.then(() => debugserver(device, cancellationToken))
-			.then(({ host, port, exec }) => {
-
-				debugserverProcesses[port] = exec.child;
-				logger.log(`Debugserver Host: ${host} Port: ${port}`);
-				return { host, port };
-			})
-			.catch((e) => {
-				vscode.window.showErrorMessage("Failed to start debugserver");
-			});
-	});
+	return devicectl.getPidFor(udid, appPath)
+		.then((pid) => pid.toString());
 }
 
 // Simulator
