@@ -206,30 +206,28 @@ export class DebugConfigurationProvider
                 return null;
             }
 
-            let debugServerInfo = await targets.deviceDebugserver(target as Device);
+            let pid = await targets.launchApp(target.udid, dbgConfig.iosBundleId);
 
-            if (!debugServerInfo) {
+            if (!pid) {
                 return null;
             }
 
-            dbgConfig.iosDebugserverPort = debugServerInfo.port;
+            dbgConfig.pid = pid;
 
             dbgConfig.preRunCommands =
                 dbgConfig.preRunCommands instanceof Array
                     ? dbgConfig.preRunCommands
                     : [];
+
             dbgConfig.preRunCommands.push(
                 `script lldb.target.module[0].SetPlatformFileSpec(lldb.SBFileSpec('${platformPath}'))`
             );
-            if (isIPv4(debugServerInfo.host)) {
-                dbgConfig.preRunCommands.push(
-                    `process connect connect://${debugServerInfo.host}:${debugServerInfo.port}`
-                );
-            } else {
-                dbgConfig.preRunCommands.push(
-                    `process connect connect://[${debugServerInfo.host}]:${debugServerInfo.port}`
-                );
-            }
+            dbgConfig.processCreateCommands = [
+                // Tells LLDB which physical iOS device (by UDID) you want to attach to.
+                `script lldb.debugger.HandleCommand("device select ${target.udid}")`,
+                // Attaches LLDB to the already-launched process on that device.
+                `script lldb.debugger.HandleCommand("device process attach --continue --pid ${pid}")`,
+            ];
 
             if (dbgConfig.env) {
                 let newEnv: { [key: string]: string } = {};

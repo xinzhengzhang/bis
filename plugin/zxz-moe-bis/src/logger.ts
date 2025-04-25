@@ -3,10 +3,6 @@ import configuration  from "./configuration";
 
 let channel: vscode.OutputChannel;
 
-const loggerPrefix = (): string => {
-    return configuration.pluginMode;
-};
-
 function getFormattedTime() {
     let time = new Date();
     const year = time.getFullYear();
@@ -33,7 +29,7 @@ function formatSingleMessage(message: any) {
 function formatMessage(severity: "ERROR" | "WARN" | "INFO", messages: any[]) {
     let message = messages.map(formatSingleMessage).join(" ");
 
-    return `[${getFormattedTime()}] [${severity}] [${loggerPrefix()}] ${message}`;
+    return `[${getFormattedTime()}] [${severity}] ${message}`;
 }
 
 export function activate() {

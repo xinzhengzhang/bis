@@ -149,63 +149,6 @@
             "description": "Bazel version for Bazelisk to run",
             "order": 15,
             "default": "latest"
-          },
-          "bis.plugin_mode": {
-            "type": "string",
-            "default": "mixed",
-            "enum": [
-              "mixed",
-              "ios-deploy",
-              "pymobiledevice3"
-            ],
-            "description": "Select your plugin mode.<br> - `mixed`: only device running iOS 17 or above will use `pymobiledevice3` to start a debug server, all other functionability will fallback to `ios-deploy`.<br> - `ios-deploy`: use `ios-deploy` only (devices running iOS 17 or above will **fail** to launch a debug server).<br> - `pymobiledevice3`: use `pymobiledevice3` to do all the work (beta).",
-            "order": 16
-          }
-        }
-      },
-      {
-        "title": "ios-deploy",
-        "properties": {
-          "ios-deploy.incremental_installation_enabled": {
-            "type": "boolean",
-            "markdownDescription": "Incremental installation",
-            "order": 1,
-            "default": true
-          },
-          "ios-deploy.wifi_device_enabled": {
-            "type": "boolean",
-            "markdownDescription": "Include devices connected via WIFI",
-            "order": 2,
-            "default": true
-          }
-        }
-      },
-      {
-        "title": "pymobiledevice3",
-        "properties": {
-          "pymobiledevice3.debugserver_local_port": {
-            "type": "number",
-            "markdownDescription": "Debug Server Port (only for device running < iOS 17)",
-            "order": 1,
-            "default": 51968
-          },
-          "pymobiledevice3.daemon_pid_file": {
-            "type": "string",
-            "markdownDescription": "Tunneld daemon PID File",
-            "order": 2,
-            "default": "/tmp/bis_pymobieldevicelite.pid"
-          },
-          "pymobiledevice3.daemon_host": {
-            "type": "string",
-            "markdownDescription": "Tunneld daemon host",
-            "order": 3,
-            "default": "127.0.0.1"
-          },
-          "pymobiledevice3.daemon_port": {
-            "type": "number",
-            "markdownDescription": "Tunneld daemon port",
-            "order": 4,
-            "default": 5555
           }
         }
       }
@@ -259,7 +202,7 @@
         }
       ]
     },
-    "viewsWelcome":[
+    "viewsWelcome": [
       {
         "view": "buildWorkspace",
         "contents": "The build targets of the current workspace"
@@ -337,7 +280,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run pretest && npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --external:ios-deploy/package.json --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "test-compile": "tsc -p ./",
@@ -348,7 +291,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "extensionDependencies": [
-    "sswg.swift-lang",
+    "swiftlang.swift-vscode",
     "vadimcn.vscode-lldb"
   ],
   "devDependencies": {
@@ -368,7 +311,6 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "ios-deploy": "github:ios-control/ios-deploy#master",
     "lodash": "^4.17.21",
     "rxjs": "^7.8.0",
     "stream-json": "^1.8.0"

@@ -99,55 +99,6 @@ const configuration = {
             return "latest";
         }
         return bazelVersion;
-    },
-    get pluginMode(): string {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<string>("plugin_mode") ?? "mixed"
-        );
-    },
-    get isWifiDeviceIncluded(): boolean {
-        return (
-            vscode.workspace
-                .getConfiguration("ios-deploy")
-                .get<boolean>("wifi_device_enabled") ?? true
-        );
-    },
-    get isIncrementalInstallEnabled(): boolean {
-        return (
-            vscode.workspace
-                .getConfiguration("ios-deploy")
-                .get<boolean>("incremental_installation_enabled") ?? true
-        );
-    },
-    get debugServerLocalPort(): number {
-        return (
-            vscode.workspace
-                .getConfiguration("pymobiledevice3")
-                .get<number>("debugserver_local_port") ?? 51968
-        );
-    },
-    get daemonPidFile(): string {
-        return (
-            vscode.workspace
-                .getConfiguration("pymobiledevice3")
-                .get<string>("daemon_pid_file") ?? '/tmp/bis_pymobieldevicelite.pid'
-        );
-    },
-    get daemonHost(): string {
-        return (
-            vscode.workspace
-                .getConfiguration("pymobiledevice3")
-                .get<string>("daemon_host") ?? '127.0.0.1'
-        );
-    },
-    get daemonPort(): number {
-        return (
-            vscode.workspace
-                .getConfiguration("pymobiledevice3")
-                .get<number>("daemon_port") ?? 5555
-        );
     }
 };
 

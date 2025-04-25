@@ -30,7 +30,6 @@ import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
 import WorkspaceService from "./workspace";
 import { TreeProvider, ITreeItem } from "./treeProvider";
-import * as pymobiledevice3 from "./pymobiledevice3";
 
 import * as debugConfigProvider from "./debugConfigProvider";
 
@@ -52,7 +51,6 @@ export function activate(context: vscode.ExtensionContext) {
     inputer.activate(context);
     cpuProvider.activate(context);
     eventEmitter.activate(context);
-    pymobiledevice3.activate(context);
 
     // Debugger
     debugConfigProvider.activate(context);

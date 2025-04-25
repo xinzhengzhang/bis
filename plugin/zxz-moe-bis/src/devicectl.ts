@@ -4,6 +4,11 @@ import { _execFile, _exec } from './utils';
 import * as crypto from 'crypto';
 import { readFile } from 'fs/promises';
 
+interface RunningProcesses {
+  processIdentifier: number;
+  executable: string;
+}
+
 async function execute_devicectl(
   args: string[],
   output: string,
@@ -16,7 +21,7 @@ async function execute_devicectl(
 
   cancellationToken.cancel = () => p.child.kill();
 
-  return p
+  return p;
 }
 
 function convertFileURL(fileURL: string): string {
@@ -35,9 +40,9 @@ function convertFileURL(fileURL: string): string {
 }
 
 export async function listDevices(): Promise<Device[]> {
-  const randm_value = crypto.randomUUID()
-  const outputFile = `/tmp/list_devices_${randm_value}.json`
-  const logFile = `/tmp/list_devices_log_${randm_value}.json`
+  const randm_value = crypto.randomUUID();
+  const outputFile = `/tmp/list_devices_${randm_value}.json`;
+  const logFile = `/tmp/list_devices_log_${randm_value}.json`;
   try {
     logger.log("List Devices");
     logger.log("outputFile: ", outputFile);
@@ -48,7 +53,7 @@ export async function listDevices(): Promise<Device[]> {
       outputFile,
       logFile,
       { cancel: () => { } }
-    )
+    );
 
     // 读取生成的 JSON 文件
     const jsonData = await readFile(outputFile, 'utf-8');
@@ -70,15 +75,15 @@ export async function listDevices(): Promise<Device[]> {
 
     return devices;
   } catch (error) {
-    console.error('执行命令或解析 JSON 文件时出错:', error);
+    logger.error('执行命令或解析 JSON 文件时出错:', error);
     return [];
   }
 }
 
 export async function appPath(udid: string, bundleID: string): Promise<string> {
-  const randm_value = crypto.randomUUID()
-  const outputFile = `/tmp/app_path_${randm_value}.json`
-  const logFile = `/tmp/app_path_log_${randm_value}.json`
+  const randm_value = crypto.randomUUID();
+  const outputFile = `/tmp/app_path_${randm_value}.json`;
+  const logFile = `/tmp/app_path_log_${randm_value}.json`;
   try {
     logger.log("App Path");
     logger.log("outputFile: ", outputFile);
@@ -89,7 +94,7 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
       outputFile,
       logFile,
       { cancel: () => { } }
-    )
+    );
 
     // 读取生成的 JSON 文件
     const jsonData = await readFile(outputFile, 'utf-8');
@@ -97,7 +102,7 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
     // 解析 JSON 数据为 Device 数组
     const apps = JSON.parse(jsonData)
       .result
-      .apps
+      .apps;
 
     if (apps.length > 0) {
       return convertFileURL(apps[0].url);
@@ -105,15 +110,15 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
       return "";
     }
   } catch (error) {
-    console.error('执行命令或解析 JSON 文件时出错:', error);
+    logger.error('执行命令或解析 JSON 文件时出错:', error);
     return "";
   }
 }
 
 export async function deviceInstall(udid: string, path: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void) {
-  const randm_value = crypto.randomUUID()
-  const outputFile = `/tmp/device_install_${randm_value}.json`
-  const logFile = `/tmp/device_install_log_${randm_value}.json`
+  const randm_value = crypto.randomUUID();
+  const outputFile = `/tmp/device_install_${randm_value}.json`;
+  const logFile = `/tmp/device_install_log_${randm_value}.json`;
 
   try {
     logger.log("Install application");
@@ -130,7 +135,7 @@ export async function deviceInstall(udid: string, path: string, cancellationToke
       outputFile,
       logFile,
       { cancel: () => { } }
-    )
+    );
 
     progressCallback && progressCallback({
       "Status": "Completed",
@@ -143,7 +148,7 @@ export async function deviceInstall(udid: string, path: string, cancellationToke
     // 解析 JSON 数据为 Device 数组
     const apps = JSON.parse(jsonData)
       .result
-      .installedApplications
+      .installedApplications;
 
     if (apps.length > 0) {
       return convertFileURL(apps[0].installationURL);
@@ -151,28 +156,59 @@ export async function deviceInstall(udid: string, path: string, cancellationToke
       return "";
     }
   } catch (error) {
-    console.error('执行命令或解析 JSON 文件时出错:', error);
+    logger.error('执行命令或解析 JSON 文件时出错:', error);
     return "";
   }
 }
 
-// const udid = "00008030-000E74543608802E";
-// const bundleID = "com.puergozi.bilianime";
-// const path = "/Users/puer/Developer/bilibili/loktar/bazel-out/applebin_ios-ios_arm64-dbg-ST-2954a897fcf1/bin/bili-universal/bili-universal_archive-root/Payload/bili-universal.app";
+export async function getPidFor(udid: string, appPath: string): Promise<Number> {
+  const randm_value = crypto.randomUUID();
+  const outputFile = `/tmp/app_path_${randm_value}.json`;
+  const logFile = `/tmp/app_path_log_${randm_value}.json`;
+  
+  await execute_devicectl(
+    ["device", "info", "processes", "-d", udid],
+    outputFile,
+    logFile,
+    { cancel: () => { } }
+  );
+  
+  // 读取生成的 JSON 文件
+  const jsonData = await readFile(outputFile, 'utf-8');
 
-// (async () => {
-//   try {
-//     // const output = await listDevices();
-//     // const output = await appPath("00008030-000E74543608802E", "com.puergozi.bilianime");
-//     const output = await deviceInstall(udid, path, bundleID,
-//       { cancel: () => {} },
-//       (event) => {
-//         console.log(event);
-//       }
-//     );
-//     console.log(output);
-//     // 对获取到的设备数组进行进一步处理
-//   } catch (error) {
-//     console.error('获取设备列表时出错:', error);
-//   }
-// })();
+  // 解析 JSON 数据为 Device 数组
+  const runningProcesses = JSON.parse(jsonData)
+    .result
+    .runningProcesses as RunningProcesses[];
+  const process = runningProcesses
+      .find(item => item.executable?.includes(appPath));
+  if (process) {
+    return process.processIdentifier;
+  } else {
+    return 1;
+  }
+}
+
+export async function launchProccess(udid: string, bundleID: string): Promise<Number> {
+  const randm_value = crypto.randomUUID();
+  const outputFile = `/tmp/app_path_${randm_value}.json`;
+  const logFile = `/tmp/app_path_log_${randm_value}.json`;
+  
+  await execute_devicectl(
+    ["device", "process", "launch", "-d", udid, "--start-stopped", bundleID],
+    outputFile,
+    logFile,
+    { cancel: () => { } }
+  );
+  
+  // 读取生成的 JSON 文件
+  const jsonData = await readFile(outputFile, 'utf-8');
+
+  // 解析 JSON 数据为 Device 数组
+  const pid = JSON.parse(jsonData)
+    .result
+    .process
+    .processIdentifier;
+    
+  return pid;
+}
