@@ -100,6 +100,13 @@ export class DebugConfigurationProvider
             dbgConfig.initCommands.unshift(
                 `platform select ${lldbPlatform[target.type]}`
             );
+            // Dont's stop after attaching to the process:
+            // -n false - Should LLDB print a "stopped with SIGSTOP" message in the UI? Be silent-no notification to you
+            // -p true - Should LLDB forward the signal on to your app? Deliver SIGSTOP to the process
+            // -s false - Should LLDB pause (break into the debugger) when this signal arrives? Don't break; just run LLDB's signal hanlder login
+            dbgConfig.initCommands.unshift(
+                `process handle SIGSTOP -p true -s false -n false`
+            );
         }
         logger.log("resolveDebugConfiguration", dbgConfig);
 
@@ -212,7 +219,7 @@ export class DebugConfigurationProvider
                 return null;
             }
 
-            dbgConfig.pid = pid;
+            dbgConfig.pid = pid.toString();
 
             dbgConfig.preRunCommands =
                 dbgConfig.preRunCommands instanceof Array
