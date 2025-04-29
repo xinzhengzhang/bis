@@ -57,15 +57,15 @@ export async function deviceAppPath(udid: string, bundleId: string): Promise<str
 	return await devicectl.appPath(udid, bundleId);
 }
 
-export async function launchApp(udid: string, bundleId: string): Promise<Number> {
-	return await devicectl.launchProccess(udid, bundleId);
+// if the process can not started with --console options no log will produced
+export async function launchApp(udid: string, bundleId: string, preferdLogPath: string): Promise<Number|undefined> {
+	return await devicectl.launchProcess(udid, bundleId, preferdLogPath);
 }
 
 export async function deviceGetPidFor(args: { udid: string, appPath: string }) {
 	let { udid, appPath } = args;
 
 	return devicectl.getPidFor(udid, appPath)
-		.then((pid) => pid.toString());
 }
 
 // Simulator
