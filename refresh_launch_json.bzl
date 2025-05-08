@@ -17,43 +17,47 @@ def _create_launch_items(target, pre_launch_task_name):
             program = "Payload/{}.app".format(bundle_info.bundle_name)
             launch_items.append(struct(
                 name = "Launch",
-                type = "lldb",
+                type = "lldb-dap",
                 request = "launch",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
                 ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 iosBundleId = bundle_info.bundle_id,
                 iosTarget = "last-selected",
                 preLaunchTask = pre_launch_task_name,
-                sourceMap = {"./": "${workspaceFolder}"}
+                sourcePath = "${workspaceFolder}",
+                debuggerRoot = "${workspaceFolder}"
             ))
             launch_items.append(struct(
                 name = "Attach",
-                type = "lldb",
+                type = "lldb-dap",
                 request = "attach",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
                 ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 iosBundleId = bundle_info.bundle_id,
                 iosTarget = "last-selected",
-                sourceMap = {"./": "${workspaceFolder}"}
+                sourcePath = "${workspaceFolder}",
+                debuggerRoot = "${workspaceFolder}"
             ))
         elif bundle_info.platform_type == "macos":
             program = "{}.app".format(bundle_info.bundle_name)
             launch_items.append(struct(
                 name = "Launch",
-                type = "lldb",
+                type = "lldb-dap",
                 request = "launch",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
                 ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 preLaunchTask = pre_launch_task_name,
-                sourceMap = {"./": "${workspaceFolder}"}
+                sourcePath = "${workspaceFolder}",
+                debuggerRoot = "${workspaceFolder}"
             ))
             launch_items.append(struct(
                 name = "Attach",
-                type = "lldb",
+                type = "lldb-dap",
                 request = "attach",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
                 ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
-                sourceMap = {"./": "${workspaceFolder}"}
+                sourcePath = "${workspaceFolder}",
+                debuggerRoot = "${workspaceFolder}"
             ))
     elif bundle_info.bundle_extension == ".xctest":
         bis_info = target[BisProjInfo]
@@ -64,8 +68,9 @@ def _create_launch_items(target, pre_launch_task_name):
         if xctest_info.xctest_run_file:
             launch_items.append(struct(
                 name = "Launch",
-                type = "lldb",
-                sourceMap = {"./": "${workspaceFolder}"},
+                type = "lldb-dap",
+                sourcePath = "${workspaceFolder}",
+                debuggerRoot = "${workspaceFolder}",
                 preLaunchTask = "bis.build: xctest bundle outputs",
                 BIS_XCTEST_RUN_FILE = xctest_info.xctest_run_file.path,
                 BIS_XCTEST_IS_DEVICE = xctest_info.xctest_is_device,
@@ -74,11 +79,12 @@ def _create_launch_items(target, pre_launch_task_name):
         else:
             launch_items.append(struct(
                 name = "Launch",
-                type = "lldb",
+                type = "lldb-dap",
                 cwd = "${workspaceFolder}",
                 internalConsoleOptions = "openOnSessionStart",
                 console = "internalConsole",
-                sourceMap = {"./": "${workspaceFolder}"},
+                sourcePath = "${workspaceFolder}",
+                debuggerRoot = "${workspaceFolder}",
                 preLaunchTask = "bis.build: xctest bundle outputs",
                 BIS_XCTEST_BUNDLE = xctest_info.xctest_bundle.path,
                 BIS_XCTEST_IS_DEVICE = xctest_info.xctest_is_device,
@@ -101,18 +107,20 @@ def _refresh_launch_json(ctx):
         # We should assert that if the files do not exist, we should not create a launch configuration. So just throw an exception
         launch_items.append(struct(
             name = "Launch",
-            type = "lldb",
+            type = "lldb-dap",
             request = "launch",
             program = '${workspaceFolder}/'+ target.files.to_list()[0].path,
             preLaunchTask = pre_launch_task_name,
-            sourceMap = {"./": "${workspaceFolder}"}
+            sourcePath = "${workspaceFolder}",
+            debuggerRoot = "${workspaceFolder}"
         ))
         launch_items.append(struct(
             name = "Attach",
-            type = "lldb",
+            type = "lldb-dap",
             request = "attach",
             program = '${workspaceFolder}/'+ target.files.to_list()[0].path,
-            sourceMap = {"./": "${workspaceFolder}"}
+            sourcePath = "${workspaceFolder}",
+            debuggerRoot = "${workspaceFolder}"
         ))
 
     launch_configuration = struct(

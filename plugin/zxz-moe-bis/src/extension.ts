@@ -208,7 +208,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Debugger
     context.subscriptions.push(
         vscode.debug.registerDebugConfigurationProvider(
-            "lldb",
+            "lldb-dap",
             new debugConfigProvider.DebugConfigurationProvider()
         )
     );

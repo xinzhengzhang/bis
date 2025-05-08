@@ -21,10 +21,6 @@ const lldbPlatform: { [T in TargetType]: string } = {
 
 const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-const isIPv4 = (address: string): boolean => {
-    return ipv4Pattern.test(address);
-};
-
 function randomString() {
     let random;
 
@@ -89,7 +85,7 @@ export class DebugConfigurationProvider
 
             dbgConfig.initCommands.unshift(
                 `command script import '${context.asAbsolutePath(
-                    "lldb/logs.py"
+                    "lldb/file_monitor.py"
                 )}'`
             );
             dbgConfig.initCommands.unshift(
@@ -99,13 +95,6 @@ export class DebugConfigurationProvider
             );
             dbgConfig.initCommands.unshift(
                 `platform select ${lldbPlatform[target.type]}`
-            );
-            // Dont's stop after attaching to the process:
-            // -n false - Should LLDB print a "stopped with SIGSTOP" message in the UI? Be silent-no notification to you
-            // -p true - Should LLDB forward the signal on to your app? Deliver SIGSTOP to the process
-            // -s false - Should LLDB pause (break into the debugger) when this signal arrives? Don't break; just run LLDB's signal hanlder login
-            dbgConfig.initCommands.unshift(
-                `process handle SIGSTOP -p true -s false -n false`
             );
         }
         logger.log("resolveDebugConfiguration", dbgConfig);
@@ -166,8 +155,8 @@ export class DebugConfigurationProvider
                     waitForDebugger: true,
                 });
 
-                dbgConfig.initCommands.push(`follow ${stdout}`);
-                dbgConfig.initCommands.push(`follow ${stderr}`);
+                dbgConfig.initCommands.push(`monitor_file ${stdout}`);
+                dbgConfig.initCommands.push(`monitor_file ${stderr}`);
             } else {
                 pid = await targets.simulatorGetPidFor({
                     udid: target.udid,
@@ -179,18 +168,19 @@ export class DebugConfigurationProvider
                 return null;
             }
 
-            dbgConfig.pid = pid;
+            dbgConfig.pid = Number(pid);
 
             if (enableSimulatorFocusMonitor) {
-                dbgConfig.postRunCommands =
-                    dbgConfig.postRunCommands instanceof Array
-                        ? dbgConfig.postRunCommands
+                dbgConfig.preRunCommands =
+                    dbgConfig.preRunCommands instanceof Array
+                        ? dbgConfig.preRunCommands
                         : [];
-                dbgConfig.postRunCommands.push(
+                dbgConfig.preRunCommands.push(
                     `simulator-focus-monitor ${target.name} – ${target.runtime}`
                 );
             }
 
+            delete dbgConfig.program;
             delete dbgConfig.env;
             delete dbgConfig.args;
         } else if (target.type === "Device") {
@@ -219,8 +209,6 @@ export class DebugConfigurationProvider
                 return null;
             }
 
-            dbgConfig.pid = pid.toString();
-
             dbgConfig.preRunCommands =
                 dbgConfig.preRunCommands instanceof Array
                     ? dbgConfig.preRunCommands
@@ -229,12 +217,17 @@ export class DebugConfigurationProvider
             dbgConfig.preRunCommands.push(
                 `script lldb.target.module[0].SetPlatformFileSpec(lldb.SBFileSpec('${platformPath}'))`
             );
-            dbgConfig.processCreateCommands = [
-                // Tells LLDB which physical iOS device (by UDID) you want to attach to.
-                `script lldb.debugger.HandleCommand("device select ${target.udid}")`,
-                // Attaches LLDB to the already-launched process on that device.
-                `script lldb.debugger.HandleCommand("device process attach --continue --pid ${pid}")`,
-            ];
+            if (dbgConfig.iosRequest === "launch") {
+                dbgConfig.launchCommands = [
+                    `device select ${target.udid}`,
+                    `device process attach --continue --pid ${pid}`
+                ]
+            } else {
+                dbgConfig.attachCommands = [
+                    `device select ${target.udid}`,
+                    `device process attach --continue --pid ${pid}`
+                ]
+            }
 
             if (dbgConfig.env) {
                 let newEnv: { [key: string]: string } = {};
