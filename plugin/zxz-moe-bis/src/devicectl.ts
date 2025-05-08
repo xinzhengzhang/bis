@@ -67,7 +67,7 @@ export async function listDevices(): Promise<Device[]> {
       .devices
       .map((d: any): Device => ({
         udid: d.hardwareProperties.udid,
-        name: `${d.deviceProperties.name}(${d.connectionProperties.tunnelState})`,
+        name: `${d.deviceProperties.name}`,
         type: "Device",
         version: d.deviceProperties.osVersionNumber,
         buildVersion: d.deviceProperties.osBuildUpdate,
