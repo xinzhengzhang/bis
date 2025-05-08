@@ -1,6 +1,5 @@
 import { promisify } from "util";
 import * as vscode from "vscode";
-import * as path from "path";
 import * as fs from "fs";
 import {
     execFile,
@@ -85,7 +84,7 @@ export function queryLocationOfBUILD(targetPath: string): Promise<string> {
                     workspaceRoot
                 )
                     .then((stdout) => {
-                        const r = RegExp(/(.*\/BUILD(?:\.bazel)?\:\d+\:\d+)\:\s+.*rule.*/)
+                        const r = RegExp(/(.*\/BUILD(?:\.bazel)?\:\d+\:\d+)\:\s+.*rule.*/);
                         if (r.test(stdout)) {
                             resolve(stdout.match(r)![1]);
                         } else {

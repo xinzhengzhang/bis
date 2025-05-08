@@ -1,9 +1,11 @@
+import { createWriteStream } from "fs";
 import { Device } from "./commonTypes";
 import * as logger from "./logger";
 import { _execFile, _exec } from './utils';
 import * as crypto from 'crypto';
 import { readFile } from 'fs/promises';
 import * as vscode from "vscode";
+import { spawn } from "child_process";
 
 interface RunningProcesses {
   processIdentifier: number;
@@ -196,13 +198,62 @@ export async function getPidFor(udid: string, appPath: string): Promise<Number> 
   }
 }
 
-export async function launchProccess(udid: string, bundleID: string): Promise<Number> {
+export async function launchProcess(udid: string, bundleID: string, preferredLogPath: string): Promise<Number|undefined> {
   const randm_value = crypto.randomUUID();
   const outputFile = `/tmp/app_path_${randm_value}.json`;
   const logFile = `/tmp/app_path_log_${randm_value}.json`;
   
+  const commandWithConsole = ["device", "process", "launch", "--console", "-d", udid, "--start-stopped", bundleID];
+  const commandWithoutConsole = ["device", "process", "launch", "-d", udid, "--start-stopped", bundleID];
+  const processLogStream = createWriteStream(preferredLogPath);
+  
+  // Attempt to launch with --console mode
+  try {
+    const consoleModeSuccess = await new Promise<boolean>((resolve, reject) => {
+      const process = spawn("xcrun", ["devicectl", ...commandWithConsole], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      const timeout = setTimeout(() => {
+        process.kill();
+        reject(new Error("Command execution timed out after 10 seconds"));
+      }, 10000);
+
+      process.stdout?.on('data', (data) => {
+        const output = data.toString();
+        if (output.includes("Waiting for")) {
+          logger.log("Process launched successfully waiting for the process attached");
+          clearTimeout(timeout);
+          resolve(true);
+        }
+        processLogStream.write(data);
+      });
+
+      process.stderr?.on('data', (data) => {
+        logger.error(`stderr: ${data}`);
+      });
+
+      process.on('error', (err) => {
+        clearTimeout(timeout);
+        processLogStream.close();
+        reject(err);
+      });
+
+      process.on('close', (code) => {
+        if (code !== 0) {
+          reject(new Error(`Process exited with code ${code}`));
+        }
+        processLogStream.close();
+      });
+    });
+
+    if (consoleModeSuccess) {
+      logger.log("Process launched successfully in --console mode.");
+      return undefined;
+    }
+  } catch (error) {
+    logger.warn("Failed to launch process in --console mode, falling back to non-console mode.");
+  }
+  
   await execute_devicectl(
-    ["device", "process", "launch", "-d", udid, "--start-stopped", bundleID],
+    commandWithoutConsole,
     outputFile,
     logFile,
     { cancel: () => { } }

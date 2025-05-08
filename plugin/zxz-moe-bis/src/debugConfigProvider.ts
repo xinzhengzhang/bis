@@ -203,11 +203,22 @@ export class DebugConfigurationProvider
                 return null;
             }
 
-            let pid = await targets.launchApp(target.udid, dbgConfig.iosBundleId);
+            let outputBasename = getOutputBasename();
+            let logPath = `${outputBasename}-log`;
+
+            let pid = await targets.launchApp(target.udid, dbgConfig.iosBundleId, logPath);
+            if (pid === undefined) {
+                pid = await targets.deviceGetPidFor({
+                    udid: target.udid,
+                    appPath: platformPath,
+                });
+            }
 
             if (!pid) {
                 return null;
             }
+            
+            dbgConfig.initCommands.push(`monitor_file ${logPath}`);
 
             dbgConfig.preRunCommands =
                 dbgConfig.preRunCommands instanceof Array
@@ -221,12 +232,12 @@ export class DebugConfigurationProvider
                 dbgConfig.launchCommands = [
                     `device select ${target.udid}`,
                     `device process attach --continue --pid ${pid}`
-                ]
+                ];
             } else {
                 dbgConfig.attachCommands = [
                     `device select ${target.udid}`,
                     `device process attach --continue --pid ${pid}`
-                ]
+                ];
             }
 
             if (dbgConfig.env) {
