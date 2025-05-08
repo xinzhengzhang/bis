@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/xinzhengzhang/bis"
   },
-  "version": "0.4.2",
+  "version": "0.4.3-beta50",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -210,7 +210,7 @@
     ],
     "debuggers": [
       {
-        "type": "lldb",
+        "type": "lldb-dap",
         "configurationAttributes": {
           "launch": {
             "properties": {
@@ -292,7 +292,7 @@
   },
   "extensionDependencies": [
     "swiftlang.swift-vscode",
-    "vadimcn.vscode-lldb"
+    "llvm-vs-code-extensions.lldb-dap"
   ],
   "devDependencies": {
     "@types/glob": "^8.0.0",

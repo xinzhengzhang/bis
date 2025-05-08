@@ -76,7 +76,7 @@ export async function listDevices(): Promise<Device[]> {
 
     return devices;
   } catch (error) {
-    const err = error as Error
+    const err = error as Error;
     vscode.window.showErrorMessage(`发生错误：${err.message}`);
     logger.error('执行命令或解析 JSON 文件时出错:', error);
     return [];
@@ -113,7 +113,7 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
       return "";
     }
   } catch (error) {
-    const err = error as Error
+    const err = error as Error;
     vscode.window.showErrorMessage(`发生错误：${err.message}`);
     logger.error('执行命令或解析 JSON 文件时出错:', error);
     return "";
@@ -161,7 +161,7 @@ export async function deviceInstall(udid: string, path: string, cancellationToke
       return "";
     }
   } catch (error) {
-    const err = error as Error
+    const err = error as Error;
     vscode.window.showErrorMessage(`发生错误：${err.message}`);
     logger.error('执行命令或解析 JSON 文件时出错:', error);
     return "";
