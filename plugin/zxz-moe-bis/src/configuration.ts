@@ -49,25 +49,10 @@ const configuration = {
                 .get<number>("compile_commands_rolling_size") ?? 300000000
         );
     },
-    get queryKindFilter(): string {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<string>("query_kind_filter") ?? "(swift|objc|cc)_library"
-        );
-    },
     get targetQueryKindFilter(): string | undefined {
         return vscode.workspace
             .getConfiguration("bis")
             .get<string>("target_query_kind_filter");
-    },
-    get autoRefreshDummyProjectForInjectionIII(): boolean {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<boolean>("auto_refresh_dummy_project_for_InjectionIII") ??
-            true
-        );
     },
     get autoRefreshTreeViewerWhenConfigurationChanged(): boolean {
         return (
@@ -90,16 +75,6 @@ const configuration = {
         }
         return bazelExecutable;
     },
-    get bazeliskVersion(): string {
-        const bazelVersion =
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<string>("bazelisk_version") ?? "";
-        if (bazelVersion.length === 0) {
-            return "latest";
-        }
-        return bazelVersion;
-    }
 };
 
 export default configuration;

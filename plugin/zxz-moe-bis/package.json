@@ -91,60 +91,36 @@
             "order": 6,
             "default": "--features=oso_prefix_is_pwd"
           },
-          "bis.query_kind_filter": {
-            "type": "string",
-            "markdownDescription": "Bazel query rules (Build task), bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
-            "order": 7,
-            "default": "(swift|objc|cc)_library"
-          },
           "bis.target_query_kind_filter": {
             "type": "string",
             "markdownDescription": "Bazel query rules (Target selection), bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
-            "order": 8,
+            "order": 7,
             "default": "(swift|objc|cc)_library"
           },
           "bis.compile_commands_rolling_size": {
             "type": "integer",
             "markdownDescription": "Rolling size of compile_commands.json",
-            "order": 9,
+            "order": 8,
             "default": 300000000
           },
           "bis.default_workspace": {
             "type": "string",
             "default": "",
             "scope": "window",
-            "order": 10,
+            "order": 9,
             "description": "Default workspace location"
-          },
-          "bis.auto_refresh_dummy_project_for_InjectionIII": {
-            "type": "boolean",
-            "markdownDescription": "Refresh bis-dummy.xcodeproj and ~/Library/Developer/Xcode/DerivedData/bis-dummy-log/Logs/Build/ automaticaly when configuration changed",
-            "order": 11,
-            "default": false
           },
           "bis.auto_refresh_tree_viewer_configuration_changed": {
             "type": "boolean",
             "markdownDescription": "Auto refresh tree viewer when BUILD.bazel / WORKSAPCE changed",
-            "order": 12,
-            "default": false
-          },
-          "bis.support_kotlin_extension": {
-            "type": "boolean",
-            "markdownDescription": "Support kotlin (kmm) It needs to be combined with unpublished rules_kotlin_mobile",
-            "order": 13,
+            "order": 10,
             "default": false
           },
           "bis.bazel_executable": {
             "type": "string",
             "description": "The name of the Bazel executable. This may be an absolute path.  If empty, \"bazel\" on the system path will be used.",
-            "order": 14,
+            "order": 11,
             "default": ""
-          },
-          "bis.bazelisk_version": {
-            "type": "string",
-            "description": "Bazel version for Bazelisk to run",
-            "order": 15,
-            "default": "latest"
           }
         }
       }

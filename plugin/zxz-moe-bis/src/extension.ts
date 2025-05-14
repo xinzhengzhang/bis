@@ -246,12 +246,6 @@ export function activate(context: vscode.ExtensionContext) {
                     "zxz-moe-bis.generateLaunchJson"
                 );
             }
-            if (deviceVariable.get() && configuration.autoRefreshDummyProjectForInjectionIII) {
-                logger.log("Auto refresh InjectionIII project");
-                vscode.commands.executeCommand(
-                    "zxz-moe-bis.refreshDummyProjectForInjectionIII"
-                );
-            }
             treeProvider.refresh();
 
             vscode.workspace.workspaceFolders?.forEach((folder) => {
