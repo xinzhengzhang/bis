@@ -45,7 +45,6 @@ def _create_launch_items(target, pre_launch_task_name):
                 type = "lldb-dap",
                 request = "launch",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
-                ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 preLaunchTask = pre_launch_task_name,
                 sourcePath = "${workspaceFolder}",
                 debuggerRoot = "${workspaceFolder}"
@@ -55,7 +54,6 @@ def _create_launch_items(target, pre_launch_task_name):
                 type = "lldb-dap",
                 request = "attach",
                 program = '${workspaceFolder}/'+ "{}/{}".format(bundle_info.archive_root, program),
-                ipaPath = '${workspaceFolder}/'+ bundle_info.archive.path,
                 sourcePath = "${workspaceFolder}",
                 debuggerRoot = "${workspaceFolder}"
             ))
@@ -79,7 +77,7 @@ def _create_launch_items(target, pre_launch_task_name):
         else:
             launch_items.append(struct(
                 name = "Launch",
-                type = "lldb-dap",
+                type = "lldb",
                 cwd = "${workspaceFolder}",
                 internalConsoleOptions = "openOnSessionStart",
                 console = "internalConsole",

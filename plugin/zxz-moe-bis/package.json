@@ -292,7 +292,8 @@
   },
   "extensionDependencies": [
     "swiftlang.swift-vscode",
-    "llvm-vs-code-extensions.lldb-dap"
+    "llvm-vs-code-extensions.lldb-dap",
+    "vadimcn.vscode-lldb"
   ],
   "devDependencies": {
     "@types/glob": "^8.0.0",
