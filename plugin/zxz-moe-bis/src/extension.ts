@@ -7,7 +7,6 @@ import * as devicePicker from "./devicePicker";
 import * as inputer from "./inputer";
 import * as cpuProvider from "./cpuProvider";
 import * as launchGenerator from "./launchGenerator";
-import * as refreshInjection from "./refreshInjectioniiiProject";
 import configuration from "./configuration";
 import { BuildTaskProvider } from "./buildTaskProvider";
 import { onDidChangeActiveTextEditorMaker } from "./refreshCompileCommands";
@@ -98,13 +97,6 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand(
             "zxz-moe-bis.generateLaunchJson",
             launchGenerator.generate
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand(
-            "zxz-moe-bis.refreshDummyProjectForInjectionIII",
-            refreshInjection.refreshInjectionIIIProject
         )
     );
 

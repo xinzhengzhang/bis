@@ -48,10 +48,6 @@
       {
         "command": "zxz-moe-bis.workspace",
         "title": "bis: set workspace root"
-      },
-      {
-        "command": "zxz-moe-bis.refreshDummyProjectForInjectionIII",
-        "title": "bis: refresh dummy project for InjectionIII"
       }
     ],
     "configuration": [
