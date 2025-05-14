@@ -189,7 +189,6 @@ export class DebugConfigurationProvider
                 platformPath = await targets.deviceInstall(
                     target as Device,
                     dbgConfig.program,
-                    dbgConfig.ipaPath,
                     dbgConfig.iosBundleId
                 );
             } else {

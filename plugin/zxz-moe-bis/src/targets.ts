@@ -22,7 +22,7 @@ async function install(udid: string, path: string, bundleID: string, cancellatio
 	return devicectl.deviceInstall(udid, path, cancellationToken, progressCallback);
 }
 
-export async function deviceInstall(device: Device, path: string, ipaPath: string, bundleID: string) {
+export async function deviceInstall(device: Device, path: string, bundleID: string) {
 	return vscode.window.withProgress({
 		"location": vscode.ProgressLocation.Notification,
 		"title": "Installing",
