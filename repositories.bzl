@@ -1,5 +1,4 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
 
 def _maybe(repo_rule, name, **kwargs):
     """Executes the given repository rule if it hasn't been executed already.
@@ -12,11 +11,13 @@ def _maybe(repo_rule, name, **kwargs):
     if not native.existing_rule(name):
         repo_rule(name = name, **kwargs)
 
-def bis_rules_dependencies_hedron_compile_commands(remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git"):
-    git_repository(
+def bis_rules_dependencies_hedron_compile_commands():
+    urls = ["https://github.com/hedronvision/bazel-compile-commands-extractor/archive/f7388651ee99608fb5f6336764657596e2f84b97.zip"]
+    http_archive(
         name = "hedron_compile_commands",
-        remote = remote,
-        commit = "f7388651ee99608fb5f6336764657596e2f84b97",
+        urls = urls,
+        strip_prefix = "bazel-compile-commands-extractor-f7388651ee99608fb5f6336764657596e2f84b97",
+        sha256 = "e8607c4c398fa048e035f8e19895cb2a464dabf2560d7d37df90ad82c687bbb8",
         patch_args = ["-p1"],
         patches = [
             ":patches/file_filter.patch",
@@ -24,11 +25,8 @@ def bis_rules_dependencies_hedron_compile_commands(remote = "https://github.com/
         ]
     )
 
-def bis_rules_dependencies_xctestrunner(mirror_host = ""):
-    hosts = ["github.com"]
-    if len(mirror_host) > 0:
-        hosts.insert(0, mirror_host)
-    urls = ["https://{}/google/xctestrunner/archive/24629f3e6c0dda397f14924b64eb45d04433c07e.tar.gz".format(host) for host in hosts]
+def bis_rules_dependencies_xctestrunner():
+    urls = ["https://github.com/google/xctestrunner/archive/24629f3e6c0dda397f14924b64eb45d04433c07e.tar.gz"]
     http_archive(
         name = "xctestrunner",
         urls = urls,

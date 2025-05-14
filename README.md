@@ -9,7 +9,7 @@ Bazel rules and plugin for developing iOS project on vscode
 bazel_dep(name = "bis", version = "0.4.2", dev_dependency = True)
 archive_override(
     module_name = "bis",
-    urls = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.4.2.tar.gz",
+    url = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.4.2.tar.gz",
     strip_prefix = "bis-0.4.2"
 )
 ```
@@ -18,12 +18,12 @@ archive_override(
 
 ```sh
 # WORKSPACE
-load('@bazel_tools//tools/build_defs/repo:git.bzl', 'git_repository')
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-git_repository(
+http_archive(
     name = "bis",
-    remote = "git@github.com:xinzhengzhang/bis.git",
-    tag = "0.4.2",
+    url = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.4.2.tar.gz",
+    strip_prefix = "bis-0.4.2"
 )
 
 load("@bis//:repositories.bzl", "bis_rules_dependencies")
