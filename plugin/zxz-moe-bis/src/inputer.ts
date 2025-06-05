@@ -42,11 +42,12 @@ function execResult(sdk: string, folderString: string): Promise<string[]> {
             kindFilter += "|" + configFilter;
         }
         const process = executeBazelCommands(
+            "query",
             [
-                "query",
                 `'kind("${kindFilter}", "//...")'`,
                 "--output=label_kind",
             ],
+            [],
             folderString,
             (exception, stdout, stderr) => {
                 if (stdout) {

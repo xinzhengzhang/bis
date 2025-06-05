@@ -90,8 +90,8 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
             const cpuOpts = cpu ? `--cpu=${cpu}` : "";
-            const command = `outpath=\`bazel ${configuration.startupOptions} cquery ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"\` && ${configuration.bazelExecutablePath} ${configuration.startupOptions} build ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && cat bazel-bin/$outpath`;
-            // const command = `${configuration.bazelExecutablePath} ${configuration.startupOptions} build ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && bazel ${configuration.startupOptions} cquery ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"  | xargs -I{} cat bazel-bin/{}`;
+            const command = `outpath=\`${configuration.bazelExecutablePath} ${configuration.startupOptions} cquery ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"\` && ${configuration.bazelExecutablePath} ${configuration.startupOptions} build ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && cat bazel-bin/$outpath`;
+            logger.log(`Executing command: ${command}`);
             const process = exec(
                 command,
                 {
@@ -118,6 +118,17 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                                 )
                             );
                         });
+                        splited
+                            .filter(str => str.startsWith('bis artifacts '))
+                            .map((str) => str.replace(/^bis artifacts /, '')).forEach((str) => {
+                                if (!str) {
+                                    return;
+                                }
+                                const labelIdentifier = `${str}`;
+                                result.push(
+                                    _this.createSyncCommandTask(buildTarget, labelIdentifier)
+                                );
+                            });
                         resolve(result);
                     } else {
                         if (exception) {
@@ -135,7 +146,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
     private createTask(
         command: string = "build",
         target: string,
-        labelIdentifier: string|undefined,
+        labelIdentifier: string | undefined,
         compilationMode: string,
         cpu: string | undefined,
     ) {
@@ -147,12 +158,45 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         const task = new vscode.Task(
             {
                 type: BuildTaskProvider.scriptType,
-                target: target + (labelIdentifier??command),
+                target: target + (labelIdentifier ?? command),
             },
             vscode.TaskScope.Workspace,
-            labelIdentifier??command,
+            labelIdentifier ?? command,
             BuildTaskProvider.scriptType,
             new vscode.ShellExecution(executionCommands)
+        );
+        task.group = vscode.TaskGroup.Build;
+        return task;
+    }
+
+    private createSyncCommandTask(
+        target: string,
+        labelIdentifier: string,
+    ) {
+        const task = new vscode.Task(
+            {
+                type: BuildTaskProvider.scriptType,
+                target: target + " sync " + labelIdentifier,
+            },
+            vscode.TaskScope.Workspace,
+            "sync " + labelIdentifier,
+            BuildTaskProvider.scriptType,
+            new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> => {
+                const writeEmitter = new vscode.EventEmitter<string>();
+                const closeEmitter = new vscode.EventEmitter<void>();
+                return {
+                    onDidWrite: writeEmitter.event,
+                    onDidClose: closeEmitter.event,
+                    open: () => {
+                        vscode.commands.executeCommand("zxz-moe-bis.syncCompileCommandsAndRestartLsp", labelIdentifier)
+                            .then(() => {
+                                closeEmitter.fire();
+                            });
+                    },
+                    close: () => { },
+                    handleInput: () => { }
+                };
+            })
         );
         task.group = vscode.TaskGroup.Build;
         return task;

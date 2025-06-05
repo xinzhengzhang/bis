@@ -37,9 +37,12 @@
         "title": "bis: generate bis launch json"
       },
       {
+        "command": "zxz-moe-bis.syncCompileCommandsAndRestartLsp",
+        "title": "bis: sync compile_commands.json and restart lsp"
+      },
+      {
         "command": "zxz-moe-bis.copyTargetPath",
-        "title": "bis: copy Target Path",
-        "enablement": ""
+        "title": "bis: copy Target Path"
       },
       {
         "command": "zxz-moe-bis.lib-deps",
@@ -60,66 +63,47 @@
             "order": 1,
             "default": true
           },
-          "bis.check_duplicate_compile_commands": {
-            "type": "boolean",
-            "markdownDescription": "Whether to ignore repeated refresh commands. Note: Different compilation parameters will still reuse the same copy. It doesn't matter in most cases, you can choose to delete the local ./compile_commands.json or disable it",
-            "order": 2,
-            "default": true
-          },
           "bis.simulator_cpu_string": {
             "type": "string",
             "markdownDescription": "CPU string of simulator",
-            "order": 3,
+            "order": 2,
             "default": "ios_x86_64"
-          },
-          "bis.pre_launch_task_name": {
-            "type": "string",
-            "markdownDescription": "Pre launch task name before build",
-            "order": 4,
-            "default": "bis.build: build",
-            "scope": "window"
           },
           "bis.startup_options": {
             "type": "string",
             "markdownDescription": "Startup options append on bazel build commands",
-            "order": 5,
+            "order": 3,
             "default": ""
           },
           "bis.build_options": {
             "type": "string",
             "markdownDescription": "Build options append on bazel build commands",
-            "order": 6,
+            "order": 4,
             "default": "--features=oso_prefix_is_pwd"
           },
           "bis.target_query_kind_filter": {
             "type": "string",
             "markdownDescription": "Bazel query rules (Target selection), bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
-            "order": 7,
+            "order": 5,
             "default": "(swift|objc|cc)_library"
-          },
-          "bis.compile_commands_rolling_size": {
-            "type": "integer",
-            "markdownDescription": "Rolling size of compile_commands.json",
-            "order": 8,
-            "default": 300000000
           },
           "bis.default_workspace": {
             "type": "string",
             "default": "",
             "scope": "window",
-            "order": 9,
+            "order": 6,
             "description": "Default workspace location"
           },
           "bis.auto_refresh_tree_viewer_configuration_changed": {
             "type": "boolean",
             "markdownDescription": "Auto refresh tree viewer when BUILD.bazel / WORKSAPCE changed",
-            "order": 10,
+            "order": 7,
             "default": false
           },
           "bis.bazel_executable": {
             "type": "string",
             "description": "The name of the Bazel executable. This may be an absolute path.  If empty, \"bazel\" on the system path will be used.",
-            "order": 11,
+            "order": 8,
             "default": ""
           }
         }

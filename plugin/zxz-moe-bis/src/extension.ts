@@ -7,9 +7,9 @@ import * as devicePicker from "./devicePicker";
 import * as inputer from "./inputer";
 import * as cpuProvider from "./cpuProvider";
 import * as launchGenerator from "./launchGenerator";
+import * as sync from "./sync";
 import configuration from "./configuration";
 import { BuildTaskProvider } from "./buildTaskProvider";
-import { onDidChangeActiveTextEditorMaker } from "./refreshCompileCommands";
 import {
     targetVariable,
     compilationModeVariable,
@@ -21,10 +21,12 @@ import { combineLatest, distinctUntilChanged, filter, skip } from "rxjs";
 import { isEqual } from "lodash";
 import {
     deleteCompileCommandsFile,
-    queryLocationOfBUILD,
-    isBisInstalled,
-    touchBisBuild,
 } from "./utils";
+import {
+    touchBisBuild,
+    isBisInstalled,
+    queryLocationOfBUILD,
+} from "./cmds";
 import LibDepsService from "./libdeps";
 import LibPathService from "./libpath";
 import WorkspaceService from "./workspace";
@@ -102,6 +104,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand(
+            "zxz-moe-bis.syncCompileCommandsAndRestartLsp",
+            sync.sync
+        )
+    )
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(
             "zxz-moe-bis.pickCompilationMode",
             picker.pickCompilationMode
         )
@@ -133,13 +142,6 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.tasks.registerTaskProvider(
             BuildTaskProvider.scriptType,
             new BuildTaskProvider()
-        )
-    );
-
-    // Hook event
-    context.subscriptions.push(
-        vscode.window.onDidChangeActiveTextEditor(
-            onDidChangeActiveTextEditorMaker()
         )
     );
 
@@ -222,9 +224,6 @@ export function activate(context: vscode.ExtensionContext) {
         if (configuration.autoRefreshTreeViewerWhenConfigurationChanged) {
             treeProvider.refresh();
         }
-        vscode.workspace.workspaceFolders?.forEach((folder) => {
-            deleteCompileCommandsFile(folder);
-        });
     });
     combineLatest([
         targetVariable.asObservable().pipe(filter((x) => x !== undefined)),
