@@ -31,21 +31,22 @@ def create_bis_build(args):
     outputs_group_str = ""
 
     if not args.ignore_parsing_targets:
-        target_stetment = f'deps({args.target})'
+        target_statment = f'deps({args.target})'
+        if args.subtarget:
+            target_statment = f"{target_statment} intersect deps({args.subtarget})"
         if len(args.file_path) > 0:
             fname = re.escape(os.path.basename(args.file_path))
-            target_stetment = f"let v = {target_stetment} in attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)"
+            target_statment = f"let v = {target_statment} in attr(hdrs, '{fname}', $v) + attr(srcs, '{fname}', $v)"
 
         aquery_args = [
             'bazel',
             'aquery',
-            f"mnemonic('(Swift|Objc|Cpp)Compile', {target_stetment})",
+            f"mnemonic('(Swift|Objc|Cpp)Compile', {target_statment})",
             '--output=jsonproto',
             '--include_artifacts=false',
             '--ui_event_filters=-info',
             '--noshow_progress',
-            '--features=-layering_check'
-        ]
+        ] + args.optionals.split()
 
         print("Start generating .bis/BUILD")
         print(f"Start query command = {' '.join(aquery_args)}", flush=True)
@@ -99,6 +100,7 @@ refresh_compile_commands(
   targets = [
     {target}
   ],
+  exclude_headers = "all",
   optionals = "{args.optionals}",
   tags = ["manual"],
 )
@@ -121,7 +123,7 @@ refresh_launch_json(
         process = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
         print(f"End build", flush=True)
     
-        cmd = "bazel run //.bis:refresh_compile_commands"
+        cmd = f"bazel run //.bis:refresh_compile_commands {args.optionals}"
         if len(args.file_path) > 0:
             cmd += f" -- --file={args.file_path}"
         elif len(args.subtarget) > 0:

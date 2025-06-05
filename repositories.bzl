@@ -23,6 +23,7 @@ def bis_rules_dependencies_hedron_compile_commands():
             ":patches/file_filter.patch",
             ":patches/swift_support.patch",
             ":patches/subtarget.patch",
+            ":patches/remove-features-and-skip-syntax-only.patch",
         ]
     )
 
