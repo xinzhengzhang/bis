@@ -35,9 +35,13 @@ class TreeItem implements ITreeItem {
                 this.path = path.replace(/^artifacts /, "");
                 this.icon = new vscode.ThemeIcon("debug-start");
                 this.type = "artifacts";
-            } else {
+            } else if (path.startsWith("sync")) {
+                this.path = path.replace(/^sync /, "");
+                this.icon = new vscode.ThemeIcon("sync");
+                this.type = "sync";
+            }
+            else {
                 this.icon = new vscode.ThemeIcon("debug-start");
-
             }
         } else {
             this.icon = vscode.ThemeIcon.Folder;
@@ -174,10 +178,6 @@ export class TreeProvider implements vscode.TreeDataProvider<ITreeItem> {
     /** Forces a re-query and refresh of the tree's contents. */
     public refresh() {
         this.updateWorkspaceFolderTreeItems();
-    }
-
-    private onBuildFilesChanged(uri: vscode.Uri) {
-        this.refresh();
     }
 
     /** Refresh the cached BazelWorkspaceFolderTreeItems. */

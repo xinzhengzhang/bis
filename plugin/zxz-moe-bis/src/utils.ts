@@ -11,6 +11,8 @@ import configuration from "./configuration";
 import { Transform } from "stream";
 import { TextDecoder } from "util";
 import * as logger from "./logger";
+import * as os from "os";
+import * as path from "path";
 
 export let _execFile = promisify(execFile);
 
@@ -20,95 +22,11 @@ export function isBisWorkspace(workspace: vscode.WorkspaceFolder) {
     return fs.existsSync(workspace.uri.fsPath + "/.bis/BUILD");
 }
 
-export function launchConfigurationExists() {
-    let exists = false;
-
-    vscode.workspace.workspaceFolders?.forEach((value) => {
-        if (fs.existsSync(value.uri.fsPath + "/.vscode/launch.json")) {
-            exists = true;
-        }
-    });
-
-    return exists;
-}
-
-export function getCompileCommandsSize(workspace: vscode.WorkspaceFolder) {
-    let path = workspace.uri.fsPath + "/compile_commands.json";
-    if (!fs.existsSync(path)) {
-        return undefined;
-    }
-    return fs.statSync(path).size;
-}
-
 export function deleteCompileCommandsFile(workspace: vscode.WorkspaceFolder) {
     let path = workspace.uri.fsPath + "/compile_commands.json";
     if (fs.existsSync(path)) {
         fs.unlinkSync(path);
     }
-}
-
-export function isBisInstalled(): Promise<void> {
-    return new Promise((resolve, reject) => {
-        vscode.commands
-            .executeCommand<string | undefined>("zxz-moe-bis.workspace", true)
-            .then((workspaceRoot) => {
-                promisify(executeBazelCommands)(
-                    ["query", "@bis//:setup"],
-                    workspaceRoot
-                )
-                    .then((stdout) => {
-                        const splited = stdout.split(/\r?\n/);
-                        const containsBis = splited.some((item) => {
-                            return item.startsWith("@bis//");
-                        });
-                        if (containsBis) {
-                            resolve(undefined);
-                        } else {
-                            reject(new Error("no @bis found"));
-                        }
-                    })
-                    .catch((error) => {
-                        reject(error);
-                    });
-            });
-    });
-}
-
-export function queryLocationOfBUILD(targetPath: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        vscode.commands
-            .executeCommand<string | undefined>("zxz-moe-bis.workspace", true)
-            .then((workspaceRoot) => {
-                promisify(executeBazelCommands)(
-                    ["query", targetPath, "--output=location"],
-                    workspaceRoot
-                )
-                    .then((stdout) => {
-                        const r = RegExp(/(.*\/BUILD(?:\.bazel)?\:\d+\:\d+)\:\s+.*rule.*/);
-                        if (r.test(stdout)) {
-                            resolve(stdout.match(r)![1]);
-                        } else {
-                            logger.error("Unexpect output: ", stdout);
-                            reject(new Error("no BUILD file found"));
-                        }
-                    })
-                    .catch((error) => {
-                        reject(error);
-                    });
-            });
-    });
-}
-
-export function touchBisBuild() {
-    // Touch .bis/BUILD
-    const task = new vscode.Task(
-        { type: "bis.build" },
-        vscode.TaskScope.Workspace,
-        "touch_bis_build",
-        "bis.build",
-        new vscode.ShellExecution("mkdir -p .bis && touch .bis/BUILD")
-    );
-    vscode.tasks.executeTask(task);
 }
 
 export enum WriteStreamType {
@@ -125,9 +43,11 @@ export class WriteStream extends Transform {
     _transform(chunk: any, encoding: BufferEncoding, callback: any) {
         switch (this.type) {
             case WriteStreamType.stdout:
+                // The output of vscode cannot add color, so we just log it directly
                 logger.log(this.decoder.decode(chunk));
                 break;
             case WriteStreamType.stderr:
+                // The output of vscode cannot add color, so we just log it with warn level
                 logger.warn(this.decoder.decode(chunk));
                 break;
         }
@@ -136,7 +56,9 @@ export class WriteStream extends Transform {
 }
 
 export function executeBazelCommands(
-    args?: ReadonlyArray<string> | null,
+    action: "build" | "run" | "query" | "aquery" | "cquery",
+    args: ReadonlyArray<string> = [],
+    run_args: ReadonlyArray<string> = [],
     workspace?: string | undefined,
     callback?: (
         error: ExecFileException | null,
@@ -145,9 +67,20 @@ export function executeBazelCommands(
     ) => void
 ): ChildProcess {
     const bazelExe = configuration.bazelExecutablePath;
+    let finalArgs = ["--preemptible", action, ...args];
+    if (action === "run") {
+        if (run_args.length > 0) {
+            finalArgs.push("--");
+            finalArgs.push(...run_args);
+        } else {
+            logger.warn(
+                "No run args provided, this may cause unexpected behavior."
+            );
+        }
+    }
     return execFile(
         bazelExe,
-        args,
+        finalArgs,
         { shell: true, cwd: workspace },
         (error, stdout, stderr) => {
             if (callback) {
@@ -155,6 +88,62 @@ export function executeBazelCommands(
             }
         }
     );
+}
+
+export function getOrCreateBazelExecutablePath(): string|undefined {
+    let bazelPath: string|undefined;
+    const workspaces = vscode.workspace.workspaceFolders
+
+    workspaces?.some((workspace) => {
+        const workspaceBazelPath = path.resolve(
+            workspace.uri.fsPath,
+            configuration.bazelExecutablePath
+        );
+        try {
+            if (fs.existsSync(workspaceBazelPath)) {
+                bazelPath = fs.realpathSync(workspaceBazelPath);
+                return true;
+            }
+            return false;
+        } catch {
+            return false;
+        }
+    });
+
+    if (!bazelPath) {
+        return undefined;
+    }
+    const hash = Buffer.from(bazelPath).toString("base64").replace(/[/+=]/g, "").slice(0, 12);
+    const tmpDir = path.join(os.tmpdir(), `bazel-link-${hash}`);
+    const linkPath = path.join(tmpDir, "bazel");
+
+    if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+    }
+
+    let needLink = true;
+    if (fs.existsSync(linkPath)) {
+        try {
+            const stat = fs.lstatSync(linkPath);
+            if (stat.isSymbolicLink()) {
+                const real = fs.readlinkSync(linkPath);
+                if (real === bazelPath) {
+                    needLink = false;
+                } else {
+                    fs.unlinkSync(linkPath);
+                }
+            } else {
+                fs.unlinkSync(linkPath);
+            }
+        } catch {
+            fs.unlinkSync(linkPath);
+        }
+    }
+    if (needLink) {
+        fs.symlinkSync(bazelPath, linkPath);
+    }
+
+    return tmpDir;
 }
 
 export async function macOSVersions() {
@@ -179,7 +168,3 @@ export async function macOSVersions() {
         buildVersion: buildVersion,
     };
 }
-
-export let isIOS17OrLater = (version: string): boolean => {
-    return parseInt(version, 10) >= 17;
-};

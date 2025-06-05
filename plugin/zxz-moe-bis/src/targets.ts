@@ -5,7 +5,6 @@ import configuration from './configuration';
 import * as vscode from "vscode";
 import { ChildProcess, PromiseWithChild } from 'child_process';
 import * as logger from "./logger";
-import { isIOS17OrLater } from './utils';
 
 let debugserverProcesses: { [port: number]: ChildProcess } = {};
 

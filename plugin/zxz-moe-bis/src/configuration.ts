@@ -14,20 +14,6 @@ const configuration = {
                 .get<boolean>("auto_generate_launch_json") ?? true
         );
     },
-    get checkDuplicateCompileCommands(): boolean {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<boolean>("check_duplicate_compile_commands") ?? true
-        );
-    },
-    get preLaunchTaskName(): string {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<string>("pre_launch_task_name") ?? "bis.build: build"
-        );
-    },
     get buildOptions(): string {
         return (
             vscode.workspace
@@ -40,13 +26,6 @@ const configuration = {
             vscode.workspace
                 .getConfiguration("bis")
                 .get<string>("startup_options") ?? ""
-        );
-    },
-    get compileCommandsRollingSize(): number {
-        return (
-            vscode.workspace
-                .getConfiguration("bis")
-                .get<number>("compile_commands_rolling_size") ?? 300000000
         );
     },
     get targetQueryKindFilter(): string | undefined {
