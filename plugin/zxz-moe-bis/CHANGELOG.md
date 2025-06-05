@@ -15,7 +15,6 @@ Features
 Configuration
 * Cleanup unused configuration
     * bis.check_duplicate_compile_commands
-    * bis.pre_launch_task_name
     * bis.compile_commands_rolling_size
 
 Enhance

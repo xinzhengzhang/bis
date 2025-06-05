@@ -81,6 +81,13 @@
             "order": 4,
             "default": "--features=oso_prefix_is_pwd"
           },
+          "bis.pre_launch_task_name": {
+            "type": "string",
+            "markdownDescription": "Pre launch task name before build",
+            "order": 4,
+            "default": "bis.build: build",
+            "scope": "window"
+          },
           "bis.target_query_kind_filter": {
             "type": "string",
             "markdownDescription": "Bazel query rules (Target selection), bazel query 'kind(\"{STATEMENT}\", ...)' --output label",
