@@ -12,8 +12,7 @@ export async function sync(subtarget?: string) {
     const buildTarget = await inputer.buildTarget();
     const compilationMode = (await picker.compilationMode()) ?? "dbg";
     const cpu = await cpuProvider.cpu();
-
-    let executionCommands = `${configuration.bazelExecutablePath} run @bis//:setup -- --target ${buildTarget} --optionals \"--compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions} --profile .bis/bis_bazel_profile\"`;
+    let executionCommands = `${configuration.bazelExecutablePath} ${configuration.startupOptions} run @bis//:setup --check_visibility=false --compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions} -- --target ${buildTarget} --optionals \"--compilation_mode=${compilationMode} --cpu="${cpu}" ${configuration.buildOptions} --profile .bis/bis_bazel_profile\"`;
     if (subtarget) {
         executionCommands += ` --subtarget ${subtarget}`;
     }
