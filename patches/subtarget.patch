@@ -1,0 +1,49 @@
+From 904ffb39c1b989f8207f3e391b4d1cf6f2594a21 Mon Sep 17 00:00:00 2001
+From: Snorlax <zhangxinzheng@bilibili.com>
+Date: Wed, 4 Jun 2025 19:57:18 +0800
+Subject: [PATCH] subtarget
+
+---
+ refresh.template.py | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/refresh.template.py b/refresh.template.py
+index f75251b..4fa232d 100644
+--- a/refresh.template.py
++++ b/refresh.template.py
+@@ -980,7 +980,7 @@ def _get_commands(target: str, flags: str):
+     log_info(f">>> Analyzing commands used in {target}")
+ 
+     # Pass along all arguments to aquery, except for --file=
+-    additional_flags = shlex.split(flags) + [arg for arg in sys.argv[1:] if not arg.startswith('--file=')]
++    additional_flags = shlex.split(flags) + [arg for arg in sys.argv[1:] if not arg.startswith('--file=') and not arg.startswith('--subtarget=')]
+     file_flags = [arg[len('--file='):] for arg in sys.argv[1:] if arg.startswith('--file=')]
+     if len(file_flags) > 1:
+         log_error(">>> At most one --file flag is supported.")
+@@ -988,6 +988,14 @@ def _get_commands(target: str, flags: str):
+     if any(arg.startswith('--file') for arg in additional_flags):
+         log_error(">>> Only the --file=<file_target> form is supported.")
+         sys.exit(1)
++    subtarget_flags = [arg[len('--subtarget='):] for arg in sys.argv[1:] if arg.startswith('--subtarget=')]
++    if len(subtarget_flags) > 1:
++        log_error(">>> At most one --subtarget flag is supported.")
++        sys.exit(1)
++    if any(arg.startswith('--subtarget') for arg in additional_flags):
++        log_error(">>> Only the --subtarget=<subtarget> form is supported.")
++        sys.exit(1)
++
+ 
+     # Detect anything that looks like a build target in the flags, and issue a warning.
+     # Note that positional arguments after -- are all interpreted as target patterns.
+@@ -1035,6 +1043,8 @@ def _get_commands(target: str, flags: str):
+         if {exclude_external_sources}:
+             # For efficiency, have bazel filter out external targets (and therefore actions) before they even get turned into actions or serialized and sent to us. Note: this is a different mechanism than is used for excluding just external headers.
+             target_statment = f"filter('^(//|@//)',{target_statment})"
++        if subtarget_flags:
++            target_statment = f"{target_statment} intersect deps({subtarget_flags[0]})"
+         compile_commands.extend(_get_commands(target_statment, None))
+         if len(compile_commands) == 0:
+             log_warning(f""">>> Bazel lists no applicable compile commands for {target}
+-- 
+2.39.5 (Apple Git-154)
+

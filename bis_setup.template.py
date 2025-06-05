@@ -124,6 +124,8 @@ refresh_launch_json(
         cmd = "bazel run //.bis:refresh_compile_commands"
         if len(args.file_path) > 0:
             cmd += f" -- --file={args.file_path}"
+        elif len(args.subtarget) > 0:
+            cmd += f" -- --subtarget={args.subtarget}"
         print(f"Start refresh_compile_commands command = {cmd}", flush=True)
         pricess = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
         print(f"End refresh_compile_commands", flush=True)
@@ -135,6 +137,7 @@ parser = argparse.ArgumentParser(description='Setup bis project')
 parser.add_argument('--optionals', default='',
                     type=str, help='--compilation_mode=dbg --cpu=ios_x86_64')
 parser.add_argument('--target', required=True, type=str, help='target labels')
+parser.add_argument('--subtarget', default='', type=str, help='subtarget label')
 parser.add_argument('--file_path', default='',
                     type=str, help='source code path')
 parser.add_argument('--ignore_parsing_targets', default=False, type=str2bool,
