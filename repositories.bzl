@@ -21,7 +21,8 @@ def bis_rules_dependencies_hedron_compile_commands():
         patch_args = ["-p1"],
         patches = [
             ":patches/file_filter.patch",
-            ":patches/swift_support.patch"
+            ":patches/swift_support.patch",
+            ":patches/subtarget.patch",
         ]
     )
 
