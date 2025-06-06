@@ -183,15 +183,13 @@ export class BuildTaskProvider implements vscode.TaskProvider {
             BuildTaskProvider.scriptType,
             new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> => {
                 const writeEmitter = new vscode.EventEmitter<string>();
-                const closeEmitter = new vscode.EventEmitter<void>();
+                const closeEmitter = new vscode.EventEmitter<number|void>();
                 return {
                     onDidWrite: writeEmitter.event,
                     onDidClose: closeEmitter.event,
                     open: () => {
                         vscode.commands.executeCommand("zxz-moe-bis.syncCompileCommandsAndRestartLsp", labelIdentifier)
-                            .then(() => {
-                                closeEmitter.fire();
-                            });
+                        closeEmitter.fire(0);
                     },
                     close: () => { },
                     handleInput: () => { }
