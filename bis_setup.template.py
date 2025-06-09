@@ -61,10 +61,14 @@ def create_bis_build(args):
         for line in aquery_process.stderr.splitlines():
             print(line, file=sys.stderr)
 
+        if aquery_process.returncode != 0:
+            print("Bazel aquery failed with non-zero exit code.", file=sys.stderr)
+            os._exit(ERR_NO_TARGET_FOUND)
+
         try:
             parsed_aquery_output = json.loads(
                 aquery_process.stdout, object_hook=lambda d: types.SimpleNamespace(**d))
-            if not hasattr(parsed_aquery_output, 'targets'):
+            if not hasattr(parsed_aquery_output, 'targets') or not parsed_aquery_output.targets:
                 print("No target found", file=sys.stderr)
                 os._exit(ERR_NO_TARGET_FOUND)
 
