@@ -26,6 +26,7 @@ Fix
 **Important**
 * We removed the implementation related to `ios-deploy`, which means you can't do real-device debugging in lower versions of Xcode (less than Xcode 16). If you're using a lower version of Xcode, please keep the plugin version at 0.4.x.
 * This is a rules interlocking change. Please ensure that the project's bis rules are also upgraded to 0.5.0.
+* Both set --cpu and --platform as a compilation parameter.
 
 ### 0.4.2
 * Auto trigger device picker when manually refreshing

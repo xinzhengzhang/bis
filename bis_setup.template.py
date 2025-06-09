@@ -137,7 +137,7 @@ refresh_launch_json(
 parser = argparse.ArgumentParser(description='Setup bis project')
 
 parser.add_argument('--optionals', default='',
-                    type=str, help='--compilation_mode=dbg --cpu=ios_x86_64')
+                    type=str, help='--compilation_mode=dbg --cpu=ios_x86_64 --platforms=@build_bazel_apple_support//platforms:ios_x86_64')
 parser.add_argument('--target', required=True, type=str, help='target labels')
 parser.add_argument('--subtarget', default='', type=str, help='subtarget label')
 parser.add_argument('--file_path', default='',

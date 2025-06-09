@@ -186,9 +186,14 @@ export class DebugConfigurationProvider
         } else if (target.type === "Device") {
             let platformPath: string | void;
             if (dbgConfig.iosRequest === "launch") {
+                //FIXME: In Bazel, since program is a build output path, it is likely to be an outdated version when the cache is hit, resulting in the installed app not matching expectations. However, codelldb only accepts an already-unpacked app bundle, and if the extension handles the unpacking, there currently isn't a good cleanup strategy.
+                let programPath = dbgConfig.program;
+                if (dbgConfig.type === "lldb-dap" && dbgConfig.ipaPath) {
+                    programPath = dbgConfig.ipaPath;
+                }
                 platformPath = await targets.deviceInstall(
                     target as Device,
-                    dbgConfig.program,
+                    programPath,
                     dbgConfig.iosBundleId
                 );
             } else {
