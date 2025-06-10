@@ -11,6 +11,7 @@ Features
     * `zxz-moe-bis.syncCompileCommandsAndRestartLsp - subtarget` refresh sub target of project
 * Add the ability to update local subtargets in the "BIS BUILD TARGET" window.
     * Note that we have currently decoupled "build all index" and "refresh compile_commands.json". Normally, we need to "build all index" to ensure that the output of "generate" in compile_commands.json exists.
+* Change --cpu to --ios_multi_cpus
 
 Configuration
 * Cleanup unused configuration
@@ -26,7 +27,6 @@ Fix
 **Important**
 * We removed the implementation related to `ios-deploy`, which means you can't do real-device debugging in lower versions of Xcode (less than Xcode 16). If you're using a lower version of Xcode, please keep the plugin version at 0.4.x.
 * This is a rules interlocking change. Please ensure that the project's bis rules are also upgraded to 0.5.0.
-* Both set --cpu and --platform as a compilation parameter.
 
 ### 0.4.2
 * Auto trigger device picker when manually refreshing

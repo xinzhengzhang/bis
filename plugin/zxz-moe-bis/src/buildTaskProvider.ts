@@ -89,7 +89,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
 
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
-            const cpuOpts = cpu ? `--cpu=${cpu} --platforms=@build_bazel_apple_support//platforms:${cpu}` : "";
+            const cpuOpts = cpu ? `--ios_multi_cpus=${cpu}` : "";
             const command = `outpath=\`${configuration.bazelExecutablePath} ${configuration.startupOptions} cquery ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"\` && ${configuration.bazelExecutablePath} ${configuration.startupOptions} build ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && cat bazel-bin/$outpath`;
             logger.log(`Executing command: ${command}`);
             const process = exec(
@@ -150,7 +150,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         compilationMode: string,
         cpu: string | undefined,
     ) {
-        const cpuOpts = cpu ? `--cpu=${cpu} --platforms=@build_bazel_apple_support//platforms:${cpu}` : "";
+        const cpuOpts = cpu ? `--ios_multi_cpus=${cpu}` : "";
         let executionCommands = `${configuration.bazelExecutablePath} ${configuration.startupOptions} ${command} ${target} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions}`;
         if (labelIdentifier) {
             executionCommands += ` --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis ${labelIdentifier}"`;

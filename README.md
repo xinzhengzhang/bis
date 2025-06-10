@@ -53,17 +53,17 @@ If you insist on independent use, the following are simple ways to use it.
 ```sh
 cd examples
 # Extract for single file
-bazel run @bis//:setup -- --target //srcs/ios:App --optionals "--compilation_mode=dbg --cpu=ios_x86_64  --platforms=@build_bazel_apple_support//platforms:ios_x86_64 --features=oso_prefix_is_pwd" --file_path srcs/ios/app.swift
+bazel run @bis//:setup -- --target //srcs/ios:App --optionals "--compilation_mode=dbg --ios_multi_cpus=x86_64 --features=oso_prefix_is_pwd" --file_path srcs/ios/app.swift
 # Extract for whole target
-bazel run @bis//:setup -- --target //srcs/ios:App --optionals "--compilation_mode=dbg --cpu=ios_x86_64 --platforms=@build_bazel_apple_support//platforms:ios_x86_64 --features=oso_prefix_is_pwd"
+bazel run @bis//:setup -- --target //srcs/ios:App --optionals "--compilation_mode=dbg --ios_multi_cpus=x86_64 --features=oso_prefix_is_pwd"
 # Build sub target
-bazel build //srcs/ios:App --compilation_mode=dbg  --cpu=ios_x86_64 --platforms=@build_bazel_apple_support//platforms:ios_x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/ios:lib"
+bazel build //srcs/ios:App --compilation_mode=dbg --ios_multi_cpus=x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/ios:lib"
 # Build app
-bazel build //srcs/ios:App --compilation_mode=dbg  --cpu=ios_x86_64 --platforms=@build_bazel_apple_support//platforms:ios_x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/ios:App"
+bazel build //srcs/ios:App --compilation_mode=dbg --ios_multi_cpus=x86_64  --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts @@//srcs/ios:App"
 # Build index dependents for sub target
-bazel  build //srcs/ios:App --compilation_mode=dbg  --cpu=ios_x86_64 --platforms=@build_bazel_apple_support//platforms:ios_x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis all index dependents @@//srcs/ios:lib"
+bazel  build //srcs/ios:App --compilation_mode=dbg --ios_multi_cpus=x86_64  --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis all index dependents @@//srcs/ios:lib"
 # Build  index dependents for whole target
-bazel build //srcs/ios:App --compilation_mode=dbg  --cpu=ios_x86_64 --platforms=@build_bazel_apple_support//platforms:ios_x86_64 --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis all index dependents @@//srcs/ios:App"
+bazel build //srcs/ios:App --compilation_mode=dbg --ios_multi_cpus=x86_64  --features=oso_prefix_is_pwd --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis all index dependents @@//srcs/ios:App"
 ```
 
 # Components
@@ -83,7 +83,7 @@ bazel run @bis//:setup -- -h
 Arguments:
     -h, --help            show this help message and exit
     --optionals OPTIONALS
-                            --compilation_mode=dbg  --cpu=ios_x86_64 --platforms=@build_bazel_apple_support//platforms:ios_x86_64
+                            --compilation_mode=dbg  --ios_multi_cpus=x86_64
     --target TARGET       target labels
     --file_path FILE_PATH
                             source code path

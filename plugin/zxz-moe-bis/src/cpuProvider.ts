@@ -18,9 +18,14 @@ export function updateCpu(device: Target | undefined) {
         // Return empty string to bazel
         // It will use the current cpu properties of the current platform
         result = configuration.simulatorCpuString ?? "";
+        if (result.startsWith("ios_")) {
+            // Remove ios_ prefix
+            // We migrate from --cpu to --ios_multi_cpus and we do not need the prefix anymore
+            result = result.replace(/^ios_/, "");
+        }
     } else {
         // Should not need support armv7?
-        result = "ios_arm64";
+        result = "arm64";
     }
     cpuVariable.update(result);
     return result;

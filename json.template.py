@@ -35,7 +35,7 @@ def expand(item):
             arch = os.popen("arch").read().strip()
             if arch not in test_arch:
                 print("Logic test requires that the xctestbundle architecture({}) must has the same value with os architecture({})".format(test_arch, arch))
-                print("You can set cpu to --cpu=ios_sim_arm64 under apple silicon or --cpu=ios_x86_64 under intel")
+                print("You can set cpu to --ios_multi_cpus=sim_arm64 under apple silicon or --ios_multi_cpus=x86_64 under intel")
                 return None
             test_agent = os.path.join(os.popen("xcrun --sdk iphonesimulator --show-sdk-platform-path").read().strip(), "Developer/Library/Xcode/Agents/xctest")
 
