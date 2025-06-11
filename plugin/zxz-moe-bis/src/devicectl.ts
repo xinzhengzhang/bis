@@ -170,7 +170,7 @@ export async function deviceInstall(udid: string, path: string, cancellationToke
   }
 }
 
-export async function getPidFor(udid: string, appPath: string): Promise<Number> {
+export async function getPidFor(udid: string, appPath: string): Promise<Number|undefined> {
   const randm_value = crypto.randomUUID();
   const outputFile = `/tmp/app_path_${randm_value}.json`;
   const logFile = `/tmp/app_path_log_${randm_value}.json`;
@@ -194,7 +194,7 @@ export async function getPidFor(udid: string, appPath: string): Promise<Number> 
   if (process) {
     return process.processIdentifier;
   } else {
-    return 1;
+    return undefined;
   }
 }
 
@@ -210,6 +210,7 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
   // Attempt to launch with --console mode
   try {
     const consoleModeSuccess = await new Promise<boolean>((resolve, reject) => {
+      logger.log(`Try Process launching --console mode with command: xcrun devicectl ${commandWithConsole.join(" ")}`);
       const process = spawn("xcrun", ["devicectl", ...commandWithConsole], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
       const timeout = setTimeout(() => {
         process.kill();
@@ -224,10 +225,6 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
           resolve(true);
         }
         processLogStream.write(data);
-      });
-
-      process.stderr?.on('data', (data) => {
-        logger.error(`stderr: ${data}`);
       });
 
       process.on('error', (err) => {
@@ -249,7 +246,7 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
       return undefined;
     }
   } catch (error) {
-    logger.warn("Failed to launch process in --console mode, falling back to non-console mode.");
+    logger.warn("Failed to launch process in --console mode, falling back to non-console mode." + JSON.stringify(error));
   }
   
   await execute_devicectl(

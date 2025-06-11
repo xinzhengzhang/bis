@@ -75,8 +75,6 @@ export class DebugConfigurationProvider
             dbgConfig.iosRequest = dbgConfig.request;
             dbgConfig.request =
                 target.type === "Simulator" ? "attach" : dbgConfig.request;
-            dbgConfig.request =
-                target.type === "Device" ? "launch" : dbgConfig.request;
 
             dbgConfig.initCommands =
                 dbgConfig.initCommands instanceof Array
@@ -210,19 +208,38 @@ export class DebugConfigurationProvider
             let outputBasename = getOutputBasename();
             let logPath = `${outputBasename}-log`;
 
-            let pid = await targets.launchApp(target.udid, dbgConfig.iosBundleId, logPath);
+            let pid: Number | undefined;
+            const tryLaunchApp = async () => {
+                const launchPid = await targets.launchApp(target.udid, dbgConfig.iosBundleId, logPath);
+                if (!launchPid) {
+                    dbgConfig.initCommands.push(`monitor_file ${logPath}`);
+                }
+                return launchPid;
+            };
+
+            if (dbgConfig.iosRequest === "launch") {
+                pid = await tryLaunchApp();
+            }
             if (pid === undefined) {
                 pid = await targets.deviceGetPidFor({
                     udid: target.udid,
                     appPath: platformPath,
                 });
+                // If the process is attach and app not running, try to launch it.
+                if (pid === undefined && dbgConfig.iosRequest === "attach") {
+                    await tryLaunchApp();
+                    if (pid == undefined) {
+                        pid = await targets.deviceGetPidFor({
+                            udid: target.udid,
+                            appPath: platformPath,
+                        });
+                    }
+                }
             }
 
             if (!pid) {
                 return null;
             }
-            
-            dbgConfig.initCommands.push(`monitor_file ${logPath}`);
 
             dbgConfig.preRunCommands =
                 dbgConfig.preRunCommands instanceof Array
