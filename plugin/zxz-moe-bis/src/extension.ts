@@ -39,6 +39,24 @@ import * as debugConfigProvider from "./debugConfigProvider";
 export function activate(context: vscode.ExtensionContext) {
     logger.activate();
 
+    isBisInstalled()
+        .then(() => {
+            touchBisBuild();
+            _activate(context);
+        })
+        .catch((error) => {
+            vscode.window.setStatusBarMessage(
+                "Bis rule not detected, please install bis in bazel module first",
+                5000
+            );
+            logger.log(
+                "If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line"
+            );
+        });
+}
+
+function _activate(context: vscode.ExtensionContext) {
+
     console.log('Congratulations, your extension "zxz-moe-bis" is now active!');
 
     // Component
@@ -250,17 +268,6 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.workspace.workspaceFolders?.forEach((folder) => {
                 deleteCompileCommandsFile(folder);
             });
-        });
-
-    isBisInstalled()
-        .then(() => {
-            touchBisBuild();
-        })
-        .catch((error) => {
-            vscode.window.showInformationMessage("Bis rule not detected");
-            logger.log(
-                "If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line"
-            );
         });
 
     context.subscriptions.push(

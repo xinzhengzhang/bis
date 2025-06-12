@@ -10,8 +10,13 @@ export async function generate() {
     const buildType: string = "bis.build";
 
     const buildTarget = await inputer.buildTarget();
-    const compilationMode = (await picker.compilationMode()) ?? "dbg";
+    const compilationMode = (await picker.compilationMode());
     const cpu = await cpuProvider.cpu();
+
+    if (!buildTarget || !compilationMode || !cpu) {
+        logger.log("Build target is not specified.");
+        return;
+    }
 
     let executionCommands = `${configuration.bazelExecutablePath} ${configuration.startupOptions} run @bis//:setup --check_visibility=false --compilation_mode=${compilationMode} --ios_multi_cpus=${cpu} ${configuration.buildOptions} -- --target ${buildTarget} --optionals \"--compilation_mode=${compilationMode} --ios_multi_cpus=${cpu} ${configuration.buildOptions}\" --ignore_parsing_targets True`;
     executionCommands += `;${configuration.bazelExecutablePath} ${configuration.startupOptions} run //.bis:refresh_launch_json --check_visibility=false --compilation_mode=${compilationMode} --ios_multi_cpus=${cpu} ${configuration.buildOptions}`;

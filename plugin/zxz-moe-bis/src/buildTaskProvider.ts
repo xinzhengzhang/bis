@@ -7,6 +7,7 @@ import { exec, execFile, ChildProcess } from "child_process";
 import * as logger from "./logger";
 import { promisify } from "util";
 import { WriteStream, WriteStreamType } from "./utils";
+import { compilationModeVariable, cpuVariable, targetVariable } from "./variables";
 
 export class BuildTaskProvider implements vscode.TaskProvider {
     static scriptType = "bis.build";
@@ -16,13 +17,14 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         if (!workspaceFolders?.length) {
             return [];
         }
-        const buildTarget = await inputer.buildTarget();
-        if (!buildTarget) {
+        const buildTarget = targetVariable.get();
+        const compilationMode = compilationModeVariable.get();
+        const cpu = cpuVariable.get();
+
+        if (!buildTarget || !compilationMode || !cpu) {
             return [];
         }
 
-        const compilationMode = (await picker.compilationMode()) ?? "dbg";
-        const cpu = cpuProvider.cpu();
         return [
             this.createTask(
                 "build",
