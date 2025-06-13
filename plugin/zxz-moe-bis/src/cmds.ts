@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { promisify } from "util";
-import { executeBazelCommands } from "./utils";
+import { executeBazelCommands, isBisWorkspace } from "./utils";
 import * as logger from "./logger";
 
 export function touchBisBuild() {
@@ -17,6 +17,9 @@ export function touchBisBuild() {
 
 export function isBisInstalled(): Promise<void> {
     return new Promise((resolve, reject) => {
+        if (isBisWorkspace()) {
+            resolve(undefined);
+        }
         vscode.commands
             .executeCommand<string | undefined>("zxz-moe-bis.workspace", true)
             .then((workspaceRoot) => {

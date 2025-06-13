@@ -18,8 +18,23 @@ export let _execFile = promisify(execFile);
 
 export let _exec = promisify(exec);
 
-export function isBisWorkspace(workspace: vscode.WorkspaceFolder) {
-    return fs.existsSync(workspace.uri.fsPath + "/.bis/BUILD");
+export function isBisWorkspace() {
+    const workspaces = vscode.workspace.workspaceFolders;
+    if (!workspaces) {
+        return false;
+    }
+    return workspaces.some((workspace) => {
+        return fs.existsSync(workspace.uri.fsPath + "/.bis/BUILD");
+    });
+}
+
+export async function isIdeviceSyslogInstalled(): Promise<boolean> {
+    try {
+        await _exec("which idevicesyslog");
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 export function deleteCompileCommandsFile(workspace: vscode.WorkspaceFolder) {
