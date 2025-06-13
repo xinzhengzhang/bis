@@ -1,4 +1,4 @@
-import { createWriteStream } from "fs";
+import { createWriteStream, openSync } from "fs";
 import { Device } from "./commonTypes";
 import * as logger from "./logger";
 import { _execFile, _exec } from './utils';
@@ -205,7 +205,8 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
   
   const commandWithConsole = ["device", "process", "launch", "--console", "-d", udid, "--start-stopped", bundleID];
   const commandWithoutConsole = ["device", "process", "launch", "-d", udid, "--start-stopped", bundleID];
-  const processLogStream = createWriteStream(preferredLogPath);
+  const processLogStream = createWriteStream(preferredLogPath, { flags: "a" });
+
   
   // Attempt to launch with --console mode
   try {
@@ -224,12 +225,12 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
           clearTimeout(timeout);
           resolve(true);
         }
-        processLogStream.write(data);
       });
+      process.stdout?.pipe(processLogStream);
+      process.stderr?.pipe(processLogStream);
 
       process.on('error', (err) => {
         clearTimeout(timeout);
-        processLogStream.close();
         reject(err);
       });
 
@@ -237,7 +238,6 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
         if (code !== 0) {
           reject(new Error(`Process exited with code ${code}`));
         }
-        processLogStream.close();
       });
     });
 

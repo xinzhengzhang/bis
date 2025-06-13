@@ -224,6 +224,16 @@ function _activate(context: vscode.ExtensionContext) {
             new debugConfigProvider.DebugConfigurationProvider()
         )
     );
+    context.subscriptions.push(
+        vscode.debug.onDidTerminateDebugSession((session) => {
+            console.log('Debug session ended:', session);
+            const idevicesyslog_proc: number = session.configuration.idevicesyslog_proc;
+            if (idevicesyslog_proc) {
+                process.kill(idevicesyslog_proc);
+                logger.log(`Terminating idevicesyslog process: ${idevicesyslog_proc}`);
+            }
+        })
+    );
 
     // Rx
     deviceVariable

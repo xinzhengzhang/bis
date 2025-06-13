@@ -9,6 +9,9 @@ import { Device, Target, TargetType } from "./commonTypes";
 import * as targets from "./targets";
 import * as simulatorFocus from "./simulatorFocus";
 import { getTargetFromUDID, lastSelected, selectDevice } from "./devicePicker";
+import { isIdeviceSyslogInstalled } from "./utils";
+import { createWriteStream } from "fs";
+import { spawn } from "child_process";
 
 let context: vscode.ExtensionContext;
 
@@ -209,10 +212,13 @@ export class DebugConfigurationProvider
             let logPath = `${outputBasename}-log`;
 
             let pid: Number | undefined;
+            let monitor_file_redirect_success = false;
             const tryLaunchApp = async () => {
                 const launchPid = await targets.launchApp(target.udid, dbgConfig.iosBundleId, logPath);
                 if (!launchPid) {
-                    dbgConfig.initCommands.push(`monitor_file ${logPath}`);
+                    // if no pid is returned, seems --console mode has successfully launched the app
+                    // and we have already redirected the log file
+                    monitor_file_redirect_success = true;
                 }
                 return launchPid;
             };
@@ -239,6 +245,24 @@ export class DebugConfigurationProvider
 
             if (!pid) {
                 return null;
+            }
+            if (!monitor_file_redirect_success) {
+                const ideviceInstalled = await isIdeviceSyslogInstalled();
+                if (ideviceInstalled) {
+                    let proc = spawn('idevicesyslog', ['-u', target.udid, '-p', pid.toString()]);
+                    const logStream = createWriteStream(logPath, { flags: "a" });
+                    proc.stdout.pipe(logStream);
+                    proc.stderr.pipe(logStream);
+                    dbgConfig.idevicesyslog_proc = proc.pid;
+                    monitor_file_redirect_success = true;
+                    logger.log(
+                        `idevicesyslog launched with pid ${proc.pid} for target ${target.udid} and process ${pid}`)
+                } else {
+                    vscode.window.showInformationMessage("The process is not launched by bis, and idevicesyslog is not installed. Try to find the log in Console.app or install idevicesyslog to redirect the log to a file.");
+                }
+            }
+            if (monitor_file_redirect_success) {
+                dbgConfig.initCommands.push(`monitor_file ${logPath}`);
             }
 
             dbgConfig.preRunCommands =
