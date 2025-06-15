@@ -44,6 +44,17 @@ export function deleteCompileCommandsFile(workspace: vscode.WorkspaceFolder) {
     }
 }
 
+export async function waitForTaskExecution(execution: vscode.TaskExecution): Promise<void> {
+    return new Promise<void>((resolve) => {
+        const disposable = vscode.tasks.onDidEndTaskProcess(e => {
+            if (e.execution === execution) {
+                disposable.dispose();
+                resolve();
+            }
+        });
+    });
+}
+
 export enum WriteStreamType {
     stdout = 1,
     stderr,

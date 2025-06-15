@@ -6,8 +6,11 @@ import configuration from "./configuration";
 import { exec, execFile, ChildProcess } from "child_process";
 import * as logger from "./logger";
 import { promisify } from "util";
-import { WriteStream, WriteStreamType } from "./utils";
+import { deleteCompileCommandsFile, waitForTaskExecution, WriteStream, WriteStreamType } from "./utils";
 import { compilationModeVariable, cpuVariable, targetVariable } from "./variables";
+import { tmpdir } from "os";
+import path = require("path");
+import { readFileSync, unlinkSync, writeFileSync } from "fs";
 
 export class BuildTaskProvider implements vscode.TaskProvider {
     static scriptType = "bis.build";
@@ -81,7 +84,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         return result;
     }
 
-    private execResult(
+    private async execResult(
         buildTarget: string,
         folderString: string,
         compilationMode: string,
@@ -89,59 +92,64 @@ export class BuildTaskProvider implements vscode.TaskProvider {
     ): Promise<vscode.Task[]> {
         const _this = this;
 
+        const all_artifacts_label_files = path.join(tmpdir(), `bis_artifacts_labels_${Date.now()}.txt`);
+            writeFileSync(all_artifacts_label_files, "");
+        const cpuOpts = cpu ? `--ios_multi_cpus=${cpu}` : "";
+        const command = `outpath=\`${configuration.bazelExecutablePath} ${configuration.startupOptions} --preemptible cquery ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"\` && ${configuration.bazelExecutablePath} ${configuration.startupOptions} --preemptible build ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && cat bazel-bin/$outpath > ${all_artifacts_label_files}`;
+
+        const task = new vscode.Task(
+            { type: "bis.query.artifacts" },
+            vscode.TaskScope.Workspace,
+            "query bis artifacts labels",
+            "bis.build",
+            new vscode.ShellExecution(command)
+        )
+        task.presentationOptions.focus = false;
+
+        logger.log(`Executing command: ${command}`);
+
+        await waitForTaskExecution(await vscode.tasks.executeTask(task));
+
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
-            const cpuOpts = cpu ? `--ios_multi_cpus=${cpu}` : "";
-            const command = `outpath=\`${configuration.bazelExecutablePath} ${configuration.startupOptions} cquery ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"\` && ${configuration.bazelExecutablePath} ${configuration.startupOptions} build ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && cat bazel-bin/$outpath`;
-            logger.log(`Executing command: ${command}`);
-            const process = exec(
-                command,
-                {
-                    cwd: folderString,
-                },
-                (exception, stdout, stderr) => {
-                    if (stdout) {
-                        const splited = stdout.split(/\r?\n/);
-                        splited.forEach((str) => {
-                            if (!str) {
-                                return;
-                            }
-                            const labelIdentifier = `${str.replace(
-                                /^bis /,
-                                ""
-                            )}`;
-                            result.push(
-                                _this.createTask(
-                                    "build",
-                                    buildTarget,
-                                    labelIdentifier,
-                                    compilationMode,
-                                    cpu
-                                )
-                            );
-                        });
-                        splited
-                            .filter(str => str.startsWith('bis artifacts '))
-                            .map((str) => str.replace(/^bis artifacts /, '')).forEach((str) => {
-                                if (!str) {
-                                    return;
-                                }
-                                const labelIdentifier = `${str}`;
-                                result.push(
-                                    _this.createSyncCommandTask(buildTarget, labelIdentifier)
-                                );
-                            });
-                        resolve(result);
-                    } else {
-                        if (exception) {
-                            logger.error(exception);
-                        }
-                        reject(exception);
+
+            const stdout = readFileSync(all_artifacts_label_files).toString(); // Ensure the file is created before exec
+            unlinkSync(all_artifacts_label_files);
+            if (stdout) {
+                const splited = stdout.split(/\r?\n/);
+                splited.forEach((str) => {
+                    if (!str) {
+                        return;
                     }
-                }
-            );
-            process.stdout?.pipe(new WriteStream(WriteStreamType.stdout));
-            process.stderr?.pipe(new WriteStream(WriteStreamType.stderr));
+                    const labelIdentifier = `${str.replace(
+                        /^bis /,
+                        ""
+                    )}`;
+                    result.push(
+                        _this.createTask(
+                            "build",
+                            buildTarget,
+                            labelIdentifier,
+                            compilationMode,
+                            cpu
+                        )
+                    );
+                });
+                splited
+                    .filter(str => str.startsWith('bis artifacts '))
+                    .map((str) => str.replace(/^bis artifacts /, '')).forEach((str) => {
+                        if (!str) {
+                            return;
+                        }
+                        const labelIdentifier = `${str}`;
+                        result.push(
+                            _this.createSyncCommandTask(buildTarget, labelIdentifier)
+                        );
+                    });
+                resolve(result);
+            } else {
+                reject(new Error(`No output from command: ${command}`));
+            }
         });
     }
 
