@@ -12,6 +12,7 @@ export function touchBisBuild() {
         "bis.build",
         new vscode.ShellExecution("mkdir -p .bis && touch .bis/BUILD")
     );
+    task.presentationOptions.focus = false;
     vscode.tasks.executeTask(task);
 }
 

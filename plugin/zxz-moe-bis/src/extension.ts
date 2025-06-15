@@ -65,10 +65,11 @@ function _activate(context: vscode.ExtensionContext) {
     compilationModeVariable.active(context);
     deviceVariable.active(context);
     cpuVariable.active(context);
+    cpuProvider.activate(context);
+
     picker.activate(context);
     devicePicker.activate(context);
     inputer.activate(context);
-    cpuProvider.activate(context);
     eventEmitter.activate(context);
 
     // Debugger
@@ -76,7 +77,10 @@ function _activate(context: vscode.ExtensionContext) {
 
     // Commands get variable
     context.subscriptions.push(
-        vscode.commands.registerCommand("zxz-moe-bis.cpu", cpuProvider.cpu)
+        vscode.commands.registerCommand(
+            "zxz-moe-bis.cpu",
+            cpuProvider.cpu
+        )
     );
 
     context.subscriptions.push(
@@ -223,16 +227,6 @@ function _activate(context: vscode.ExtensionContext) {
             "lldb-dap",
             new debugConfigProvider.DebugConfigurationProvider()
         )
-    );
-    context.subscriptions.push(
-        vscode.debug.onDidTerminateDebugSession((session) => {
-            console.log('Debug session ended:', session);
-            const idevicesyslog_proc: number = session.configuration.idevicesyslog_proc;
-            if (idevicesyslog_proc) {
-                process.kill(idevicesyslog_proc);
-                logger.log(`Terminating idevicesyslog process: ${idevicesyslog_proc}`);
-            }
-        })
     );
 
     // Rx
