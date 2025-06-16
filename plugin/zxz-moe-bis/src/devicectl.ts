@@ -17,10 +17,16 @@ async function execute_devicectl(
   output: string,
   log: string,
   cancellationToken: { cancel(): void },
+  customEnv?: { [key: string]: string } | null
 ) {
   const command = ["xcrun", "devicectl"].concat(args).concat(["-j", output, "-l", log]);
   logger.log("execute: ", command.join(" "));
-  let p = _exec(command.join(" "));
+  let p = _exec(command.join(" "), {
+    env: {
+      ...process.env,
+      ...customEnv,
+    },
+  });
 
   cancellationToken.cancel = () => p.child.kill();
 
@@ -212,13 +218,17 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
   try {
     const consoleModeSuccess = await new Promise<boolean>((resolve, reject) => {
       logger.log(`Try Process launching --console mode with command: xcrun devicectl ${commandWithConsole.join(" ")}`);
-      const process = spawn("xcrun", ["devicectl", ...commandWithConsole], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      const targetLaunchProcess = spawn("xcrun", ["devicectl", ...commandWithConsole], { detached: true, stdio: ['ignore', 'pipe', 'pipe'], env: {
+        ...process.env,
+        "DEVICECTL_CHILD_OS_ACTIVITY_DT_MODE": "enable"
+
+      } });
       const timeout = setTimeout(() => {
-        process.kill();
+        targetLaunchProcess.kill();
         reject(new Error("Command execution timed out after 10 seconds"));
       }, 10000);
 
-      process.stdout?.on('data', (data) => {
+      targetLaunchProcess.stdout?.on('data', (data) => {
         const output = data.toString();
         if (output.includes("Waiting for")) {
           logger.log("Process launched successfully waiting for the process attached");
@@ -226,15 +236,14 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
           resolve(true);
         }
       });
-      process.stdout?.pipe(processLogStream);
-      process.stderr?.pipe(processLogStream);
+      targetLaunchProcess.stderr?.pipe(processLogStream);
 
-      process.on('error', (err) => {
+      targetLaunchProcess.on('error', (err) => {
         clearTimeout(timeout);
         reject(err);
       });
 
-      process.on('close', (code) => {
+      targetLaunchProcess.on('close', (code) => {
         if (code !== 0) {
           reject(new Error(`Process exited with code ${code}`));
         }
@@ -253,7 +262,10 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
     commandWithoutConsole,
     outputFile,
     logFile,
-    { cancel: () => { } }
+    { cancel: () => { } },
+    {
+      "DEVICECTL_CHILD_OS_ACTIVITY_DT_MODE": "enable"
+    }
   );
   
   // 读取生成的 JSON 文件

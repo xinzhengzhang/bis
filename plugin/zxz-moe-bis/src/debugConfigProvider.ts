@@ -252,21 +252,23 @@ export class DebugConfigurationProvider
             if (!pid) {
                 return null;
             }
-            const ideviceInstalled = await isIdeviceSyslogInstalled();
-            if (ideviceInstalled) {
-                const task = new vscode.Task(
-                    { type: "bis.idevicesyslog.redirect" },
-                    vscode.TaskScope.Workspace,
-                    "redirect idevicesyslog",
-                    "bis.build",
-                    new vscode.ShellExecution(
-                        `idevicesyslog -u ${target.udid} -p ${pid}`
-                    )
-                );
-                task.presentationOptions.panel = vscode.TaskPanelKind.Dedicated;
-                this.latestIDeviceSysLogExecution = await vscode.tasks.executeTask(task);
-            } else {
-                vscode.window.showInformationMessage("idevicesyslog is not installed. Try to find the log in Console.app or install idevicesyslog to redirect the log to a file.");
+            if (dbgConfig.iosRequest === "attach") {
+                const ideviceInstalled = await isIdeviceSyslogInstalled();
+                if (ideviceInstalled) {
+                    const task = new vscode.Task(
+                        { type: "bis.idevicesyslog.redirect" },
+                        vscode.TaskScope.Workspace,
+                        "redirect idevicesyslog",
+                        "bis.build",
+                        new vscode.ShellExecution(
+                            `idevicesyslog -u ${target.udid} -p ${pid}`
+                        )
+                    );
+                    task.presentationOptions.panel = vscode.TaskPanelKind.Dedicated;
+                    this.latestIDeviceSysLogExecution = await vscode.tasks.executeTask(task);
+                } else {
+                    vscode.window.showInformationMessage("idevicesyslog is not installed. Try to find the log in Console.app or install idevicesyslog to redirect the log to a file.");
+                }
             }
 
             dbgConfig.preRunCommands =
