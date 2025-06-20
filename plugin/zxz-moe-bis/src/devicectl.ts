@@ -12,7 +12,7 @@ interface RunningProcesses {
   executable: string;
 }
 
-async function execute_devicectl(
+async function executeDevicectl(
   args: string[],
   output: string,
   log: string,
@@ -49,15 +49,15 @@ function convertFileURL(fileURL: string): string {
 }
 
 export async function listDevices(): Promise<Device[]> {
-  const randm_value = crypto.randomUUID();
-  const outputFile = `/tmp/list_devices_${randm_value}.json`;
-  const logFile = `/tmp/list_devices_log_${randm_value}.json`;
+  const randomValue = crypto.randomUUID();
+  const outputFile = `/tmp/list_devices_${randomValue}.json`;
+  const logFile = `/tmp/list_devices_log_${randomValue}.json`;
   try {
     logger.log("List Devices");
     logger.log("outputFile: ", outputFile);
     logger.log("logFile: ", logFile);
     // 执行命令
-    await execute_devicectl(
+    await executeDevicectl(
       ["list", "devices"],
       outputFile,
       logFile,
@@ -92,15 +92,15 @@ export async function listDevices(): Promise<Device[]> {
 }
 
 export async function appPath(udid: string, bundleID: string): Promise<string> {
-  const randm_value = crypto.randomUUID();
-  const outputFile = `/tmp/app_path_${randm_value}.json`;
-  const logFile = `/tmp/app_path_log_${randm_value}.json`;
+  const randomValue = crypto.randomUUID();
+  const outputFile = `/tmp/app_path_${randomValue}.json`;
+  const logFile = `/tmp/app_path_log_${randomValue}.json`;
   try {
     logger.log("App Path");
     logger.log("outputFile: ", outputFile);
     logger.log("logFile: ", logFile);
     // 执行命令
-    await execute_devicectl(
+    await executeDevicectl(
       ["device", "info", "apps", "-d", udid, "--bundle-id", bundleID],
       outputFile,
       logFile,
@@ -129,9 +129,9 @@ export async function appPath(udid: string, bundleID: string): Promise<string> {
 }
 
 export async function deviceInstall(udid: string, path: string, cancellationToken: { cancel(): void }, progressCallback?: (event: any) => void) {
-  const randm_value = crypto.randomUUID();
-  const outputFile = `/tmp/device_install_${randm_value}.json`;
-  const logFile = `/tmp/device_install_log_${randm_value}.json`;
+  const randomValue = crypto.randomUUID();
+  const outputFile = `/tmp/device_install_${randomValue}.json`;
+  const logFile = `/tmp/device_install_log_${randomValue}.json`;
 
   try {
     logger.log("Install application");
@@ -143,7 +143,7 @@ export async function deviceInstall(udid: string, path: string, cancellationToke
       "PercentComplete": 0
     });
     // 执行命令
-    await execute_devicectl(
+    await executeDevicectl(
       ["device", "install", "app", "-d", udid, path],
       outputFile,
       logFile,
@@ -177,11 +177,11 @@ export async function deviceInstall(udid: string, path: string, cancellationToke
 }
 
 export async function getPidFor(udid: string, appPath: string): Promise<Number|undefined> {
-  const randm_value = crypto.randomUUID();
-  const outputFile = `/tmp/app_path_${randm_value}.json`;
-  const logFile = `/tmp/app_path_log_${randm_value}.json`;
+  const randomValue = crypto.randomUUID();
+  const outputFile = `/tmp/app_path_${randomValue}.json`;
+  const logFile = `/tmp/app_path_log_${randomValue}.json`;
   
-  await execute_devicectl(
+  await executeDevicectl(
     ["device", "info", "processes", "-d", udid],
     outputFile,
     logFile,
@@ -205,9 +205,9 @@ export async function getPidFor(udid: string, appPath: string): Promise<Number|u
 }
 
 export async function launchProcess(udid: string, bundleID: string, preferredLogPath: string): Promise<Number|undefined> {
-  const randm_value = crypto.randomUUID();
-  const outputFile = `/tmp/app_path_${randm_value}.json`;
-  const logFile = `/tmp/app_path_log_${randm_value}.json`;
+  const randomValue = crypto.randomUUID();
+  const outputFile = `/tmp/app_path_${randomValue}.json`;
+  const logFile = `/tmp/app_path_log_${randomValue}.json`;
   
   const commandWithConsole = ["device", "process", "launch", "--console", "-d", udid, "--start-stopped", bundleID];
   const commandWithoutConsole = ["device", "process", "launch", "-d", udid, "--start-stopped", bundleID];
@@ -258,7 +258,7 @@ export async function launchProcess(udid: string, bundleID: string, preferredLog
     logger.warn("Failed to launch process in --console mode, falling back to non-console mode." + JSON.stringify(error));
   }
   
-  await execute_devicectl(
+  await executeDevicectl(
     commandWithoutConsole,
     outputFile,
     logFile,

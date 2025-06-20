@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { promisify } from "util";
 import { executeBazelCommands, isBisWorkspace, isVersionAtLeast } from "./utils";
 import * as logger from "./logger";
-import { bis_rule_latest_version } from "./configuration";
+import { BIS_RULE_LATEST_VERSION } from "./configuration";
 
 export function touchBisBuild() {
     // Touch .bis/BUILD
@@ -33,7 +33,7 @@ export function isBisInstalled(context: vscode.ExtensionContext): Promise<void> 
                     )
                         .then((stdout) => {
                             const version = stdout.trim();
-                            if (isVersionAtLeast(version, bis_rule_latest_version)) {
+                            if (isVersionAtLeast(version, BIS_RULE_LATEST_VERSION)) {
                                 resolve(undefined);
                             } else {
                                 reject(new Error("bis rule version is too low currently: " + version));

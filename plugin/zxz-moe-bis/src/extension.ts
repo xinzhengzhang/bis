@@ -128,7 +128,7 @@ function _activate(context: vscode.ExtensionContext) {
             "zxz-moe-bis.syncCompileCommandsAndRestartLsp",
             sync.sync
         )
-    )
+    );
 
     context.subscriptions.push(
         vscode.commands.registerCommand(

@@ -7,7 +7,7 @@ import {
     exec,
     ExecFileException,
 } from "child_process";
-import configuration, { bis_rule_latest_version } from "./configuration";
+import configuration, { BIS_RULE_LATEST_VERSION } from "./configuration";
 import { Transform } from "stream";
 import { TextDecoder } from "util";
 import * as logger from "./logger";
@@ -36,10 +36,10 @@ export function isBisWorkspace(context: vscode.ExtensionContext) {
         // 使用正则表达式匹配 #version <version> 格式
         const versionMatch = firstLine.match(/^#version\s+(.+)$/);
         if (versionMatch && versionMatch[1]) {
-            const rule_version = versionMatch[1].trim();
-            return isVersionAtLeast(rule_version, bis_rule_latest_version);
+            const ruleVersion = versionMatch[1].trim();
+            return isVersionAtLeast(ruleVersion, BIS_RULE_LATEST_VERSION);
         }
-        return false
+        return false;
     });
 }
 
@@ -99,7 +99,7 @@ export class WriteStream extends Transform {
 export function executeBazelCommands(
     action: "build" | "run" | "query" | "aquery" | "cquery",
     args: ReadonlyArray<string> = [],
-    run_args: ReadonlyArray<string> = [],
+    runArgs: ReadonlyArray<string> = [],
     workspace?: string | undefined,
     callback?: (
         error: ExecFileException | null,
@@ -110,9 +110,9 @@ export function executeBazelCommands(
     const bazelExe = configuration.bazelExecutablePath;
     let finalArgs = ["--preemptible", action, ...args];
     if (action === "run") {
-        if (run_args.length > 0) {
+        if (runArgs.length > 0) {
             finalArgs.push("--");
-            finalArgs.push(...run_args);
+            finalArgs.push(...runArgs);
         }
     }
     return execFile(
@@ -129,7 +129,7 @@ export function executeBazelCommands(
 
 export function getOrCreateBazelExecutablePath(): string|undefined {
     let bazelPath: string|undefined;
-    const workspaces = vscode.workspace.workspaceFolders
+    const workspaces = vscode.workspace.workspaceFolders;
 
     workspaces?.some((workspace) => {
         const workspaceBazelPath = path.resolve(

@@ -240,7 +240,7 @@ export class DebugConfigurationProvider
                 // If the process is attach and app not running, try to launch it.
                 if (pid === undefined && dbgConfig.iosRequest === "attach") {
                     await tryLaunchApp();
-                    if (pid == undefined) {
+                    if (pid === undefined) {
                         pid = await targets.deviceGetPidFor({
                             udid: target.udid,
                             appPath: platformPath,

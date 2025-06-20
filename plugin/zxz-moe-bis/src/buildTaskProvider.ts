@@ -92,10 +92,10 @@ export class BuildTaskProvider implements vscode.TaskProvider {
     ): Promise<vscode.Task[]> {
         const _this = this;
 
-        const all_artifacts_label_files = path.join(tmpdir(), `bis_artifacts_labels_${Date.now()}.txt`);
-            writeFileSync(all_artifacts_label_files, "");
+        const allArtifactsLabelFiles = path.join(tmpdir(), `bis_artifacts_labels_${Date.now()}.txt`);
+            writeFileSync(allArtifactsLabelFiles, "");
         const cpuOpts = cpu ? `--ios_multi_cpus=${cpu}` : "";
-        const command = `outpath=\`${configuration.bazelExecutablePath} ${configuration.startupOptions} --preemptible cquery ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"\` && ${configuration.bazelExecutablePath} ${configuration.startupOptions} --preemptible build ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && cat bazel-bin/$outpath > ${all_artifacts_label_files}`;
+        const command = `outpath=\`${configuration.bazelExecutablePath} ${configuration.startupOptions} --preemptible cquery ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --output=starlark --starlark:expr="'{}/{}_bis_artifacts_labels.txt'.format(target.label.package, target.label.name)"\` && ${configuration.bazelExecutablePath} ${configuration.startupOptions} --preemptible build ${buildTarget} --compilation_mode=${compilationMode} ${cpuOpts} ${configuration.buildOptions} --aspects=@bis//:bisproject_aspect.bzl%bis_aspect --output_groups="bis artifacts labels" && cat bazel-bin/$outpath > ${allArtifactsLabelFiles}`;
 
         const task = new vscode.Task(
             { type: "bis.query.artifacts" },
@@ -103,7 +103,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
             "query bis artifacts labels",
             "bis.build",
             new vscode.ShellExecution(command)
-        )
+        );
         task.presentationOptions.focus = false;
 
         logger.log(`Executing command: ${command}`);
@@ -113,8 +113,8 @@ export class BuildTaskProvider implements vscode.TaskProvider {
         return new Promise((resolve, reject) => {
             let result: vscode.Task[] = [];
 
-            const stdout = readFileSync(all_artifacts_label_files).toString(); // Ensure the file is created before exec
-            unlinkSync(all_artifacts_label_files);
+            const stdout = readFileSync(allArtifactsLabelFiles).toString(); // Ensure the file is created before exec
+            unlinkSync(allArtifactsLabelFiles);
             if (stdout) {
                 const splited = stdout.split(/\r?\n/);
                 splited.forEach((str) => {
@@ -198,7 +198,7 @@ export class BuildTaskProvider implements vscode.TaskProvider {
                     onDidWrite: writeEmitter.event,
                     onDidClose: closeEmitter.event,
                     open: () => {
-                        vscode.commands.executeCommand("zxz-moe-bis.syncCompileCommandsAndRestartLsp", labelIdentifier)
+                        vscode.commands.executeCommand("zxz-moe-bis.syncCompileCommandsAndRestartLsp", labelIdentifier);
                         closeEmitter.fire(0);
                     },
                     close: () => { },
