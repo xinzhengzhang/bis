@@ -1,6 +1,8 @@
 import exp = require("constants");
 import * as vscode from "vscode";
 
+export const bis_rule_latest_version = "0.5.0";
+
 const configuration = {
     get simulatorCpuString(): string | undefined {
         return vscode.workspace

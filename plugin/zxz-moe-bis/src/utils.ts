@@ -7,7 +7,7 @@ import {
     exec,
     ExecFileException,
 } from "child_process";
-import configuration from "./configuration";
+import configuration, { bis_rule_latest_version } from "./configuration";
 import { Transform } from "stream";
 import { TextDecoder } from "util";
 import * as logger from "./logger";
@@ -18,13 +18,28 @@ export let _execFile = promisify(execFile);
 
 export let _exec = promisify(exec);
 
-export function isBisWorkspace() {
+export function isBisWorkspace(context: vscode.ExtensionContext) {
     const workspaces = vscode.workspace.workspaceFolders;
     if (!workspaces) {
         return false;
     }
+
     return workspaces.some((workspace) => {
-        return fs.existsSync(workspace.uri.fsPath + "/.bis/BUILD");
+        const buildFilePath = path.join(workspace.uri.fsPath, '.bis', 'BUILD');
+        if (!fs.existsSync(buildFilePath)) {
+            return false;
+        }
+        // read first line of the BUILD file
+        const content = fs.readFileSync(buildFilePath, 'utf8');
+        const firstLine = content.split('\n')[0].trim();
+
+        // 使用正则表达式匹配 #version <version> 格式
+        const versionMatch = firstLine.match(/^#version\s+(.+)$/);
+        if (versionMatch && versionMatch[1]) {
+            const rule_version = versionMatch[1].trim();
+            return isVersionAtLeast(rule_version, bis_rule_latest_version);
+        }
+        return false
     });
 }
 
@@ -98,10 +113,6 @@ export function executeBazelCommands(
         if (run_args.length > 0) {
             finalArgs.push("--");
             finalArgs.push(...run_args);
-        } else {
-            logger.warn(
-                "No run args provided, this may cause unexpected behavior."
-            );
         }
     }
     return execFile(
@@ -193,4 +204,46 @@ export async function macOSVersions() {
         version: productVersion,
         buildVersion: buildVersion,
     };
+}
+
+export function isVersionAtLeast(currentVersion: string, minVersion: string): boolean {
+    function parseVersion(version: string): { major: number, minor: number, patch: number, prerelease?: string } {
+        const [mainVersion, prerelease] = version.split('-');
+        const parts = mainVersion.split('.').map(Number);
+
+        return {
+            major: parts[0] || 0,
+            minor: parts[1] || 0,
+            patch: parts[2] || 0,
+            prerelease: prerelease
+        };
+    }
+
+    function compareVersion(version1: string, version2: string): number {
+        const v1 = parseVersion(version1);
+        const v2 = parseVersion(version2);
+
+        if (v1.major !== v2.major) {
+            return v1.major - v2.major;
+        }
+        if (v1.minor !== v2.minor) {
+            return v1.minor - v2.minor;
+        }
+        if (v1.patch !== v2.patch) {
+            return v1.patch - v2.patch;
+        }
+        
+        if (!v1.prerelease && v2.prerelease) {
+            return 1;
+        }
+        if (v1.prerelease && !v2.prerelease) {
+            return -1;
+        }
+        if (v1.prerelease && v2.prerelease) {
+            return v1.prerelease.localeCompare(v2.prerelease);
+        }
+        
+        return 0;
+    }
+    return compareVersion(currentVersion, minVersion) >= 0;
 }

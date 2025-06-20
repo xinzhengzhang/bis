@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import { promisify } from "util";
-import { executeBazelCommands, isBisWorkspace } from "./utils";
+import { executeBazelCommands, isBisWorkspace, isVersionAtLeast } from "./utils";
 import * as logger from "./logger";
+import { bis_rule_latest_version } from "./configuration";
 
 export function touchBisBuild() {
     // Touch .bis/BUILD
@@ -16,35 +17,33 @@ export function touchBisBuild() {
     vscode.tasks.executeTask(task);
 }
 
-export function isBisInstalled(): Promise<void> {
+export function isBisInstalled(context: vscode.ExtensionContext): Promise<void> {
     return new Promise((resolve, reject) => {
-        if (isBisWorkspace()) {
+        if (isBisWorkspace(context)) {
             resolve(undefined);
-        }
-        vscode.commands
-            .executeCommand<string | undefined>("zxz-moe-bis.workspace", true)
-            .then((workspaceRoot) => {
-                promisify(executeBazelCommands)(
-                    "query",
-                    ["@bis//:setup"],
-                    [],
-                    workspaceRoot
-                )
-                    .then((stdout) => {
-                        const splited = stdout.split(/\r?\n/);
-                        const containsBis = splited.some((item) => {
-                            return item.startsWith("@bis//");
+        } else {
+            vscode.commands
+                .executeCommand<string | undefined>("zxz-moe-bis.workspace", true)
+                .then((workspaceRoot) => {
+                    promisify(executeBazelCommands)(
+                        "run",
+                        ["@bis//:version"],
+                        [],
+                        workspaceRoot
+                    )
+                        .then((stdout) => {
+                            const version = stdout.trim();
+                            if (isVersionAtLeast(version, bis_rule_latest_version)) {
+                                resolve(undefined);
+                            } else {
+                                reject(new Error("bis rule version is too low currently: " + version));
+                            }
+                        })
+                        .catch((error) => {
+                            reject(error);
                         });
-                        if (containsBis) {
-                            resolve(undefined);
-                        } else {
-                            reject(new Error("no @bis found"));
-                        }
-                    })
-                    .catch((error) => {
-                        reject(error);
-                    });
-            });
+                });
+            }
     });
 }
 

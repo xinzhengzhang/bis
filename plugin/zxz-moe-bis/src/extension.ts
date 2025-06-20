@@ -38,8 +38,7 @@ import * as debugConfigProvider from "./debugConfigProvider";
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
     logger.activate();
-
-    isBisInstalled()
+    isBisInstalled(context)
         .then(() => {
             touchBisBuild();
             _activate(context);
@@ -50,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
                 5000
             );
             logger.log(
-                "If you confirmed you have installed, try running \nbazel query '@bis//:setup'\nin your command line"
+                "If you confirmed you have installed, try running \nbazel run '@bis//:version'\nin your command line"
             );
         });
 }

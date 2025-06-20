@@ -1,7 +1,8 @@
 # Change Log
 
-### 0.5.0
 ## [Unreleased]
+
+### 0.5.0
 Features
 * Migrate to `swiftlang.swift-vscode` 
 * The debug configuration related to iOS has been changed from codelldb to lldb-dap.
@@ -9,6 +10,7 @@ Features
 * As an alternative, we've added the functionality of global manual updating, as well as local updating and syncing for subtargets.
     * `zxz-moe-bis.syncCompileCommandsAndRestartLsp` refresh all project
     * `zxz-moe-bis.syncCompileCommandsAndRestartLsp - subtarget` refresh sub target of project
+* Load logs through [idevicesyslog](https://github.com/libimobiledevice/libimobiledevice/blob/master/docs/idevicesyslog.1) when `attaching` on a real device.
 * Add the ability to update local subtargets in the "BIS BUILD TARGET" window.
     * Note that we have currently decoupled "build all index" and "refresh compile_commands.json". Normally, we need to "build all index" to ensure that the output of "generate" in compile_commands.json exists.
 * Change --cpu to --ios_multi_cpus
