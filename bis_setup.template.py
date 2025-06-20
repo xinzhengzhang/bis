@@ -96,7 +96,7 @@ def create_bis_build(args):
                   aquery_args, file=sys.stderr)
         print(f"End query", flush=True)
 
-    template = f"""
+    template = f"""#version 0.5.0
 load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
 refresh_compile_commands(

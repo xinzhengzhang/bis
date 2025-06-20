@@ -9,6 +9,14 @@ py_binary(
     tags = ["manual"],
 )
 
+genrule(
+    name = "version",
+    cmd = "echo \"#!/usr/bin/env bash\" > $@ && echo \"echo 0.5.0\" >> $@",
+    outs = ["version_dump.sh"],
+    executable = True,
+    tags = ["manual"],
+)
+
 template_generator(
     name = "template",
     output = "template_generator.py"
