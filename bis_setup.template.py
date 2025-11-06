@@ -96,7 +96,7 @@ def create_bis_build(args):
                   aquery_args, file=sys.stderr)
         print(f"End query", flush=True)
 
-    template = f"""#version 0.5.0
+    template = f"""#version 0.5.1
 load("@bis//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@bis//:refresh_launch_json.bzl", "refresh_launch_json")
 refresh_compile_commands(
@@ -127,7 +127,7 @@ refresh_launch_json(
         process = subprocess.run(cmd, shell=True, encoding=locale.getpreferredencoding(), check=False)
         print(f"End build", flush=True)
     
-        cmd = f"bazel run //.bis:refresh_compile_commands {args.optionals}"
+        cmd = f"bazel run //.bis:refresh_compile_commands"
         if len(args.file_path) > 0:
             cmd += f" -- --file={args.file_path}"
         elif len(args.subtarget) > 0:

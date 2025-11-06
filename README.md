@@ -6,11 +6,11 @@ Bazel rules and plugin for developing iOS project on vscode
 
 ```sh
 # MODULE.bazel
-bazel_dep(name = "bis", version = "0.5.0", dev_dependency = True)
+bazel_dep(name = "bis", version = "0.5.1", dev_dependency = True)
 archive_override(
     module_name = "bis",
-    url = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.5.0.tar.gz",
-    strip_prefix = "bis-0.5.0"
+    url = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.5.1.tar.gz",
+    strip_prefix = "bis-0.5.1"
 )
 ```
 
@@ -22,8 +22,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "bis",
-    url = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.5.0.tar.gz",
-    strip_prefix = "bis-0.5.0"
+    url = "https://github.com/xinzhengzhang/bis/archive/refs/tags/0.5.1.tar.gz",
+    strip_prefix = "bis-0.5.1"
 )
 
 load("@bis//:repositories.bzl", "bis_rules_dependencies")

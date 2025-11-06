@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 0.5.1
+Fix
+* Fix the issue that use --platforms=ios_* to run py_binary will cause the error of incompatible target platform
+
 ### 0.5.0
 Features
 * Migrate to `swiftlang.swift-vscode` 
