@@ -18,8 +18,8 @@ export async function generate() {
         return;
     }
 
-    let executionCommands = `${configuration.bazelExecutablePath} ${configuration.startupOptions} run @bis//:setup --check_visibility=false --compilation_mode=${compilationMode} --ios_multi_cpus=${cpu} ${configuration.buildOptions} -- --target ${buildTarget} --optionals \"--compilation_mode=${compilationMode} --ios_multi_cpus=${cpu} ${configuration.buildOptions}\" --ignore_parsing_targets True`;
-    executionCommands += `;${configuration.bazelExecutablePath} ${configuration.startupOptions} run //.bis:refresh_launch_json --check_visibility=false --compilation_mode=${compilationMode} --ios_multi_cpus=${cpu} ${configuration.buildOptions}`;
+    let executionCommands = `${configuration.bazelExecutablePath} ${configuration.startupOptions} run @bis//:setup --check_visibility=false -- --target ${buildTarget} --optionals \"--compilation_mode=${compilationMode} --ios_multi_cpus=${cpu} ${configuration.buildOptions}\" --ignore_parsing_targets True`;
+    executionCommands += `;${configuration.bazelExecutablePath} ${configuration.startupOptions} run //.bis:refresh_launch_json --check_visibility=false`;
 
     const bazelPath = utils.getOrCreateBazelExecutablePath();
     logger.log(`Bazel temp executable path: ${bazelPath}`);
