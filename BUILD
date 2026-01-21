@@ -11,7 +11,7 @@ py_binary(
 
 genrule(
     name = "version",
-    cmd = "echo \"#!/usr/bin/env bash\" > $@ && echo \"echo 0.5.1\" >> $@",
+    cmd = "echo \"#!/usr/bin/env bash\" > $@ && echo \"echo 0.5.2\" >> $@",
     outs = ["version_dump.sh"],
     executable = True,
     tags = ["manual"],

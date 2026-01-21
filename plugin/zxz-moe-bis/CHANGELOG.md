@@ -2,7 +2,11 @@
 
 ## [Unreleased]
 
-### 0.5.1
+### 0.5.2
+Fix
+* Fix the issue introduced in 0.5.2 where config parameters were not applied to refresh_launch_json, causing target errors
+
+### 0.5.2
 Fix
 * Fix the issue that use --platforms=ios_* to run py_binary will cause the error of incompatible target platform
 
