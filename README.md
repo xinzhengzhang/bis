@@ -1,3 +1,5 @@
+
+
 # bis
 
 Bazel rules and plugin for developing iOS project on vscode
@@ -85,6 +87,7 @@ Arguments:
     --optionals OPTIONALS
                             --compilation_mode=dbg  --ios_multi_cpus=x86_64
     --target TARGET       target labels
+    --subtarget SUBTARGET   subtarget label
     --file_path FILE_PATH
                             source code path
     --ignore_parsing_targets IGNORE_PARSING_TARGETS
