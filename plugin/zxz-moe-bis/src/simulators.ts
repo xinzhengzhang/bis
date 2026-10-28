@@ -103,7 +103,13 @@ export async function boot(udid: string): Promise<void>
     logger.log(`Booting simulator (udid: ${udid}) if required`);
     let time = new Date().getTime();
 
-    await _execFile('open', ['-g', '-a', 'Simulator', '--args', '-StartLastDeviceOnLaunch', '0']);
+    try {
+        // Xcode 27 uses DeviceHub for the simulator UI. Resolve it by bundle ID.
+        await _execFile('open', ['-g', '-b', 'com.apple.dt.Devices']);
+    } catch (error) {
+        logger.log(`Could not open DeviceHub; trying legacy Simulator: ${error}`);
+        await _execFile('open', ['-g', '-a', 'Simulator', '--args', '-StartLastDeviceOnLaunch', '0']);
+    }
     await _execFile('xcrun', ['simctl', 'bootstatus', udid, '-b']);
 
     logger.log(`Booted in ${new Date().getTime() - time} ms`);
